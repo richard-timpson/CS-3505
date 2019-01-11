@@ -10,9 +10,7 @@ Program should take in one input, and will output to the console whether or not 
 
 // including relevant libraries
 #include <iostream>
-#include <cmath>
 #include <cstdlib>
-
 using namespace std;
 
 int main (int argc, char** argv)
