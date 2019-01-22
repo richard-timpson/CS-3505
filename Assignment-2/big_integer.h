@@ -3,6 +3,9 @@
 #ifndef BIG_INTEGER_H
 #define BIG_INTEGER_H
 
+#include<string>
+
+
 class big_integer 
 {
     private: 
