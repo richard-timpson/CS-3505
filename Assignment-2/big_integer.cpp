@@ -27,7 +27,6 @@ Destructor that does nothing
 */
 big_integer::~big_integer()
 {
-    cout << "Calling destructor";
 }
 
 /*
@@ -45,6 +44,14 @@ big_integer& big_integer::operator= (const big_integer &rhs)
 {
     this->integer = rhs.integer;
     return *this;
+}
+
+/*
+Get value function
+*/
+string big_integer::get_value() const
+{
+    return this->integer;
 }
 
 /*

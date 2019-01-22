@@ -35,48 +35,48 @@ int main ()
       cout << "Failed:  Object initialized with " << v << endl;
   }
 
-  // if (ok)
-  // {
-  //   cout << "Test 02: Constructor that takes a string" << endl;
+  if (ok)
+  {
+    cout << "Test 02: Constructor that takes a string" << endl;
 
-  //   big_integer h("12345");
-  //   string v = h.get_value();
+    big_integer h("12345");
+    string v = h.get_value();
 
-  //   ok = (v == "12345");
-  //   if (!ok)
-  //     cout << "Failed:  Object initialized with " << v << endl;
-  // }
+    ok = (v == "12345");
+    if (!ok)
+      cout << "Failed:  Object initialized with " << v << endl;
+  }
 
-  // if (ok)
-  // {
-  //   cout << "Test 03: Copy constructor" << endl;
+  if (ok)
+  {
+    cout << "Test 03: Copy constructor" << endl;
 
-  //   big_integer g("223345");
-  //   big_integer h(g);
-  //   string u = g.get_value();
-  //   string v = h.get_value();
+    big_integer g("223345");
+    big_integer h(g);
+    string u = g.get_value();
+    string v = h.get_value();
 
-  //   ok = (u == v);
-  //   if (!ok)
-  //     cout << "Failed:  Object initialized with " << v
-	//    << " instead of " << u << endl;
-  // }
+    ok = (u == v);
+    if (!ok)
+      cout << "Failed:  Object initialized with " << v
+	   << " instead of " << u << endl;
+  }
 
-  // if (ok)
-  // {
-  //   cout << "Test 04: Assignment operator" << endl;
+  if (ok)
+  {
+    cout << "Test 04: Assignment operator" << endl;
 
-  //   big_integer g("54321");
-  //   big_integer h;
-  //   h = g;
-  //   string u = g.get_value();
-  //   string v = h.get_value();
+    big_integer g("54321");
+    big_integer h;
+    h = g;
+    string u = g.get_value();
+    string v = h.get_value();
 
-  //   ok = (u == v);
-  //   if (!ok)
-  //     cout << "Failed:  Object assigned " << v
-	//    << " instead of " << u << endl;
-  // }
+    ok = (u == v);
+    if (!ok)
+      cout << "Failed:  Object assigned " << v
+	   << " instead of " << u << endl;
+  }
 
   // if (ok)
   // {
