@@ -218,6 +218,25 @@ int main ()
 	     << " instead of " << expected << endl;
     }
   
+   if (ok)
+    {
+      cout << "Test simple: operator/" << endl;
+
+      big_integer g("12345");
+      big_integer h("20");
+      string u = g.get_value();
+      string v = h.get_value();
+      string w = (g / h).get_value();
+
+      long expected = atol(u.c_str()) / atol(v.c_str());
+      long actual   = atol(w.c_str());
+    
+      ok = (expected == actual);
+      if (!ok)
+	cout << "Failed:  Quotient was " << w
+	     << " instead of " << expected << endl;
+    }
+
   if (ok)
     {
       cout << "Test 11: operator/" << endl;
@@ -236,7 +255,7 @@ int main ()
 	cout << "Failed:  Quotient was " << w
 	     << " instead of " << expected << endl;
     }
-
+  
   if (ok)
     {
       cout << "Test 12: operator/" << endl;
@@ -255,7 +274,26 @@ int main ()
 	cout << "Failed:  Quotient was " << w
 	     << " instead of " << expected << endl;
     }
- 
+  
+  if (ok)
+    {
+      cout << "Test Simple: operator%" << endl;
+
+      big_integer g("12345");
+      big_integer h("20");
+      string u = g.get_value();
+      string v = h.get_value();
+      string w = (g % h).get_value();
+
+      long expected = atol(u.c_str()) % atol(v.c_str());
+      long actual   = atol(w.c_str());
+    
+      ok = (expected == actual);
+      if (!ok)
+	cout << "Failed:  Remainder was " << w
+	     << " instead of " << expected << endl;
+    }
+
   if (ok)
     {
       cout << "Test 13: operator%" << endl;

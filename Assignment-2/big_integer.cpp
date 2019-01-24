@@ -91,7 +91,8 @@ Overloading modulo operator
 */
 const big_integer big_integer::operator%(const big_integer& rhs)
 {
-  big_integer number;
+  string remainder = mod_two_strings(this->integer, rhs.integer);
+  big_integer number(remainder);
   return number;
 }
 
@@ -245,31 +246,54 @@ string big_integer::divide_two_strings(string dividend, string divisor)
   }
   stringstream ss;
   int divisor_value = atoi(divisor.c_str());
-  string starting_string = dividend.substr(0, divisor.size());
-  int starting_dividend_portion =atoi(starting_string.c_str());
-  int dividend_portion = 0;
+  string starting_dividend_portion = dividend.substr(0, divisor.size());
+  int starting_index = starting_dividend_portion.size();
+  int dividend_portion = atoi(starting_dividend_portion.c_str());
+  if (dividend_portion < divisor_value)
+  {
+     dividend_portion = atoi(dividend.substr(0, divisor.size() + 1).c_str());
+     starting_index++;
+  }
   int quotient = 0;
   int remainder = 0;
   string quotient_string = "";
-  for (int i = divisor.size(); i < dividend.size(); i++)
+  for (int i = starting_index; i < dividend.size() + 1; i++)
   {
-    if (starting_dividend_portion < divisor_value)
-    {
-starting_dividend_portion = atoi(dividend.substr(0, divisor.size() + 1).c_str());
-      break;
-    }
-    else 
-    {
-      dividend_portion = starting_dividend_portion;
-    }      
     quotient = dividend_portion / divisor_value;
     remainder = dividend_portion % divisor_value;
-ss << quotient;
-string temp_quotient_string = ss.str();
-quotient_string.append(temp_quotient_string);
-    dividend_portion = quotient * 10 + dividend[i];
+    quotient_string+= (char)('0'+quotient);
+    dividend_portion = remainder * 10 + dividend[i] -'0';
   }
   return quotient_string;
+}
+
+string big_integer::mod_two_strings(string dividend, string divisor) 
+{
+  // check if divisor is bigger than dividend, return 0 if it is
+  if (is_bigger(divisor, dividend))
+  {
+      return dividend;
+  }
+  int divisor_value = atoi(divisor.c_str());
+  string starting_dividend_portion = dividend.substr(0, divisor.size());
+  int starting_index = starting_dividend_portion.size();
+  int dividend_portion = atoi(starting_dividend_portion.c_str());
+  if (dividend_portion < divisor_value)
+  {
+     dividend_portion = atoi(dividend.substr(0, divisor.size() + 1).c_str());
+     starting_index++;
+  }
+  int quotient = 0;
+  int remainder = 0;
+  for (int i = starting_index; i < dividend.size() + 1; i++)
+  {
+    quotient = dividend_portion / divisor_value;
+    remainder = dividend_portion % divisor_value;
+    dividend_portion = remainder * 10 + dividend[i] -'0';
+  }
+  stringstream ss;
+  ss << remainder;
+  return ss.str();
 }
 
 
