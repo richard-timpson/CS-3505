@@ -1,7 +1,6 @@
-
-
-
 #include <iostream>
+#include <sstream>
+#include <cstdlib>
 #include "big_integer.h"
 
 using namespace std;
@@ -82,7 +81,8 @@ Overloading division operator
 */
 const big_integer big_integer::operator/(const big_integer& rhs)
 {
-  big_integer number;
+  string quotient = divide_two_strings(this->integer, rhs.integer);
+  big_integer number(quotient);
   return number;
 }
 
@@ -234,6 +234,42 @@ string big_integer:: multiply_two_strings (string number, string multiplier)
   }
 
   return product;
+}
+
+string big_integer::divide_two_strings(string dividend, string divisor) 
+{
+  // check if divisor is bigger than dividend, return 0 if it is
+  if (is_bigger(divisor, dividend))
+  {
+      return "0";
+  }
+  stringstream ss;
+  int divisor_value = atoi(divisor.c_str());
+  string starting_string = dividend.substr(0, divisor.size());
+  int starting_dividend_portion =atoi(starting_string.c_str());
+  int dividend_portion = 0;
+  int quotient = 0;
+  int remainder = 0;
+  string quotient_string = "";
+  for (int i = divisor.size(); i < dividend.size(); i++)
+  {
+    if (starting_dividend_portion < divisor_value)
+    {
+starting_dividend_portion = atoi(dividend.substr(0, divisor.size() + 1).c_str());
+      break;
+    }
+    else 
+    {
+      dividend_portion = starting_dividend_portion;
+    }      
+    quotient = dividend_portion / divisor_value;
+    remainder = dividend_portion % divisor_value;
+ss << quotient;
+string temp_quotient_string = ss.str();
+quotient_string.append(temp_quotient_string);
+    dividend_portion = quotient * 10 + dividend[i];
+  }
+  return quotient_string;
 }
 
 
