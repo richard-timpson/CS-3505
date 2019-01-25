@@ -176,13 +176,14 @@ string big_integer::subtract_two_strings(string left, string right)
     return result;
   }
  
-  
   // keeping track of the positions in the string as we perform the operation
   int left_pos = left.size() - 1;
   int right_pos = right.size() - 1;
+
   // using a carry to determine if we need to decrement the left hand value based on previous calcuation
   int carry = 0;
 
+  // the loop for the division. Keep going while we still have values in both strings
   while ( left_pos >= 0 || right_pos >= 0)
   {
         
@@ -207,13 +208,12 @@ string big_integer::subtract_two_strings(string left, string right)
       carry = 1;
       difference += 10;
     }
+
     // if the difference is not less than 0, make sure to set carry to 0. 
     else 
     {
       carry = 0;
     }
-
-
 
     // append the difference to the results string
     result.insert (0, 1, (char)('0'+difference));
