@@ -1,4 +1,11 @@
-
+/*
+ * Richard Timpson
+ * CS 3505 - Software Practice II
+ * 1/25/19
+ * The class definition of a big integer string class that 
+ * supports the addition, subtraction, multiplication, division
+ * and modulo operators. 
+ */
 
 #ifndef BIG_INTEGER_H
 #define BIG_INTEGER_H

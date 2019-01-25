@@ -78,33 +78,6 @@ int main ()
 	     << " instead of " << u << endl;
     }
 
-  if (ok) 
-  {
-    cout << "Is Bigger Test: " << endl;
-    string a = "12345";
-    string b = "1234";
-    ok  =  big_integer::is_bigger(a, b);
-    if (!ok)
-      cout << "Failed: 12345 is bigger than 1234" << endl;
-    
-    string c = "1234";
-    string d = "12345";
-    ok = big_integer::is_bigger(c, d);
-    if (!ok)
-      cout << "Succeeded: 1234 is smaller than 12345" << endl;
-
-    string e = "5555";
-    string f = "5555";
-    ok = big_integer::is_bigger(e, f);
-    if (!ok)
-      cout << "Succeeded: 5555 is the same size as 5555" << endl;
-
-    string g = "5444";
-    string h = "4444";
-    ok = big_integer::is_bigger(g,h);
-    if (ok)
-      cout << "Succeeded: 5444 is bigger than 4444" << endl;
-  }
 
   if (ok)
     {
@@ -218,24 +191,6 @@ int main ()
 	     << " instead of " << expected << endl;
     }
   
-   if (ok)
-    {
-      cout << "Test simple: operator/" << endl;
-
-      big_integer g("12345");
-      big_integer h("20");
-      string u = g.get_value();
-      string v = h.get_value();
-      string w = (g / h).get_value();
-
-      long expected = atol(u.c_str()) / atol(v.c_str());
-      long actual   = atol(w.c_str());
-    
-      ok = (expected == actual);
-      if (!ok)
-	cout << "Failed:  Quotient was " << w
-	     << " instead of " << expected << endl;
-    }
 
   if (ok)
     {
@@ -275,24 +230,6 @@ int main ()
 	     << " instead of " << expected << endl;
     }
   
-  if (ok)
-    {
-      cout << "Test Simple: operator%" << endl;
-
-      big_integer g("12345");
-      big_integer h("20");
-      string u = g.get_value();
-      string v = h.get_value();
-      string w = (g % h).get_value();
-
-      long expected = atol(u.c_str()) % atol(v.c_str());
-      long actual   = atol(w.c_str());
-    
-      ok = (expected == actual);
-      if (!ok)
-	cout << "Failed:  Remainder was " << w
-	     << " instead of " << expected << endl;
-    }
 
   if (ok)
     {
@@ -357,6 +294,168 @@ int main ()
 
   if (ok)
     cout << "Passed preliminary tests." << endl;
+
+  if (ok) 
+  {
+    cout << "Is Bigger Test: " << endl;
+    string a = "12345";
+    string b = "1234";
+    ok  =  big_integer::is_bigger(a, b);
+    if (!ok)
+      cout << "Failed: 12345 is bigger than 1234" << endl;
+    
+    string c = "1234";
+    string d = "12345";
+    ok = big_integer::is_bigger(c, d);
+    if (!ok)
+      cout << "Succeeded: 1234 is smaller than 12345" << endl;
+
+    string e = "5555";
+    string f = "5555";
+    ok = big_integer::is_bigger(e, f);
+    if (!ok)
+      cout << "Succeeded: 5555 is the same size as 5555" << endl;
+
+    string g = "5444";
+    string h = "4444";
+    ok = big_integer::is_bigger(g,h);
+    if (ok)
+      cout << "Succeeded: 5444 is bigger than 4444" << endl;
+
+    string i = "5555";
+    string j = "5554";
+    ok = big_integer::is_bigger(i,j);
+    if (ok)
+      cout << "Succeeded: 5555 is bigger than 5554" << endl;
+
+  }
+  if (ok)
+  {
+    cout << "Test Simple: operator%" << endl;
+
+    big_integer g("12345");
+    big_integer h("20");
+    string u = g.get_value();
+    string v = h.get_value();
+    string w = (g % h).get_value();
+
+    long expected = atol(u.c_str()) % atol(v.c_str());
+    long actual   = atol(w.c_str());
+    
+    ok = (expected == actual);
+    if (!ok)
+      cout << "Failed:  Remainder was "  
+	   << " instead of " << expected << endl;
+  }
+   if (ok)
+    {
+      cout << "Test simple: operator/" << endl;
+
+      big_integer g("12345");
+      big_integer h("20");
+      string u = g.get_value();
+      string v = h.get_value();
+      string w = (g / h).get_value();
+
+      long expected = atol(u.c_str()) / atol(v.c_str());
+      long actual   = atol(w.c_str());
+    
+      ok = (expected == actual);
+      if (!ok)
+	cout << "Failed:  Quotient was " << w
+	     << " instead of " << expected << endl;
+    }
+   if (ok) 
+     {
+       cout << "Test Stress: operator/" << endl;
+
+       big_integer g("1234567891123456789");
+       big_integer h("5");
+       string u = g.get_value();
+       string v = h.get_value();
+       string w = (g/h).get_value();
+       
+       long expected = atol(u.c_str()) / atol(v.c_str());
+       long actual = atol(w.c_str());
+       
+       ok = (expected == actual);
+       if (!ok)
+	 cout << "Failed: Quotient was " << w 
+	      << " instead of " << expected << endl;
+     }
+   if (ok) 
+     {
+       cout << "Test Division by 0: operator/" << endl;
+
+       big_integer g("1234567891123456789");
+       big_integer h("0");
+       string u = g.get_value();
+       string v = h.get_value();
+       string w = (g/h).get_value();
+       
+       long expected = 0;
+       long actual = atol(w.c_str());
+       
+       ok = (expected == actual);
+       if (!ok)
+	 cout << "Failed: Quotient was " << w 
+	      << " instead of " << expected << endl;
+     }
+   if (ok) 
+     {
+       cout << "Test Division by same value: operator/" << endl;
+
+       big_integer g("12345");
+       big_integer h("12345");
+       string u = g.get_value();
+       string v = h.get_value();
+       string w = (g/h).get_value();
+       
+       long expected = atol(u.c_str()) / atol(v.c_str());
+       long actual = atol(w.c_str());
+       
+       ok = (expected == actual);
+       if (!ok)
+	 cout << "Failed: Quotient was " << w 
+	      << " instead of " << expected << endl;
+     }
+  if (ok) 
+     {
+       cout << "Test Division with numerator 0: operator/" << endl;
+
+       big_integer g("0");
+       big_integer h("12345");
+       string u = g.get_value();
+       string v = h.get_value();
+       string w = (g/h).get_value();
+       
+       long expected = atol(u.c_str()) / atol(v.c_str());
+       long actual = atol(w.c_str());
+       ok = (expected == actual);
+       if (!ok)
+	 cout << "Failed: Quotient was " << w 
+	      << " instead of " << expected << endl;
+     }
+  if (ok) 
+     {
+       cout << "Test Subtraction with large values: operator/" << endl;
+
+       big_integer g("10000000000000000000000000000000");
+       big_integer h("1");
+       string u = g.get_value();
+       string v = h.get_value();
+       string w = (g - h).get_value();
+       
+       string expected = "9999999999999999999999999999999";
+       
+       
+       ok = (expected == w);
+       if (!ok)
+	 cout << "Failed: Quotient was " << w 
+	      << " instead of " << expected << endl;
+     }
+
+
 
   return 0;
 }
