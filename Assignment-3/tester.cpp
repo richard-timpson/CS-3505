@@ -153,7 +153,7 @@ int main ()
       if (set.contains("world"))
 	ok = false;
       if (ok)
-	cout << "\t Success! Set doesn't container 'hello world'" << endl;
+	cout << "\t Success! Set doesn't contain'hello world'" << endl;
       else
 	cout << "\t Failed" << endl;
     }
