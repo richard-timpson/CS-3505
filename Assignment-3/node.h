@@ -23,12 +23,16 @@ namespace cs3505
 			       //   private data (and constructor) within this class.
  
     private:
-      node(const std::string & data);  // Constructor (changed to take a reference to avoid a copy)
+    node(const std::string & data, const string_set  & set);  // Constructor, takes in the data for the node, and also a reference to the string_set for getting the head and tail pointers of doubly linked list. 
       ~node();                         // Destructor
-
+      
+      
       std::string data;     // Variable to hold the element
-      node        *next;    // Variable to point to the next node in the list    
-  };
+      string_set set; // copy of reference to string set. 
+      node *next;    // Variable to point to the next node in the list    
+      node *back;    // Variable to point to previous node in doubly linked list
+      node *fore;    // Variable to point to the next node in the doubly linked list
+  };o
 }
 
 #endif

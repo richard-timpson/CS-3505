@@ -110,18 +110,19 @@ int main ()
     
     if (ok) 
     {
-      cout << "Test1: Contains" << endl;
+      cout << "Test1: Add/ Contains" << endl;
       cs3505::string_set set(50);
       set.add("hello");
       set.add("world");
       set.add("!");
-
-      if (!set.contains("hello"))
-	ok = false;
-      if (!set.contains("world"))
-	ok = false;
-      if (!set.contains("!"))
-	ok = false;
+      
+      ok = false;
+      if (set.contains("hello") && set.get_size() == 1)
+	ok = true;
+      if (set.contains("world") && set.get_size() == 2)
+	ok = true;
+      if (set.contains("!") && set.get_size() == 3)
+	ok = true;
       if (ok)
 	cout << "\t Success! Set contains 'hello world!'" << endl;
       else 
@@ -148,10 +149,11 @@ int main ()
       set.add("world");
       set.remove("hello");
       set.remove("world");
-      if (set.contains("hello"))
-	ok = false;
-      if (set.contains("world"))
-	ok = false;
+      ok = false;
+      if (!set.contains("hello") && set.get_size() == 0)
+	ok = true;
+      if (!set.contains("world") && set.get_size() == 0)
+	ok = true;
       if (ok)
 	cout << "\t Success! Set doesn't contain'hello world'" << endl;
       else

@@ -21,6 +21,9 @@ namespace cs3505
                      //   (which will really be an array of node pointers)
       int capacity;  // The size of the hashtable array
       int size;      // The number of elements in the set
+      node *head;    // the head of the doubly linked list
+      node *tail;    // the tail of the doubly linked list
+
 
     public:
       string_set(int capacity = 100);        // Constructor.  Notice the default parameter value.

@@ -167,34 +167,40 @@ namespace cs3505
     if (current->data == target)
     {
       table[index] = current->next;
-      current->next = null;
+      current->next = NULL;
       delete(current);
       size--;
       return;
     }
     
-    // loop through all nodes in the list
+    // loop through all nodes in the list to find the node to remove
     node *previous = NULL;
+    bool delete_node = false;
     while (current != NULL )
     {
-      // set the current to the next
-      
-      
       // if we are at the current target
       // set the previous next pointer to the current next pointer,
-      // delete the current node, and decrement size;
-      if (current->data == target) 
+      if (current->data == target)
       {
-	previous->next = current->next;
-	current->next = NULL;
-	delete(current);
-	size --;
-	return;
+	delete_node = true;
+	break;
       }
       previous = current;
       current = current->next;
+
     }
-    return;
+    // if we found a node to remove, set previous's next to currents next,
+    // and 0 current next's pointer. 
+    if (delete_node)
+    {
+      // delete the node from the list
+      previous->next = current->next;
+      current->next = NULL;
+      delete(current);
+      size --;
+      return;      
+    }
+
   }
 
 

@@ -25,11 +25,31 @@
   *   an element.  It is initialized to
   *   not point to any other node.
   */
-cs3505::node::node(const std::string & s)
+cs3505::node::node(const std::string & s, const string_set & set)
   : next(NULL),  // This syntax is used to call member variable constructors (or initialize them).
     data(s)      // This calls the copy constructor - we are making a copy of the string.
 {
-  // No other work needed - the initializers took care of everything.
+  this->set = set;
+  // if there are no items in the list, set the head and the tail to the current node
+  // and set the back and fore pointers of the current node to NULL
+  if (set.head == NULL && set.tail == NULL)
+  {
+    set.head = this;
+    set.tail = this;
+    this->back = NULL;
+    this->fore = NULL;
+  }
+  // if there are items in the list, set the current tail's next pointer to the current node (Add to the end of the list)
+  // set the current node's back to the current tail
+  // set the current's next to NULL 
+  // set the tail to the current node, making it the new tail.
+  else 
+  {
+    set.tail->next  = this;
+    this->back = set.tail;
+    this->fore = NULL;
+    set.tail = this;
+  }
 }
 
   
@@ -38,13 +58,61 @@ cs3505::node::node(const std::string & s)
   */
 cs3505::node::~node()
 {
+
+  // deletion of the head
+
+  if (this->back == NULL)
+  {
+     // if it is, set the back pointer of the fore node to null
+    this->fore->back = NULL;
+
+    // set the fore pointer of the current node to null
+    this->fore = NULL;
+
+    // set the head to the fore pointer of the current node
+    this->set.head = this;
+  }
+ 
+  // deletion of the tail
+
+  if (this->fore == NULL)
+  {
+    // set the fore pointer of the back node to null
+    this->back->fore = NULL;
+
+    // set the back pointer of the current node to null
+    this->back = NULL;
+
+    // set the tail to the back pointer of the current node
+    this->set.tail = this;
+  }
+
+  // deletion of a random object
+  
+  // Loop through the liist until we find the element to remove
+  while (this->fore != NULL)
+  {
+    // set the back pointer of the fore node to the back of the current
+    this->fore->back = this->back;
+
+    // set the fore pointer of the back node to the fore of the current
+    this->back->fore = this->fore;
+
+    // set the fore pointer to null
+    this->fore = NULL;
+
+    // set the back pointer to null
+    this->back = NULL;
+  }
+
   // I'm not convinced that the recursive delete is the
   //   best approach.  I'll keep it (and you'll keep it too).
-
   if (this->next != NULL)
     delete this->next;
 
   // Invalidate the entry so that it is not accidentally used.
 
   this->next = NULL;      
+
+  
 }
