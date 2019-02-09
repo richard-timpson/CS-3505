@@ -16,6 +16,7 @@
 #include <iostream>
 #include <fstream>
 #include <set>
+#include <vector>
 #include <iterator>
 #include "string_set.h"
 #include "node.h"
@@ -28,6 +29,9 @@ using namespace std;
 //        Instead of 'using namespace cs3505', I qualified the class names 
 //        below with cs3505::
 //        I did this for clarity.
+
+int cs3505::node::creation_count = 0;
+int cs3505::node::deletion_count = 0;
 
 int main ()
 {
@@ -52,10 +56,10 @@ int main ()
     // Loop for reading the file.  Note that it is controlled
     //   from within the loop (see the 'break').
     
+    int count = 0;
     while (true)
     {
       // Read a word (don't worry about punctuation)
-      
       string word;
       in >> word;
 
@@ -69,6 +73,9 @@ int main ()
       
       stl_set.insert(word);
       our_set.add(word);
+     
+      count++;
+
     }
 
     // Close the file.
@@ -92,7 +99,10 @@ int main ()
     // variables declared within this block will be automatically
     // destroyed.  Local objects will have their destructors
     // called.  (Blocks are great for controlling scope/lifetime.)
+   
+    cout << "creation coutn: " <<  cs3505::node::creation_count << endl;
   }
+  cout << "deletion count " <<  cs3505::node::deletion_count << endl;
 
   // I really should test here to make sure that memory got cleaned up (that the
   // nodes and tables were deleted appropriately).  There is no such test here.
@@ -105,6 +115,7 @@ int main ()
   
 
   {
+    cout << "hitting second test" << endl;
     bool ok = true;
 
     
@@ -159,7 +170,51 @@ int main ()
       else
 	cout << "\t Failed" << endl;
     }
+    
+    if (ok)
+    {
+      set<string>         stl_set;  // The built-in set class - no constructor parameters.
+
+      cs3505::string_set  our_set(1000);  // Our set class, with a hashtable of 1000 slots.
+  
+      // Open the file stream for reading.  (We'll be able to use it just like
+      //   the keyboard stream 'cin'.)
+
+      ifstream in("Yankee.txt");
+
+      // Loop for reading the file.  Note that it is controlled
+      //   from within the loop (see the 'break').
+    
+      int count = 0;
+      while (true)
+      {
+	// Read a word (don't worry about punctuation)
+	string word;
+	in >> word;
+
+	// If the read failed, we're probably at end of file
+	//   (or else the disk went bad).  Exit the loop.
       
+	if (in.fail())
+	  break;
+
+	// Word successfully read.  Add it to both sets.
+      
+	stl_set.insert(word);
+	our_set.add(word);
+     
+	count++;
+	
+
+      }
+      vector<string> our_vector = our_set.get_elements();
+      for (vector<string>::iterator it = our_vector.begin(); it != our_vector.end(); it++)
+      {
+	string word = *it;
+	cout << word << endl;
+      }
+            
+    }
   }
   return 0;
 }

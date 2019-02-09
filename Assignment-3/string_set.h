@@ -9,12 +9,13 @@
 #define STRING_SET_H
 
 #include "node.h"
+#include <vector>
 
 namespace cs3505
 {
-
   class string_set
     {
+      friend class node;
       // Default visibility is private.
 
       node** table;  // The hashtable, a pointer to a node pointer
@@ -33,6 +34,7 @@ namespace cs3505
       void add      (const std::string & target);        // Not const - modifies the object
       void remove   (const std::string & target);        // Not const - modifies the object
       bool contains (const std::string & target) const;  // Const - does not change the object
+      std::vector<std::string> get_elements() const;
       int  get_size () const;                            // Const - does not change object
 
       string_set & operator= (const string_set & rhs);   // Not const - modifies this object

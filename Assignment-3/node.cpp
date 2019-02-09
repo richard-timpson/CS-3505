@@ -4,9 +4,12 @@
  * Peter Jensen
  * January 29, 2019
  */
-
+#include <cstdlib>
+#include <iostream>
 #include "node.h"
+#include "string_set.h"
 
+using namespace std;
 // We're not in a namespace.  We are not in any class.  Symbols defined
 //   here are globally available.  We need to qualify our function names
 //   so that we are definining our cs3505::node class functions.
@@ -25,17 +28,17 @@
   *   an element.  It is initialized to
   *   not point to any other node.
   */
-cs3505::node::node(const std::string & s, const string_set & set)
+cs3505::node::node(const std::string & s,  string_set * set)
   : next(NULL),  // This syntax is used to call member variable constructors (or initialize them).
-    data(s)      // This calls the copy constructor - we are making a copy of the string.
+    data(s)
 {
   this->set = set;
-  // if there are no items in the list, set the head and the tail to the current node
+  // if there are no items in the list, set th head and the tail to the current node
   // and set the back and fore pointers of the current node to NULL
-  if (set.head == NULL && set.tail == NULL)
+  if (this->set->head == NULL && this->set->tail == NULL)
   {
-    set.head = this;
-    set.tail = this;
+    this->set->head = this;
+    this->set->tail = this;
     this->back = NULL;
     this->fore = NULL;
   }
@@ -45,11 +48,12 @@ cs3505::node::node(const std::string & s, const string_set & set)
   // set the tail to the current node, making it the new tail.
   else 
   {
-    set.tail->next  = this;
-    this->back = set.tail;
+    this->set->tail->fore  = this;
+    this->back = this->set->tail;
     this->fore = NULL;
-    set.tail = this;
+    this->set->tail = this;
   }
+  this->creation_count++;
 }
 
   
@@ -58,39 +62,50 @@ cs3505::node::node(const std::string & s, const string_set & set)
   */
 cs3505::node::~node()
 {
+  // 19169 words. 
+  
+  if (this->back == NULL && this->fore == NULL)
+  {
+    this->set->head = NULL;
+    this->set->tail = NULL;
+  }
 
-  // deletion of the head
+  //  deletion of the head
 
-  if (this->back == NULL)
+  else if (this->back == NULL)
   {
      // if it is, set the back pointer of the fore node to null
+    this->set->head = this->fore;
     this->fore->back = NULL;
 
     // set the fore pointer of the current node to null
-    this->fore = NULL;
 
-    // set the head to the fore pointer of the current node
-    this->set.head = this;
+    this->fore = NULL;
+    this->back = NULL;
+
+
   }
  
   // deletion of the tail
 
-  if (this->fore == NULL)
+  else if (this->fore == NULL)
   {
-    // set the fore pointer of the back node to null
+    // set the tail to the previous node
+    this->set->tail = this->back;
+    
+    // set the fore node of the previous node to Null
     this->back->fore = NULL;
-
-    // set the back pointer of the current node to null
+    
+    // 0 out the pointers of the current node. 
+    this->fore = NULL;
     this->back = NULL;
 
-    // set the tail to the back pointer of the current node
-    this->set.tail = this;
   }
 
   // deletion of a random object
   
   // Loop through the liist until we find the element to remove
-  while (this->fore != NULL)
+  else
   {
     // set the back pointer of the fore node to the back of the current
     this->fore->back = this->back;
@@ -103,6 +118,7 @@ cs3505::node::~node()
 
     // set the back pointer to null
     this->back = NULL;
+
   }
 
   // I'm not convinced that the recursive delete is the
@@ -114,5 +130,6 @@ cs3505::node::~node()
 
   this->next = NULL;      
 
-  
+
+  this->deletion_count++;
 }

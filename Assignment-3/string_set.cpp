@@ -11,6 +11,9 @@
 #include <string>
 #include <vector>    // Needed for the assignment.
 
+
+using namespace std;
+
 namespace cs3505
 {
   /*******************************************************
@@ -28,6 +31,8 @@ namespace cs3505
     this->table = new node*[capacity];
     this->capacity = capacity;
     this->size = 0;
+    this->head = NULL;
+    this->tail = NULL;
 
     // The array must be cleared -- it will have bogus values in it.
     //   (NULL means 'no linked list chain in this entry')
@@ -134,14 +139,16 @@ namespace cs3505
     node *current = table[index];
     while (current != NULL)
     {
+
       if (current->data == target)
         return;
       current = current->next;
     }
 
+
     // Make a new node, then link it in to the beginning of the chain.
 
-    node *n = new node(target); // The node is created, but points nowhere.
+    node *n = new node(target, this); // The node is created, but points nowhere.
     n->next = table[index];     // Point the node to the head node of the chain.
     table[index] = n;           // Point the head of the chain to our new node.
    
@@ -235,6 +242,24 @@ namespace cs3505
   /** Returns a count of the number of elements
     *   in this set.
     */
+  /** This function populates and returns a std::vector<std::string>
+    * with all the elements in this set.  The strings in the vector will be in the
+    * order that they were inserted into to this set, v[0] was added first, etc.
+    * (Note:  Attempting to add a duplicate string does not count or
+    * change this ordering.)
+    * The size of the return vector will be the size of this string_set.
+    */
+  vector<string> string_set:: get_elements() const
+  {
+    vector<string> return_vector;
+    node * current = this->head;
+    while (current->fore != NULL)
+    {
+      return_vector.push_back(current->data);
+      current = current->fore;
+    }
+    return return_vector;
+  }
   int string_set::get_size() const
   {
     return this->size;
