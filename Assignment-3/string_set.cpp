@@ -284,8 +284,11 @@ string_set &string_set::operator=(const string_set &rhs)
   this->table = new node *[rhs.capacity];
   this->capacity = rhs.capacity;
   this->size = 0;
+
+  // loop through every pointer in the table
   for (int i = 0; i < capacity; i++)
   {
+    // loop through every item in each list and add that string to the current set. 
     node *temp = rhs.table[i];
     while (temp != NULL)
     {

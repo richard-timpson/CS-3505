@@ -28,8 +28,34 @@ int main()
 {
 
     bool ok = true;
+
+    /* Size test */
+
+    cout << endl << "Size Test" << endl;
+    if (ok)
+    {
+        cout << "Size - Test1: Simple size test" << endl;
+        cs3505::string_set our_set(10);
+        our_set.add("Hello");
+        our_set.add("World!");
+        our_set.add("!");
+        if (our_set.get_size()!= 3) 
+        {
+            ok = false;
+        }
+        if (ok) 
+        {
+            cout << "\tSuccess" << endl;
+        }
+        else 
+        {
+            cout << "\tFailure" << endl;
+        }
+    }
+
+
     /* Contains Test */
-    cout << "Testing Contains Function" << endl;
+    cout << endl << "Contains Test" << endl;
 
     // Make sure simple addition with contains works
     if (ok)
@@ -97,7 +123,7 @@ int main()
     // Verify that the set size is the same as the vector size.
     if (ok)
     {
-        cout << "Add - Test3: Verify set size" << endl;
+        cout << "Contains - Test3: Verify set size" << endl;
         set<string> stl_set;
         cs3505::string_set our_set(1000);
         ifstream in("Yankee.txt");
@@ -112,7 +138,6 @@ int main()
             stl_set.insert(word);
         }
         vector<string> our_vector = our_set.get_elements();
-        cout << "stl set size is " << stl_set.size() << endl;
         if (stl_set.size() != our_set.get_size())
         {
             ok = false;
@@ -166,8 +191,7 @@ int main()
 
     /* Remove Test */
     cout << endl
-         << "Removal Tests" << endl
-         << endl;
+         << "Removal Tests" << endl;
     /* Note. Was going to write test for simple removal but it's already in contains. */
 
     // Add every word from Yankee.txt and remove every word from Yankee.txt and make sure the set size is 0
@@ -256,8 +280,7 @@ int main()
 
     /* Operator Equals */
     cout << endl
-         << "Operator Equals tests" << endl
-         << endl;
+         << "Operator Equals tests" << endl;
     // Test the set size of both to verify that they are the same
     if (ok)
     {
@@ -362,8 +385,7 @@ int main()
 
     /* Get Elements */
     cout << endl
-         << "Get elements Tests" << endl
-         << endl;
+         << "Get elements Tests" << endl;
 
     // verify vector size for small set
 
@@ -437,13 +459,34 @@ int main()
         our_set.add("name");
         our_set.add("is");
         our_set.add("richard");
-        our_set.add("and");
-        our_set.add("this");
-        our_set.add("iss");
-        our_set.add("a");
-        our_set.add("set");
 
         vector<string> our_vector = our_set.get_elements();
+        vector<string>::iterator it = our_vector.begin();
+        string word = *it;
+        if (word !="Hi") ok = false;
+        it++;
+        word = *it;
+        if (word !="my") ok = false;
+        it++;
+        word = *it;
+        if (word !="name") ok = false;
+        it++;
+        word = *it;
+        if (word !="is") ok = false;
+        it++;
+        word = *it;
+        if (word !="richard") ok = false;
+        it++;
+        word = *it;
+        if (ok)
+        {
+            cout << "\tSuccess" << endl;
+        }
+        else
+        {
+            cout << "\tFailure" << endl;
+        }
+
     }
 
     // Add every work from Yankee.txt and make sure that as we iterate through the vector every word in the vector is also in the set.
@@ -461,15 +504,20 @@ int main()
             our_set.add(word);
         }
         vector<string> our_vector = our_set.get_elements();
-        if (our_vector.size() != our_set.get_size())
+        for (vector<string>::iterator it = our_vector.begin(); it!= our_vector.end(); it++) 
         {
-            ok = false;
+            string word = *it;
+            if (!our_set.contains(word)) 
+            {
+                ok = false;
+                break;
+            }
         }
-        if (ok)
+        if (ok) 
         {
-            cout << "\tSuccess!" << endl;
+            cout << "\tSuccess" << endl;
         }
-        else
+        else 
         {
             cout << "\tFailure!" << endl;
         }
@@ -477,5 +525,65 @@ int main()
 
 
     // Make sure that the get_elements works after an object has been deleted.
-    // Run small test with 10 words to make sure that the words are iterated in the correct order.
+
+
+    // make sure that the vector prints the words out as they were added
+
+    if (ok)
+    {
+        cout << "Elements - Test5: Verify vector is correct after deletion and then insertion" << endl;
+        cs3505::string_set our_set(5);
+        our_set.add("Hi");
+        our_set.add("my");
+        our_set.add("name");
+        our_set.add("is");
+        our_set.add("richard");
+
+        vector<string> our_vector = our_set.get_elements();
+        vector<string>::iterator it = our_vector.begin();
+        string word = *it;
+        if (word !="Hi") ok = false;
+        it++;
+        word = *it;
+        if (word !="my") ok = false;
+        it++;
+        word = *it;
+        if (word !="name") ok = false;
+        it++;
+        word = *it;
+        if (word !="is") ok = false;
+        it++;
+        word = *it;
+        if (word !="richard") ok = false;
+        it++;
+        word = *it;
+
+
+        our_set.remove("Hi");
+        our_set.remove("name");
+        our_set.add("end");
+        our_vector = our_set.get_elements();
+        it = our_vector.begin();
+
+        word = *it;
+        if (word !="my") ok = false;
+        it++;
+        word = *it;
+        if (word !="is") ok = false;
+        it++;
+        word = *it;
+        if (word !="richard") ok = false;
+        it++;
+        word = *it;
+        if (word !="end") ok = false;
+        if (ok) 
+        {
+            cout << "\tSuccess!" << endl;
+        }
+        else 
+        {
+            cout << "\tFailure!" << endl;
+        }
+    }
+
 }
