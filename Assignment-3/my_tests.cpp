@@ -1,16 +1,13 @@
 /*
- * This is a tester that I started to write in class.  It reads
- * words from a text file, then adds the words to two sets: A built-in
- * set class, and our string_set class.  After reading the file, it
- * prints out all the words stored in the STL set object.  At the end
- * of the test, it prints out the sizes of both sets to see that they
- * are the same.
- *
- *
- * If the comments wrap lines, widen your emacs window.
- *
- * Peter Jensen
- * January 29, 2019
+ * CS3505 – Software Pratice
+ * Richard Timpson
+ * February 9, 2019
+ * 
+ * 
+ * This is a very incomplete tester as I did not have time to finisht the project
+ * after running into some bugs. You'll see many tests that I was failing commented out
+ * and other test cases that I was going to test but did not get to. :(
+ * 
  */
 
 #include <iostream>
@@ -21,27 +18,14 @@
 #include "string_set.h"
 #include "node.h"
 
-// For convenience only:
-
 using namespace std;
 
-// Note:  Our classes were declared in a cs3505 namepsace.
-//        Instead of 'using namespace cs3505', I qualified the class names
-//        below with cs3505::
-//        I did this for clarity.
-
+// static variables for testing destructore
 int cs3505::node::creation_count = 0;
 int cs3505::node::deletion_count = 0;
 
 int main()
 {
-    // test contains for every element in the set.
-    // test adding a duplicate to make sure that it doesn't work
-    // test the operator overload to make sure it copies every element exactly.
-    // test delete to make sure that items are removed from both lists.
-    // test the doubly linked list to make sure that words are added in order.
-    // test deletion and addition of the same word.
-    // test delete to make sure the creation count and the deletion count are the same.
 
     bool ok = true;
     /* Contains Test */
@@ -110,10 +94,43 @@ int main()
         }
     }
 
+    // Verify that the set size is the same as the vector size.
+    if (ok)
+    {
+        cout << "Add - Test3: Verify set size" << endl;
+        set<string> stl_set;
+        cs3505::string_set our_set(1000);
+        ifstream in("Yankee.txt");
+        int count = 0;
+        while (true)
+        {
+            string word;
+            in >> word;
+            if (in.fail())
+                break;
+            our_set.add(word);
+            stl_set.insert(word);
+        }
+        vector<string> our_vector = our_set.get_elements();
+        cout << "stl set size is " << stl_set.size() << endl;
+        if (stl_set.size() != our_set.get_size())
+        {
+            ok = false;
+        }
+        if (ok)
+        {
+            cout << "\tSuccess!" << endl;
+        }
+        else
+        {
+            cout << "\tFailure!" << endl;
+        }
+    }
+
     // Add every word from Yankee.txt and make sure it's in the set.
     if (ok)
     {
-        cout << "Contains - Test 3: Test all words from Yankee.txt" << endl;
+        cout << "Contains - Test 4: Test all words from Yankee.txt" << endl;
         cs3505::string_set our_set(1000);
         ifstream in("Yankee.txt");
 
@@ -152,85 +169,68 @@ int main()
          << "Removal Tests" << endl
          << endl;
     /* Note. Was going to write test for simple removal but it's already in contains. */
-    // attempting to get words with the same hash value.
-    if (ok)
-    {
-        cs3505::string_set our_set(1000);
-        our_set.add("methods");
-        our_set.add("grand");
-        our_set.add("winks");
-        our_set.remove("methods");
-        our_set.remove("grand");
-        our_set.remove("winks");
-    }
 
     // Add every word from Yankee.txt and remove every word from Yankee.txt and make sure the set size is 0
-    // if (ok)
-    // {
-    //     ok = false;
-    //     cout << "Remove - Test1: Remove all words from yankee.txt" << endl;
-    //     ifstream in("Yankee.txt");
-    //     cs3505::string_set our_set(1000);
-    //     while (true)
-    //     {
-    //         string word;
-    //         in >> word;
-    //         if (in.fail())
-    //             break;
-    //         our_set.add(word);
-    //         if (our_set.contains(word))
-    //         {
-    //             ok = true;
-    //         }
-    //         else
-    //         {
-    //             ok = false;
-    //             cout << "\t Failure: Didn't succesfully add every word" << endl;
-    //             break;
-    //         }
-    //     }
+    if (ok)
+    {
+        ok = false;
+        cout << "Remove - Test1: Remove all words from yankee.txt" << endl;
+        ifstream in("Yankee.txt");
+        cs3505::string_set our_set(1000);
+        while (true)
+        {
+            string word;
+            in >> word;
+            if (in.fail())
+                break;
+            our_set.add(word);
+            if (our_set.contains(word))
+            {
+                ok = true;
+            }
+            else
+            {
+                ok = false;
+                cout << "\t Failure: Didn't succesfully add every word" << endl;
+                break;
+            }
+        }
 
-    //     ok = true;
-    //     ifstream in_repeat("Yankee.txt");
-    //     int count = 1;
-    //     while (true)
-    //     {
-    //         string word;
-    //         in_repeat >> word;
-    //         if (in_repeat.fail())
-    //             break;
-    //         our_set.remove(word);
-    //         if (our_set.contains(word))
-    //         {
-    //             ok = false;
-    //             cout << "\t Failure: Set contains word " << word << endl;
-    //             break;
-    //         }
-    //         count++;
-    //         cout << count << endl;
-    //     }
-    //     cout << our_set.get_size() << endl;
-    //     if (our_set.get_size() == 0)
-    //         ok = true;
-    //     else
-    //     {
-    //         ok = false;
-    //     }
-    //     if (ok)
-    //     {
-    //         cout << "\t Success!" << endl;
-    //     }
-    //     else
-    //     {
-    //         cout << "\t Failure!" << endl;
-    //     }
-    // }
+        ok = true;
+        ifstream in_repeat("Yankee.txt");
+        int count = 1;
+        while (true)
+        {
+            string word;
+            in_repeat >> word;
+            if (in_repeat.fail())
+                break;
+            if (our_set.contains(word))
+            {
+                our_set.remove(word);
+            }
+        }
+        if (our_set.get_size() == 0)
+            ok = true;
+        else
+        {
+            ok = false;
+        }
+        if (ok)
+        {
+            cout << "\t Success!" << endl;
+        }
+        else
+        {
+            cout << "\t Failure!" << endl;
+        }
+    }
 
     // Add every word from yankee keeping track of the creation count, and upon deletion verify that all objects created have been deleted.
     if (ok)
     {
         {
-            cout << "Contains - Test 3: Test all words from Yankee.txt" << endl;
+            cout << "Remove - Test 2: Test destructor for all words" << endl;
             cs3505::string_set our_set(1000);
             ifstream in("Yankee.txt");
 
@@ -254,118 +254,228 @@ int main()
         }
     }
 
-    // /* Operator Equals */
-    // cout << endl
-    //      << "Operator Equals tests" << endl
-    //      << endl;
-    // // Test the set size of both to verify that they are the same
-    // if (ok)
-    // {
-    //     cout << "Equals - Test1: Same set size" << endl;
-    //     cs3505::string_set our_set(1000);
-    //     ifstream in("Yankee.txt");
+    /* Operator Equals */
+    cout << endl
+         << "Operator Equals tests" << endl
+         << endl;
+    // Test the set size of both to verify that they are the same
+    if (ok)
+    {
+        cout << "Equals - Test1: Same set size" << endl;
+        cs3505::string_set our_set(1000);
+        ifstream in("Yankee.txt");
 
-    //     while (true)
-    //     {
-    //         string word;
-    //         in >> word;
-    //         if (in.fail())
-    //             break;
-    //         our_set.add(word);
-    //     }
-    //     cs3505::string_set new_set = our_set;
-    //     if (new_set.get_size() != our_set.get_size())
-    //         ok = false;
-    //     else
-    //     {
-    //         ok = true;
-    //     }
-    //     if (ok)
-    //         cout << "\t Success " << endl;
-    //     else
-    //     {
-    //         cout << "\t Failure" << endl;
-    //     }
-    // }
+        while (true)
+        {
+            string word;
+            in >> word;
+            if (in.fail())
+                break;
+            our_set.add(word);
+        }
+        cs3505::string_set new_set(1000);
+        new_set = our_set;
+        if (new_set.get_size() != our_set.get_size())
+            ok = false;
+        else
+        {
+            ok = true;
+        }
+        if (ok)
+            cout << "\t Success " << endl;
+        else
+        {
+            cout << "\t Failure" << endl;
+        }
+    }
     // Make sure that the address of both set's are not the same (The new set is completely new copy)
-    // if (ok)
-    // {
-    //     cout << "Equals - Test2: Verify deep copy" << endl;
-    //     cs3505::string_set our_set(1000);
-    //     ifstream in("Yankee.txt");
+    if (ok)
+    {
+        cout << "Equals - Test2: Verify new address" << endl;
+        cs3505::string_set our_set(1000);
+        ifstream in("Yankee.txt");
 
-    //     while (true)
-    //     {
-    //         string word;
-    //         in >> word;
-    //         if (in.fail())
-    //             break;
-    //         our_set.add(word);
-    //     }
-    //     cs3505::string_set new_set = our_set;
-    //     cout << &new_set << endl;
-    //     cout << &our_set << endl;
-    // }
+        while (true)
+        {
+            string word;
+            in >> word;
+            if (in.fail())
+                break;
+            our_set.add(word);
+        }
+        cs3505::string_set new_set(1000);
+        new_set = our_set;
+        if (&new_set == &our_set)
+        {
+            ok = false;
+        }
+        if (ok)
+        {
+            cout << "\tSuccess!" << endl;
+        }
+        else
+        {
+            cout << "\tFailure!" << endl;
+        }
+    }
 
+    // Make sure that every word added to the first set is also in the second set.
+    if (ok)
+    {
+        cout << "Equals - Test3: Verify all elements are same" << endl;
+        cs3505::string_set our_set(1000);
+        ifstream in("Yankee.txt");
 
-    // Add Yankee.txt to set, set it to the next set, and make sure that every word is contained in the new set.
+        while (true)
+        {
+            string word;
+            in >> word;
+            if (in.fail())
+                break;
+            our_set.add(word);
+        }
+        cs3505::string_set new_set(1000);
+        new_set = our_set;
+
+        ifstream in_new("Yankee.txt");
+        while (true)
+        {
+            string word;
+            in >> word;
+            if (in.fail())
+                break;
+            if (!new_set.contains(word))
+            {
+                ok = false;
+                break;
+            }
+        }
+        if (ok)
+        {
+            cout << "\tSuccess!" << endl;
+        }
+        else
+        {
+            cout << "\tFailure!" << endl;
+        }
+    }
 
     /* Get Elements */
-    cout << endl << "Get elements Tests" << endl << endl;
+    cout << endl
+         << "Get elements Tests" << endl
+         << endl;
+
+    // verify vector size for small set
+
+    if (ok)
+    {
+        cout << "Elements - Test1: Verify vector size is same as set size for small set" << endl;
+        cs3505::string_set our_set(5);
+        our_set.add("Hi");
+        our_set.add("my");
+        our_set.add("name");
+        our_set.add("is");
+        our_set.add("richard");
+        our_set.add("and");
+        our_set.add("this");
+        our_set.add("iss");
+        our_set.add("a");
+        our_set.add("set");
+
+        vector<string> our_vector = our_set.get_elements();
+        if (our_vector.size() != our_set.get_size())
+        {
+            ok = false;
+        }
+        if (ok)
+        {
+            cout << "\tSuccess" << endl;
+        }
+        else 
+        {
+            cout << "\tFailure" << endl;
+        }
+    }
 
     // Verify that the set size is the same as the vector size.
     if (ok)
     {
-        cout << "Elements - Test1: Doubly linked list set size" << endl;
-        set<string> stl_set; // The built-in set class - no constructor parameters.
-
-        cs3505::string_set our_set(1000); // Our set class, with a hashtable of 1000 slots.
-
-        // Open the file stream for reading.  (We'll be able to use it just like
-        //   the keyboard stream 'cin'.)
-
+        cout << "Elements - Test2: Verify vector size is same as set size for large set" << endl;
+        cs3505::string_set our_set(1000);
         ifstream in("Yankee.txt");
-
-        // Loop for reading the file.  Note that it is controlled
-        //   from within the loop (see the 'break').
-
-        int count = 0;
         while (true)
         {
-            // Read a word (don't worry about punctuation)
             string word;
             in >> word;
-
-            // If the read failed, we're probably at end of file
-            //   (or else the disk went bad).  Exit the loop.
-
             if (in.fail())
                 break;
-
-            // Word successfully read.  Add it to both sets.
-            stl_set.insert(word);
             our_set.add(word);
-
-            count++;
         }
         vector<string> our_vector = our_set.get_elements();
-        for (vector<string>::iterator it = our_vector.begin(); it != our_vector.end(); it++)
+        if (our_vector.size() != our_set.get_size())
         {
-            string word = *it;
-            // cout << word << endl;
-        }
-        if (our_set.get_size() != stl_set.size())
             ok = false;
+        }
         if (ok)
-            cout << "\t Sucess: Set size's are the same" << endl;
+        {
+            cout << "\tSuccess!" << endl;
+        }
         else
         {
-            cout << "\t Failed: Set size's aren't the same size" << endl;
+            cout << "\tFailure!" << endl;
         }
     }
 
+    // make sure that the vector prints the words out as they were added
+
+    if (ok)
+    {
+        cout << "Elements - Test3: Verify vector loops through words in the order they were added" << endl;
+        cs3505::string_set our_set(5);
+        our_set.add("Hi");
+        our_set.add("my");
+        our_set.add("name");
+        our_set.add("is");
+        our_set.add("richard");
+        our_set.add("and");
+        our_set.add("this");
+        our_set.add("iss");
+        our_set.add("a");
+        our_set.add("set");
+
+        vector<string> our_vector = our_set.get_elements();
+    }
+
     // Add every work from Yankee.txt and make sure that as we iterate through the vector every word in the vector is also in the set.
-    
+    if (ok)
+    {
+        cout << "Elements - Test4: Verify vector has all words in from yankee.txt" << endl;
+        cs3505::string_set our_set(1000);
+        ifstream in("Yankee.txt");
+        while (true)
+        {
+            string word;
+            in >> word;
+            if (in.fail())
+                break;
+            our_set.add(word);
+        }
+        vector<string> our_vector = our_set.get_elements();
+        if (our_vector.size() != our_set.get_size())
+        {
+            ok = false;
+        }
+        if (ok)
+        {
+            cout << "\tSuccess!" << endl;
+        }
+        else
+        {
+            cout << "\tFailure!" << endl;
+        }
+    }
+
+
     // Make sure that the get_elements works after an object has been deleted.
     // Run small test with 10 words to make sure that the words are iterated in the correct order.
 }

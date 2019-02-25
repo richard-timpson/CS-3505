@@ -1,8 +1,8 @@
 /* This node class is used to build linked lists for the
  * string_set class.
  *
- * Peter Jensen
- * January 29, 2019
+ * Peter Jensen and Richard Timpson
+ * February 9, 2019
  */
 #include <cstdlib>
 #include <iostream>

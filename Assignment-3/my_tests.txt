@@ -1,0 +1,17 @@
+Testing Contains Function
+Contains - Test1: Simple addition
+	 Success!
+Contains - Test2: Adding deleted word
+	 Success!
+Contains - Test 3: Test all words from Yankee.txt
+	 Success!
+
+Removal Tests
+
+Contains - Test 3: Test all words from Yankee.txt
+	Success!
+
+Get elements Tests
+
+Elements - Test1: Doubly linked list set size
+	 Sucess: Set size's are the same

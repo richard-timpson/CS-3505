@@ -1,8 +1,8 @@
 /* A 'string set' is defined as a set of strings stored
  * in a hashtable that uses chaining to resolve collisions.
  *
- * Peter Jensen
- * January 29, 2019
+ * Peter Jensen and Richard Timpson
+ * February 9, 2019
  */
 
 #ifndef STRING_SET_H
