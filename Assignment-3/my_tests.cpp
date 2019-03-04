@@ -23,6 +23,8 @@ using namespace std;
 // static variables for testing destructore
 int cs3505::node::creation_count = 0;
 int cs3505::node::deletion_count = 0;
+int cs3505::string_set::creation_count = 0;
+int cs3505::string_set::deletion_count = 0;
 
 int main()
 {
@@ -200,7 +202,7 @@ int main()
         ok = false;
         cout << "Remove - Test1: Remove all words from yankee.txt" << endl;
         ifstream in("Yankee.txt");
-        cs3505::string_set our_set(1000);
+        cs3505::string_set our_set(10000);
         while (true)
         {
             string word;
@@ -229,10 +231,7 @@ int main()
             in_repeat >> word;
             if (in_repeat.fail())
                 break;
-            if (our_set.contains(word))
-            {
-                our_set.remove(word);
-            }
+            our_set.remove(word);
         }
         if (our_set.get_size() == 0)
             ok = true;
@@ -253,6 +252,10 @@ int main()
     // Add every word from yankee keeping track of the creation count, and upon deletion verify that all objects created have been deleted.
     if (ok)
     {
+        cs3505::node::creation_count = 0;
+        cs3505::node::deletion_count = 0;
+        cs3505::string_set::creation_count = 0;
+        cs3505::string_set::deletion_count = 0;
         {
             cout << "Remove - Test 2: Test destructor for all words" << endl;
             cs3505::string_set our_set(1000);
@@ -267,7 +270,29 @@ int main()
                     break;
                 our_set.add(word);
             }
+
+            // ifstream in_repeat("Yankee.txt");
+
+            // // add every word from yankee.txt to set
+            // while (true)
+
+            // {
+            //     string word;
+            //     in_repeat >> word;
+            //     if (in_repeat.fail())
+            //         break;
+            //     our_set.remove(word);
+            // }
+            
+            cout << "Node Creation count: " << cs3505::node::creation_count << endl;
+            cout << "Node Deletion count: " << cs3505::node::deletion_count << endl;
+            cout << "Set Creation count: " << cs3505::string_set::creation_count << endl;
+            cout << "set Deletion count: " << cs3505::string_set::deletion_count << endl;
         }
+        cout << "Node Creation count: " << cs3505::node::creation_count << endl;
+            cout << "Node Deletion count: " << cs3505::node::deletion_count << endl;
+            cout << "Set Creation count: " << cs3505::string_set::creation_count << endl;
+            cout << "set Deletion count: " << cs3505::string_set::deletion_count << endl;
         if (cs3505::node::creation_count != cs3505::node::deletion_count)
             ok = false;
         if (ok)
@@ -296,7 +321,7 @@ int main()
                 break;
             our_set.add(word);
         }
-        cs3505::string_set new_set(1000);
+        cs3505::string_set new_set;
         new_set = our_set;
         if (new_set.get_size() != our_set.get_size())
             ok = false;
@@ -326,8 +351,8 @@ int main()
                 break;
             our_set.add(word);
         }
-        cs3505::string_set new_set(1000);
-        new_set = our_set;
+        cs3505::string_set new_set = our_set;
+        // new_set = our_set;
         if (&new_set == &our_set)
         {
             ok = false;
@@ -373,6 +398,36 @@ int main()
                 break;
             }
         }
+        if (ok)
+        {
+            cout << "\tSuccess!" << endl;
+        }
+        else
+        {
+            cout << "\tFailure!" << endl;
+        }
+    }
+
+    /* Copy Constructor */
+    cout << endl << "Copy Constructor Tests" << endl;
+    if (ok)
+    {
+        cout << "Copy Constructor - Test1: Verfiy set size is same" << endl;
+        cs3505::string_set our_set(100);
+        ifstream in("Yankee.txt");
+        while (true)
+        {
+            string word;
+            in >> word;
+            if (in.fail())
+                break;
+            our_set.add(word);
+        }
+        cs3505::string_set new_set(our_set);
+
+        if (new_set.get_size() != our_set.get_size())
+            ok = false;
+
         if (ok)
         {
             cout << "\tSuccess!" << endl;

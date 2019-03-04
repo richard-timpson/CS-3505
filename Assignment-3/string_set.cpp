@@ -7,9 +7,9 @@
 
 #include "string_set.h"
 #include "node.h"
-#include <iostream> 
+#include <iostream>
 #include <string>
-#include <vector> 
+#include <vector>
 
 using namespace std;
 
@@ -25,19 +25,19 @@ namespace cs3505
     */
 string_set::string_set(int capacity)
 {
-  // Set up a hashtable of the specified capacity.
+    // Set up a hashtable of the specified capacity.
 
-  this->table = new node *[capacity];
-  this->capacity = capacity;
-  this->size = 0;
-  this->head = NULL;
-  this->tail = NULL;
+    this->table = new node *[capacity];
+    this->capacity = capacity;
+    this->size = 0;
+    this->head = NULL;
+    this->tail = NULL;
 
-  // The array must be cleared -- it will have bogus values in it.
-  //   (NULL means 'no linked list chain in this entry')
+    // The array must be cleared -- it will have bogus values in it.
+    //   (NULL means 'no linked list chain in this entry')
 
-  for (int i = 0; i < capacity; i++)
-    table[i] = NULL;
+    for (int i = 0; i < capacity; i++)
+        table[i] = NULL;
 }
 
 /** Copy constructor:  Initialize this set
@@ -46,16 +46,16 @@ string_set::string_set(int capacity)
     */
 string_set::string_set(const string_set &other)
 {
-  // Give initial values to ensure the object is well-formed.
+    // Give initial values to ensure the object is well-formed.
 
-  table = NULL;
-  size = 0;
-  capacity = 0;
+    table = NULL;
+    size = 0;
+    capacity = 0;
 
-  // Use our assignment operator to complete this step.
-  //   (Dereference this, then assign to that instance.)
+    // Use our assignment operator to complete this step.
+    //   (Dereference this, then assign to that instance.)
 
-  *this = other;
+    *this = other;
 }
 
 /** Destructor:  release any memory allocated
@@ -63,9 +63,9 @@ string_set::string_set(const string_set &other)
     */
 string_set::~string_set()
 {
-  // Use a helper function to do all the work.
+    // Use a helper function to do all the work.
 
-  clean();
+    clean();
 }
 
 /** Releases any memory that was allocated by
@@ -75,30 +75,30 @@ string_set::~string_set()
     */
 void string_set::clean()
 {
-  // Clean up the table (if any)
+    // Clean up the table (if any)
 
-  if (table != NULL)
-  {
-    // Clean up (deallocate) any chains in the table.
+    if (table != NULL)
+    {
+        // Clean up (deallocate) any chains in the table.
 
-    for (int i = 0; i < capacity; i++)
-      if (table[i] != NULL)
-      {
-        delete table[i];
-        table[i] = NULL; // Not needed, but a good idea
-      }
+        for (int i = 0; i < capacity; i++)
+            if (table[i] != NULL)
+            {
+                delete table[i];
+                table[i] = NULL; // Not needed, but a good idea
+            }
 
-    // Release the table's memory.
+        // Release the table's memory.
 
-    delete[] table;
-  }
+        delete[] table;
+    }
 
-  // When 'this' object has been cleaned, it has no array.
-  //   Set the fields appropriately.
+    // When 'this' object has been cleaned, it has no array.
+    //   Set the fields appropriately.
 
-  table = NULL;
-  size = 0;
-  capacity = 0;
+    table = NULL;
+    size = 0;
+    capacity = 0;
 }
 
 /** Computes a table index for a given string.
@@ -109,13 +109,13 @@ void string_set::clean()
     */
 int string_set::hash(const std::string &s) const
 {
-  // A well-known hash algorithm.  Do not change!!!
+    // A well-known hash algorithm.  Do not change!!!
 
-  long long hash = 0;
-  for (int i = 0; i < s.length(); i++)
-    hash = ((hash * 2237) + s[i]) % capacity;
+    long long hash = 0;
+    for (int i = 0; i < s.length(); i++)
+        hash = ((hash * 2237) + s[i]) % capacity;
 
-  return static_cast<int>(hash);
+    return static_cast<int>(hash);
 }
 
 /** Adds the specified element to this set.  If the element
@@ -123,31 +123,31 @@ int string_set::hash(const std::string &s) const
     */
 void string_set::add(const std::string &target)
 {
-  // Determine which table entry chain might contain this string.
+    // Determine which table entry chain might contain this string.
 
-  int index = hash(target);
+    int index = hash(target);
 
-  // Walk the chain (the linked list).  Check each entry for the
-  //   string.  If we find it, just bail out.  (No duplicates allowed.)
+    // Walk the chain (the linked list).  Check each entry for the
+    //   string.  If we find it, just bail out.  (No duplicates allowed.)
 
-  node *current = table[index];
-  while (current != NULL)
-  {
+    node *current = table[index];
+    while (current != NULL)
+    {
+        if (current->data == target)
+            return;
+        current = current->next;
+    }
 
-    if (current->data == target)
-      return;
-    current = current->next;
-  }
+    // Make a new node, then link it in to the beginning of the chain.
 
-  // Make a new node, then link it in to the beginning of the chain.
+    node *n = new node(target, this); // The node is created, but points nowhere.
+    // creation_count++;
+    n->next = table[index];           // Point the node to the head node of the chain.
+    table[index] = n;                 // Point the head of the chain to our new node.
 
-  node *n = new node(target, this); // The node is created, but points nowhere.
-  n->next = table[index];           // Point the node to the head node of the chain.
-  table[index] = n;                 // Point the head of the chain to our new node.
+    // We added a string - count it.
 
-  // We added a string - count it.
-
-  size++;
+    size++;
 }
 
 /** Removes the specified target element from this set.  If the
@@ -156,48 +156,52 @@ void string_set::add(const std::string &target)
     */
 void string_set::remove(const std::string &target)
 {
-  int index = hash(target);
-  // get a pointer to the first node in the list
-  node *current = table[index];
+    if (!contains(target))
+        return;
+    int index = hash(target);
+    // get a pointer to the first node in the list
+    node *current = table[index];
 
-  // if the first pointer is the target
-  // set the first pointer to the next in the list
-  // and delete the first pointer. Also decrement size
-  if (current->data == target)
-  {
-    table[index] = current->next;
-    current->next = NULL;
-    delete (current);
-    size--;
-    return;
-  }
-
-  // loop through all nodes in the list to find the node to remove
-  node *previous = NULL;
-  bool delete_node = false;
-  while (current != NULL)
-  {
-    // if we are at the current target
-    // set the previous next pointer to the current next pointer,
+    // if the first pointer is the target
+    // set the first pointer to the next in the list
+    // and delete the first pointer. Also decrement size
     if (current->data == target)
     {
-      delete_node = true;
-      break;
+        table[index] = current->next;
+        current->next = NULL;
+        delete (current);
+        // deletion_count++;
+        size--;
+        return;
     }
-    previous = current;
-    current = current->next;
-  }
-  // if we found a node to remove, set previous's next to currents next,
-  // and 0 current next's pointer.
-  if (delete_node)
-  {
-    // delete the node from the list
-    previous->next = current->next;
-    current->next = NULL;
-    delete (current);
-    size--;
-    return;
-  }
+
+    // loop through all nodes in the list to find the node to remove
+    node *previous = NULL;
+    bool delete_node = false;
+    while (current != NULL)
+    {
+        // if we are at the current target
+        // set the previous next pointer to the current next pointer,
+        if (current->data == target)
+        {
+            delete_node = true;
+            break;
+        }
+        previous = current;
+        current = current->next;
+    }
+    // if we found a node to remove, set previous's next to currents next,
+    // and 0 current next's pointer.
+    if (delete_node)
+    {
+        // delete the node from the list
+        previous->next = current->next;
+        current->next = NULL;
+        delete (current);
+        // deletion_count++;
+        size--;
+        return;
+    }
 }
 
 /** Returns true if the specified target element in in this set,
@@ -205,24 +209,24 @@ void string_set::remove(const std::string &target)
     */
 bool string_set::contains(const std::string &target) const
 {
-  // Determine which table entry chain might contain this string.
+    // Determine which table entry chain might contain this string.
 
-  int index = hash(target);
+    int index = hash(target);
 
-  // this is almost the exact same as the add function.
-  // walk all of the nodes at the list specified by the hash
-  // return true if the value is in the list.
+    // this is almost the exact same as the add function.
+    // walk all of the nodes at the list specified by the hash
+    // return true if the value is in the list.
 
-  node *current = table[index];
-  while (current != NULL)
-  {
-    if (current->data == target)
-      return true;
-    current = current->next;
-  }
+    node *current = table[index];
+    while (current != NULL)
+    {
+        if (current->data == target)
+            return true;
+        current = current->next;
+    }
 
-  // if we reach the end of the list without finding it, return false
-  return false;
+    // if we reach the end of the list without finding it, return false
+    return false;
 }
 
 /** Returns a count of the number of elements
@@ -237,26 +241,26 @@ bool string_set::contains(const std::string &target) const
     */
 vector<string> string_set::get_elements() const
 {
-  vector<string> return_vector;
-  node *current = this->head;
-  // add the first element
-  if (current != NULL)
-  {
-    return_vector.push_back(current->data);
-  }
-  // loop through all elements and add them to set. 
-  // change the current pointer first to ensure that we add the last item in the set. 
-  while (current->fore != NULL)
-  {
-    current = current->fore;
-    return_vector.push_back(current->data);
-  }
-  return return_vector;
+    vector<string> return_vector;
+    node *current = this->head;
+    // add the first element
+    if (current != NULL)
+    {
+        return_vector.push_back(current->data);
+    }
+    // loop through all elements and add them to set.
+    // change the current pointer first to ensure that we add the last item in the set.
+    while (current->fore != NULL)
+    {
+        current = current->fore;
+        return_vector.push_back(current->data);
+    }
+    return return_vector;
 }
 
 int string_set::get_size() const
 {
-  return this->size;
+    return this->size;
 }
 
 /*** Assignment operator ***/
@@ -268,44 +272,50 @@ int string_set::get_size() const
     */
 string_set &string_set::operator=(const string_set &rhs)
 {
-  // If we are assigning this object to this object,
-  //   do nothing.  (This is important!)
+    // If we are assigning this object to this object,
+    //   do nothing.  (This is important!)
 
-  if (this == &rhs) // Compare addresses (not object contents)
-    return *this;   // Do nothing if identical
+    if (this == &rhs) // Compare addresses (not object contents)
+        return *this; // Do nothing if identical
 
-  // Wipe away anything that is stored in this object.
+    // Wipe away anything that is stored in this object.
 
-  clean();
+    clean();
 
-  // Create a new set (new table) and populate it with the entries
-  //   from the set in rhs.  Use the capacity from rhs.  Hint:
-  //   see the first constructor above (but you cannot call it).
-  this->table = new node *[rhs.capacity];
-  this->capacity = rhs.capacity;
-  this->size = 0;
-
-  // loop through every pointer in the table
-  for (int i = 0; i < capacity; i++)
-  {
-    // loop through every item in each list and add that string to the current set. 
-    node *temp = rhs.table[i];
-    while (temp != NULL)
+    // Create a new set (new table) and populate it with the entries
+    //   from the set in rhs.  Use the capacity from rhs.  Hint:
+    //   see the first constructor above (but you cannot call it).
+    this->table = new node *[rhs.capacity];
+    this->capacity = rhs.capacity;
+    this->size = 0;
+    for (int i = 0; i < this->capacity; i++)
     {
-      add(temp->data);
-      temp = temp->next;
+        this->table[i] = NULL;
     }
-  }
-  // Requirement:  Do not permanently point to arrays or nodes in rhs.
-  //   When rhs is destroyed, it will delete its array and nodes,
-  //   and we cannot count on their existence.  Instead, you will
-  //   create a new array for this object, traverse rhs,
-  //   and add one entry to this set for every entry in rhs.
+    this->head = NULL;
+    this->tail = NULL;
 
-  // To be completed as part of the assignment.
+    // loop through every pointer in the table
+    for (int i = 0; i < capacity; i++)
+    {
+        // loop through every item in each list and add that string to the current set.
+        node *temp = rhs.table[i];
+        while (temp != NULL)
+        {
+            add(temp->data);
+            temp = temp->next;
+        }
+    }
+    // Requirement:  Do not permanently point to arrays or nodes in rhs.
+    //   When rhs is destroyed, it will delete its array and nodes,
+    //   and we cannot count on their existence.  Instead, you will
+    //   create a new array for this object, traverse rhs,
+    //   and add one entry to this set for every entry in rhs.
 
-  // Done with assignment operator.
+    // To be completed as part of the assignment.
 
-  return *this;
+    // Done with assignment operator.
+
+    return *this;
 }
 } // namespace cs3505

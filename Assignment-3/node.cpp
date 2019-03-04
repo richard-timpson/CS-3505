@@ -53,7 +53,7 @@ cs3505::node::node(const std::string & s,  string_set * set)
     this->fore = NULL;
     this->set->tail = this;
   }
-  this->creation_count++;
+//   cs3505::node::creation_count++;
 }
 
   
@@ -62,7 +62,6 @@ cs3505::node::node(const std::string & s,  string_set * set)
   */
 cs3505::node::~node()
 {
-  // 19169 words. 
   
   if (this->back == NULL && this->fore == NULL)
   {
@@ -104,7 +103,6 @@ cs3505::node::~node()
 
   // deletion of a random object
   
-  // Loop through the liist until we find the element to remove
   else
   {
     // set the back pointer of the fore node to the back of the current
@@ -131,5 +129,5 @@ cs3505::node::~node()
   this->next = NULL;      
 
 
-  this->deletion_count++;
+//   cs3505::node::deletion_count++;
 }
