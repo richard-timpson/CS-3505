@@ -1,0 +1,13 @@
+\babel@toc {english}{}
+\contentsline {section}{\numberline {1}Introduction}{1}
+\contentsline {subsection}{\numberline {1.1}Overview and Technologies}{1}
+\contentsline {subsection}{\numberline {1.2}Connection Overview}{2}
+\contentsline {subsection}{\numberline {1.3}Editing Overview}{2}
+\contentsline {section}{\numberline {2}Connection}{2}
+\contentsline {subsection}{\numberline {2.1}UML Diagram}{2}
+\contentsline {subsection}{\numberline {2.2}Socket Connection}{2}
+\contentsline {subsection}{\numberline {2.3}Loggin In}{2}
+\contentsline {subsection}{\numberline {2.4}Picking a Spreadsheet}{5}
+\contentsline {section}{\numberline {3}Editing}{6}
+\contentsline {subsection}{\numberline {3.1}Generating a saved spreadsheet}{6}
+\contentsline {section}{\numberline {4}Conclusion}{7}
