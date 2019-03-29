@@ -62,6 +62,7 @@
     <Content Include="Libraries\Formula.xml" />
     <Content Include="Libraries\FormulaEvaluator.dll" />
     <Content Include="Libraries\Spreadsheet.dll" />
+    <Content Include="Libraries\Spreadsheet.xml" />
     <Content Include="Libraries\SpreadsheetPanel.dll" />
     <Content Include="README.txt" />
   </ItemGroup>
