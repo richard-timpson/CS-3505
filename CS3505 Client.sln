@@ -21,6 +21,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controller", "Controller", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkController", "..\u0893816\CS3505 Client\NetworkController\NetworkController.csproj", "{0F1D593E-2012-4B80-97CE-0FDD42C8108F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{9A873028-ED72-4E30-A592-8423729BBF4C}"
+	ProjectSection(SolutionItems) = preProject
+		..\u0893816\PS1\FormulaEvaluator\bin\Debug\FormulaEvaluator.dll = ..\u0893816\PS1\FormulaEvaluator\bin\Debug\FormulaEvaluator.dll
+		..\u0893816\PS1\FormulaEvaluator\bin\Debug\FormulaEvaluator.pdb = ..\u0893816\PS1\FormulaEvaluator\bin\Debug\FormulaEvaluator.pdb
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
