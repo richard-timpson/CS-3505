@@ -33,7 +33,8 @@ int main()
 
     /* Size test */
 
-    cout << endl << "Size Test" << endl;
+    cout << endl
+         << "Size Test" << endl;
     if (ok)
     {
         cout << "Size - Test1: Simple size test" << endl;
@@ -41,23 +42,23 @@ int main()
         our_set.add("Hello");
         our_set.add("World!");
         our_set.add("!");
-        if (our_set.get_size()!= 3) 
+        if (our_set.get_size() != 3)
         {
             ok = false;
         }
-        if (ok) 
+        if (ok)
         {
             cout << "\tSuccess" << endl;
         }
-        else 
+        else
         {
             cout << "\tFailure" << endl;
         }
     }
 
-
     /* Contains Test */
-    cout << endl << "Contains Test" << endl;
+    cout << endl
+         << "Contains Test" << endl;
 
     // Make sure simple addition with contains works
     if (ok)
@@ -283,16 +284,16 @@ int main()
             //         break;
             //     our_set.remove(word);
             // }
-            
+
             cout << "Node Creation count: " << cs3505::node::creation_count << endl;
             cout << "Node Deletion count: " << cs3505::node::deletion_count << endl;
             cout << "Set Creation count: " << cs3505::string_set::creation_count << endl;
             cout << "set Deletion count: " << cs3505::string_set::deletion_count << endl;
         }
         cout << "Node Creation count: " << cs3505::node::creation_count << endl;
-            cout << "Node Deletion count: " << cs3505::node::deletion_count << endl;
-            cout << "Set Creation count: " << cs3505::string_set::creation_count << endl;
-            cout << "set Deletion count: " << cs3505::string_set::deletion_count << endl;
+        cout << "Node Deletion count: " << cs3505::node::deletion_count << endl;
+        cout << "Set Creation count: " << cs3505::string_set::creation_count << endl;
+        cout << "set Deletion count: " << cs3505::string_set::deletion_count << endl;
         if (cs3505::node::creation_count != cs3505::node::deletion_count)
             ok = false;
         if (ok)
@@ -302,7 +303,7 @@ int main()
             cout << "\t Failed!" << endl;
         }
     }
-        // Add every word from Yankee.txt and remove every word from Yankee.txt and make sure the set size is 0
+    // Add every word from Yankee.txt and remove every word from Yankee.txt and make sure the set size is 0
     if (ok)
     {
         ok = false;
@@ -461,7 +462,8 @@ int main()
     }
 
     /* Copy Constructor */
-    cout << endl << "Copy Constructor Tests" << endl;
+    cout << endl
+         << "Copy Constructor Tests" << endl;
     if (ok)
     {
         cout << "Copy Constructor - Test1: Verfiy set size is same" << endl;
@@ -489,7 +491,7 @@ int main()
             cout << "\tFailure!" << endl;
         }
     }
-    
+
     /* Get Elements */
     cout << endl
          << "Get elements Tests" << endl;
@@ -520,7 +522,7 @@ int main()
         {
             cout << "\tSuccess" << endl;
         }
-        else 
+        else
         {
             cout << "\tFailure" << endl;
         }
@@ -570,19 +572,24 @@ int main()
         vector<string> our_vector = our_set.get_elements();
         vector<string>::iterator it = our_vector.begin();
         string word = *it;
-        if (word !="Hi") ok = false;
+        if (word != "Hi")
+            ok = false;
         it++;
         word = *it;
-        if (word !="my") ok = false;
+        if (word != "my")
+            ok = false;
         it++;
         word = *it;
-        if (word !="name") ok = false;
+        if (word != "name")
+            ok = false;
         it++;
         word = *it;
-        if (word !="is") ok = false;
+        if (word != "is")
+            ok = false;
         it++;
         word = *it;
-        if (word !="richard") ok = false;
+        if (word != "richard")
+            ok = false;
         if (ok)
         {
             cout << "\tSuccess" << endl;
@@ -591,7 +598,6 @@ int main()
         {
             cout << "\tFailure" << endl;
         }
-
     }
 
     // Add every work from Yankee.txt and make sure that as we iterate through the vector every word in the vector is also in the set.
@@ -609,28 +615,26 @@ int main()
             our_set.add(word);
         }
         vector<string> our_vector = our_set.get_elements();
-        for (vector<string>::iterator it = our_vector.begin(); it!= our_vector.end(); it++) 
+        for (vector<string>::iterator it = our_vector.begin(); it != our_vector.end(); it++)
         {
             string word = *it;
-            if (!our_set.contains(word)) 
+            if (!our_set.contains(word))
             {
                 ok = false;
                 break;
             }
         }
-        if (ok) 
+        if (ok)
         {
             cout << "\tSuccess" << endl;
         }
-        else 
+        else
         {
             cout << "\tFailure!" << endl;
         }
     }
 
-
     // Make sure that the get_elements works after an object has been deleted.
-
 
     // make sure that the vector prints the words out as they were added
 
@@ -647,21 +651,24 @@ int main()
         vector<string> our_vector = our_set.get_elements();
         vector<string>::iterator it = our_vector.begin();
         string word = *it;
-        if (word !="Hi") ok = false;
+        if (word != "Hi")
+            ok = false;
         it++;
         word = *it;
-        if (word !="my") ok = false;
+        if (word != "my")
+            ok = false;
         it++;
         word = *it;
-        if (word !="name") ok = false;
+        if (word != "name")
+            ok = false;
         it++;
         word = *it;
-        if (word !="is") ok = false;
+        if (word != "is")
+            ok = false;
         it++;
         word = *it;
-        if (word !="richard") ok = false;
-
-
+        if (word != "richard")
+            ok = false;
 
         our_set.remove("Hi");
         our_set.remove("name");
@@ -670,21 +677,25 @@ int main()
         it = our_vector.begin();
 
         word = *it;
-        if (word !="my") ok = false;
+        if (word != "my")
+            ok = false;
         it++;
         word = *it;
-        if (word !="is") ok = false;
+        if (word != "is")
+            ok = false;
         it++;
         word = *it;
-        if (word !="richard") ok = false;
+        if (word != "richard")
+            ok = false;
         it++;
         word = *it;
-        if (word !="end") ok = false;
-        if (ok) 
+        if (word != "end")
+            ok = false;
+        if (ok)
         {
             cout << "\tSuccess!" << endl;
         }
-        else 
+        else
         {
             cout << "\tFailure!" << endl;
         }
@@ -714,12 +725,12 @@ int main()
             }
         }
 
-	vector<string> our_vector = our_set.get_elements();
-	cout << "vector size: " << our_vector.size() << endl;
-	if (our_vector.size() == 100000)
-	  ok = true;
-	else
-	  ok = false;
+        vector<string> our_vector = our_set.get_elements();
+        cout << "vector size: " << our_vector.size() << endl;
+        // if (our_vector.size() == 100000)
+        //   ok = true;
+        // else
+        //   ok = false;
         if (ok)
         {
             cout << "\t Success!" << endl;
@@ -729,5 +740,89 @@ int main()
             cout << "\t Failure!" << endl;
         }
     }
+    if (ok)
+    {
+        ok = false;
+        cout << "Remove - Test4: Remove all words from test1.txt" << endl;
+        ifstream in("test1.txt");
+        cs3505::string_set our_set(1000);
+        while (true)
+        {
+            string word;
+            in >> word;
+            if (in.fail())
+                break;
+            our_set.add(word);
+            if (our_set.contains(word))
+            {
+                ok = true;
+            }
+            else
+            {
+                ok = false;
+                cout << "\t Failure: Didn't succesfully add every word" << endl;
+                break;
+            }
+        }
 
+        vector<string> our_vector = our_set.get_elements();
+        cout << "vector size: " << our_vector.size() << endl;
+        if (ok)
+        {
+            cout << "\t Success!" << endl;
+        }
+        else
+        {
+            cout << "\t Failure!" << endl;
+        }
+    }
+    if (ok)
+    {
+        ok = false;
+        cout << "Remove - Test5: Remove all words from test1.txt" << endl;
+        ifstream in("test1.txt");
+        cs3505::string_set our_set(1000);
+        while (true)
+        {
+            string word;
+            in >> word;
+            if (in.fail())
+                break;
+            our_set.add(word);
+            if (our_set.contains(word))
+            {
+                ok = true;
+            }
+            else
+            {
+                ok = false;
+                cout << "\t Failure: Didn't succesfully add every word" << endl;
+                break;
+            }
+        }
+
+        ifstream in_repeat("test1.txt");
+        while (true)
+        {
+            string word;
+            in_repeat >> word;
+            if (in_repeat.fail())
+                break;
+            our_set.remove(word);
+            if (our_set.contains(word))
+            {
+                ok = false;
+                break;
+            }
+        }
+
+        if (ok)
+        {
+            cout << "\t Success!" << endl;
+        }
+        else
+        {
+            cout << "\t Failure!" << endl;
+        }
+    }
 }
