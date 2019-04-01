@@ -36,6 +36,9 @@ namespace CS3505
         /// </summary>
         private string Password;
 
+        /// <summary>
+        /// JSON terminator string
+        /// </summary>
         private const string ENDOFMESSAGE = "\n\n";
 
         /// <summary>
