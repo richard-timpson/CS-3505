@@ -82,6 +82,17 @@ namespace CS3505
 
             // Networking.Send(ss.theSocket, Username + ENDOFMESSAGE);
             // Networking.GetData(ss);
+
+            //var mess = new
+            //{
+            //    type = ss.sb.ToString(),
+            //    cell = "A1",
+                
+            //};
+            //JsonConvert.SerializeObject(mess);
+
+            ///string message = Json(mess);
+
         }
 
         /// <summary>

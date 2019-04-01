@@ -1,1 +1,21 @@
-﻿
+﻿Client TODO:
+	Peter:
+		- Address textbox
+	Zach: 
+		- Push Administrator GUI as its own solution
+	Tyler: 
+		- test JSON
+
+Client Completed
+	Peter:
+		-
+	Zach:
+	Tyler: 
+
+JSON SERIALIZE?
+            //var mess = new
+            //{
+            //    type = ss.sb.ToString(),
+            //    cell = "A1",
+            //};
+            //JsonConvert.SerializeObject(mess);
