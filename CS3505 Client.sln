@@ -8,9 +8,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetGUI", "SpreadsheetGUI\SpreadsheetGUI.csproj", "{F9945146-5679-4B8E-A29E-33F63D38AC97}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "View", "View", "{31F56CC0-90BB-473A-B4CB-2448D0BCFD43}"
-	ProjectSection(SolutionItems) = preProject
-		ClientGUI-TODO.txt = ClientGUI-TODO.txt
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientGUI", "ClientGUI\ClientGUI.csproj", "{F50891BF-7F53-493F-A950-39DC34F01B61}"
 EndProject

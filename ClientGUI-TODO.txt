@@ -1,2 +1,0 @@
-ClientGUI TODO:
-1. Figure out what maximum length of username should be, for determining maximum length of UsernameTextBox
