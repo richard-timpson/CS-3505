@@ -14,6 +14,7 @@ namespace CS3505
     /// <param name="ss"></param>
 
     public delegate void NetworkAction(SocketState ss);
+
     /// <summary>
     /// This class holds all the necessary state to represent a socket connection
     /// Note that all of its fields are public because we are using it like a "struct"

@@ -1,6 +1,6 @@
 ﻿Client TODO:
 	Peter:
-		- Address textbox
+		- List of spreadsheets on successful login
 	Zach: 
 		- Push Administrator GUI as its own solution
 	Tyler: 
@@ -8,7 +8,7 @@
 
 Client Completed
 	Peter:
-		-
+		- Address textbox
 	Zach:
 	Tyler: 
 
