@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CS3505;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,14 +10,36 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace SpreadsheetListGUI
 {
     public partial class Form1 : Form
     {
+        private SpreadsheetController ssController;
         public Form1()
         {
             InitializeComponent();
-            // Set the selection mode to multiple and extended.
+            InitializeSpreadsheetListBox();
+        }
+
+        /// <summary>
+        /// Used when the Client GUI successfully connects and has a
+        /// Spreadsheet controller with a SocketState on it.
+        /// </summary>
+        /// <param name="ssc">The Client GUI's Spreadsheet Controller</param>
+        public Form1(SpreadsheetController ssc)
+        {
+            ssController = ssc;
+            InitializeComponent();
+            InitializeSpreadsheetListBox();
+        }
+
+        /// <summary>
+        /// Starts up the ListOfSpreadsheetsListBox
+        /// </summary>
+        private void InitializeSpreadsheetListBox()
+        {
+            // Set the selection mode to one. Should we be able to select multiple?
             ListOfSpreadsheets.SelectionMode = SelectionMode.One;
 
             // Shutdown the painting of the ListBox as items are added.

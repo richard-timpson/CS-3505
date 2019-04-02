@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CS3505;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,9 +13,18 @@ namespace ClientGUI
 {
     public partial class ClientLogIn : Form
     {
+        /// <summary>
+        /// Used to connect to the server
+        /// </summary>
+        private SpreadsheetController ssController;
+
         public ClientLogIn()
         {
             InitializeComponent();
+
+            //It is okay to set this controller's Spreadsheet to null because it won't be 
+            //doing anything spreadsheet related. It will just try to connect to the server. 
+            ssController = new SpreadsheetController(null);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -33,6 +43,11 @@ namespace ClientGUI
         {
             //3 strings. Username, Password, Address
             //Send the strings to the server to evaluate
+            //if (String.IsNullOrWhiteSpace(AddressTextBox.Text))
+            //{
+            //    //use ssController to connect with our address string
+            //}
+            //ssController.Connect(AddressTextBox.Text, UsernameTextBox.Text, PasswordTextBox.Text);
 
             //If there is no address, default connect to Generics Spreadsheet Server.
             //Otherwise connect to Spreadsheet Server corresponding to that address.

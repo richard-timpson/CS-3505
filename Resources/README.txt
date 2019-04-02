@@ -1,6 +1,7 @@
 ﻿Client TODO:
 	Peter:
-		- List of spreadsheets on successful login
+		- List of spreadsheets window on successful login
+		- Learn more about ListBox. Is that the way to go when it comes to listing spreadsheets?
 	Zach: 
 		- Push Administrator GUI as its own solution
 	Tyler: 
