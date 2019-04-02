@@ -43,8 +43,9 @@ int main(int argc, char *argv[])
         error("ERROR connecting");
     printf("Please enter the message: ");
     bzero(buffer,256);
-    fgets(buffer,255,stdin);
-    n = write(sockfd,buffer,strlen(buffer));
+    // fgets(buffer,255,stdin);
+    char buffer1[] = "{\"richard\":\"test\"}";
+    n = write(sockfd,buffer1,strlen(buffer1));
     if (n < 0) 
          error("ERROR writing to socket");
     bzero(buffer,256);
