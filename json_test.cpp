@@ -12,7 +12,7 @@ int main()
         {"nothing", nullptr},
         {"answer", {{"everything", 42}}},
         {"list", {1, 0, 2}},
-        {"object", {{"currency", "USD"}, {"value", 42.99}}}};
+        {"object", {{"currency", "US"}, {"value", 42.99}}}};
 
     std::cout << j2.dump() << std::endl;
     return 0;
