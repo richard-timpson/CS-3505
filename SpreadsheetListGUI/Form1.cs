@@ -57,6 +57,7 @@ namespace SpreadsheetListGUI
             }
             // Allow the ListBox to repaint and display the new items.
             ListOfSpreadsheets.EndUpdate();
+            //
         }
     }
 }
