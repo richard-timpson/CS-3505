@@ -14,7 +14,7 @@ network_controller: ../bin/network_library.o network_controller.cpp network_cont
 	g++ -std=c++11  -o ../bin/network_controller.o -c  network_controller.cpp 
 
 network_library: network_library.cpp network_library.h
-	g++ -std=c++11 -I ../libs/asio-1.12.2/include/ -lpthread -o ../bin/network_library.o -c  network_library.cpp
+	g++ -std=c++11 -o ../bin/network_library.o -c  network_library.cpp
 
 
 
