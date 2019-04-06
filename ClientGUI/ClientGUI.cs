@@ -22,9 +22,18 @@ namespace ClientGUI
         {
             InitializeComponent();
 
-            //It is okay to set this controller's Spreadsheet to null because it won't be 
-            //doing anything spreadsheet related. It will just try to connect to the server. 
+            //On start up, set the Spreadsheet in the controller to null, since there
+            //is no Spreadsheet associated with the client yet.
             ssController = new SpreadsheetController(null);
+            
+
+            //The client has not connected, disable the list of Spreadsheets
+            ListOfSpreadsheets.Enabled = false;
+
+            //Initial Connect before username/password?
+            EditSpreadsheetButton.Enabled = false;
+            NewSpreadsheetButton.Enabled = false;
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -32,35 +41,93 @@ namespace ClientGUI
 
         }
 
+        private void TestPopulateListView()
+        {
+            ListOfSpreadsheets.Enabled = true;
+            // Set the selection mode to one. Should we be able to select multiple?
+            ListOfSpreadsheets.SelectionMode = SelectionMode.One;
+
+            // Shutdown the painting of the ListView as items are added.
+            ListOfSpreadsheets.BeginUpdate();
+            // Loop through and add 100 items to the ListView.
+            Random rng = new Random();
+            for (int x = 1; x <= 100; x++)
+            {
+                string s = "";
+                for (int i = 0; i < 5; i++)
+                {
+                    s += (char)(65 + rng.Next(27));
+                }
+                ListOfSpreadsheets.Items.Add(s);
+            }
+            // Allow the ListView to repaint and display the new items.
+            ListOfSpreadsheets.EndUpdate();
+            //
+        }
+
         /// <summary>
-        /// Verifies if the username/password combination from UsernameTextBox
-        /// and PasswordTextBox is valid. If it is, open a new window listing
-        /// available spreadsheets. Otherwise, print an error.
+        /// Sends the selected spreadsheet from the ListOfSpreadsheets to the server
+        /// along with username, password, and IP address.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void LogInButton_Click(object sender, EventArgs e)
+        private void EditSpreadsheetButton_Click(object sender, EventArgs e)
         {
-            //3 strings. Username, Password, Address
-            //Send the strings to the server to evaluate
-            //if (String.IsNullOrWhiteSpace(AddressTextBox.Text))
-            //{
-            //    //use ssController to connect with our address string
-            //}
-            //ssController.Connect(AddressTextBox.Text, UsernameTextBox.Text, PasswordTextBox.Text);
+            MessageBox.Show(ListOfSpreadsheets.SelectedItem.ToString());
+        }
 
-            //If there is no address, default connect to Generics Spreadsheet Server.
-            //Otherwise connect to Spreadsheet Server corresponding to that address.
+        /// <summary>
+        /// Connect to the server with the specified address in the Address Text Box.
+        /// If there is no value in the Address text box, it connects to The Generics
+        /// server by default.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ConnectButton_Click(object sender, EventArgs e)
+        {
+            
+            
+                //If AddressTextBox is null, empty, or whitespace, connect to Generics Server.
+                if (String.IsNullOrWhiteSpace(AddressTextBox.Text))
+                {
+                //use the controller to connect to the Generics Server
+                //connectedToServer = true;
+                }
+                else //Otherwise, connect with the given address
+                {
+                    try
+                    {
+                        //connectedToServer = true;
+                        //Maybe make another connect method with only an address argument?
+                        ssController.Connect(AddressTextBox.Text, "", "");
+                
+                    }
+                    catch //Fails to connect because of invalid address.
+                    {
+                        //connectedToServer = false;
+                        //Handle invalid server error gracefully.
+                        MessageBox.Show("Invalid Server Address.\n\nPlease enter a different address.",
+                                        "Failed To Connect",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Error);
+                    }
+                }
+                TestPopulateListView();
+                NewSpreadsheetButton.Enabled = true;
+                
+            
+        }
 
-            //If the username wasn't recognized, creates a new user with given password.
-            //Successful logins open a new window listing available spreadsheets to edit.
-
-            //If username was recognized but password was not, write an error message.
-            MessageBox.Show("Username/Password Combination incorrect.",
-                            "Invalid Username/Password Combination",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
-
+        /// <summary>
+        /// Enables the EditSpreadsheetButton if something in ListOfSpreadsheets 
+        /// is selected. If nothing is selected, the EditSpreadsheetButton will 
+        /// remain disabled.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ListOfSpreadsheets_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EditSpreadsheetButton.Enabled = true;
         }
     }
 }

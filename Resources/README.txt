@@ -2,6 +2,10 @@
 	Peter:
 		- List of spreadsheets window on successful login
 		- Learn more about ListBox. Is that the way to go when it comes to listing spreadsheets?
+		- Initial Connection? Send It has the initial connection before username/password. Will we need to make another connect
+	      method that only connects to the address?
+		- Passing in an invalid address can take a second before it throws an exception. Should we disable/reenable everything when the client
+		  hits the connect button?
 	Zach: 
 		- Push Administrator GUI as its own solution
 	Tyler: 

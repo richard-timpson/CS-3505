@@ -35,9 +35,12 @@
             this.UsernameTextBox = new System.Windows.Forms.TextBox();
             this.PasswordTextBox = new System.Windows.Forms.TextBox();
             this.PasswordLabel = new System.Windows.Forms.Label();
-            this.LogInButton = new System.Windows.Forms.Button();
             this.AddressTextBox = new System.Windows.Forms.TextBox();
             this.AddressLabel = new System.Windows.Forms.Label();
+            this.ListOfSpreadsheets = new System.Windows.Forms.ListBox();
+            this.EditSpreadsheetButton = new System.Windows.Forms.Button();
+            this.NewSpreadsheetButton = new System.Windows.Forms.Button();
+            this.ConnectButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // TheGenericsLabel
@@ -72,7 +75,7 @@
             // UsernameLabel
             // 
             this.UsernameLabel.AutoSize = true;
-            this.UsernameLabel.Location = new System.Drawing.Point(30, 151);
+            this.UsernameLabel.Location = new System.Drawing.Point(30, 121);
             this.UsernameLabel.Name = "UsernameLabel";
             this.UsernameLabel.Size = new System.Drawing.Size(77, 17);
             this.UsernameLabel.TabIndex = 3;
@@ -80,14 +83,14 @@
             // 
             // UsernameTextBox
             // 
-            this.UsernameTextBox.Location = new System.Drawing.Point(31, 176);
+            this.UsernameTextBox.Location = new System.Drawing.Point(31, 146);
             this.UsernameTextBox.Name = "UsernameTextBox";
             this.UsernameTextBox.Size = new System.Drawing.Size(206, 22);
             this.UsernameTextBox.TabIndex = 4;
             // 
             // PasswordTextBox
             // 
-            this.PasswordTextBox.Location = new System.Drawing.Point(31, 247);
+            this.PasswordTextBox.Location = new System.Drawing.Point(31, 217);
             this.PasswordTextBox.Name = "PasswordTextBox";
             this.PasswordTextBox.PasswordChar = '·';
             this.PasswordTextBox.Size = new System.Drawing.Size(206, 22);
@@ -96,47 +99,78 @@
             // PasswordLabel
             // 
             this.PasswordLabel.AutoSize = true;
-            this.PasswordLabel.Location = new System.Drawing.Point(30, 222);
+            this.PasswordLabel.Location = new System.Drawing.Point(30, 192);
             this.PasswordLabel.Name = "PasswordLabel";
             this.PasswordLabel.Size = new System.Drawing.Size(73, 17);
             this.PasswordLabel.TabIndex = 5;
             this.PasswordLabel.Text = "Password:";
             // 
-            // LogInButton
-            // 
-            this.LogInButton.Location = new System.Drawing.Point(31, 355);
-            this.LogInButton.Name = "LogInButton";
-            this.LogInButton.Size = new System.Drawing.Size(80, 29);
-            this.LogInButton.TabIndex = 7;
-            this.LogInButton.Text = "Log In";
-            this.LogInButton.UseVisualStyleBackColor = true;
-            this.LogInButton.Click += new System.EventHandler(this.LogInButton_Click);
-            // 
             // AddressTextBox
             // 
-            this.AddressTextBox.Location = new System.Drawing.Point(31, 318);
+            this.AddressTextBox.Location = new System.Drawing.Point(31, 288);
             this.AddressTextBox.Name = "AddressTextBox";
-            this.AddressTextBox.PasswordChar = '·';
             this.AddressTextBox.Size = new System.Drawing.Size(206, 22);
             this.AddressTextBox.TabIndex = 9;
             // 
             // AddressLabel
             // 
             this.AddressLabel.AutoSize = true;
-            this.AddressLabel.Location = new System.Drawing.Point(30, 293);
+            this.AddressLabel.Location = new System.Drawing.Point(30, 263);
             this.AddressLabel.Name = "AddressLabel";
             this.AddressLabel.Size = new System.Drawing.Size(64, 17);
             this.AddressLabel.TabIndex = 8;
             this.AddressLabel.Text = "Address:";
             // 
+            // ListOfSpreadsheets
+            // 
+            this.ListOfSpreadsheets.FormattingEnabled = true;
+            this.ListOfSpreadsheets.ItemHeight = 16;
+            this.ListOfSpreadsheets.Location = new System.Drawing.Point(290, 18);
+            this.ListOfSpreadsheets.Name = "ListOfSpreadsheets";
+            this.ListOfSpreadsheets.Size = new System.Drawing.Size(533, 340);
+            this.ListOfSpreadsheets.TabIndex = 10;
+            this.ListOfSpreadsheets.SelectedIndexChanged += new System.EventHandler(this.ListOfSpreadsheets_SelectedIndexChanged);
+            // 
+            // EditSpreadsheetButton
+            // 
+            this.EditSpreadsheetButton.Location = new System.Drawing.Point(290, 372);
+            this.EditSpreadsheetButton.Name = "EditSpreadsheetButton";
+            this.EditSpreadsheetButton.Size = new System.Drawing.Size(206, 29);
+            this.EditSpreadsheetButton.TabIndex = 11;
+            this.EditSpreadsheetButton.Text = "Edit Spreadsheet";
+            this.EditSpreadsheetButton.UseVisualStyleBackColor = true;
+            this.EditSpreadsheetButton.Click += new System.EventHandler(this.EditSpreadsheetButton_Click);
+            // 
+            // NewSpreadsheetButton
+            // 
+            this.NewSpreadsheetButton.Location = new System.Drawing.Point(617, 372);
+            this.NewSpreadsheetButton.Name = "NewSpreadsheetButton";
+            this.NewSpreadsheetButton.Size = new System.Drawing.Size(206, 29);
+            this.NewSpreadsheetButton.TabIndex = 12;
+            this.NewSpreadsheetButton.Text = "New Spreadsheet";
+            this.NewSpreadsheetButton.UseVisualStyleBackColor = true;
+            // 
+            // ConnectButton
+            // 
+            this.ConnectButton.Location = new System.Drawing.Point(31, 316);
+            this.ConnectButton.Name = "ConnectButton";
+            this.ConnectButton.Size = new System.Drawing.Size(103, 29);
+            this.ConnectButton.TabIndex = 13;
+            this.ConnectButton.Text = "Connect";
+            this.ConnectButton.UseVisualStyleBackColor = true;
+            this.ConnectButton.Click += new System.EventHandler(this.ConnectButton_Click);
+            // 
             // ClientLogIn
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(290, 413);
+            this.ClientSize = new System.Drawing.Size(839, 413);
+            this.Controls.Add(this.ConnectButton);
+            this.Controls.Add(this.NewSpreadsheetButton);
+            this.Controls.Add(this.EditSpreadsheetButton);
+            this.Controls.Add(this.ListOfSpreadsheets);
             this.Controls.Add(this.AddressTextBox);
             this.Controls.Add(this.AddressLabel);
-            this.Controls.Add(this.LogInButton);
             this.Controls.Add(this.PasswordTextBox);
             this.Controls.Add(this.PasswordLabel);
             this.Controls.Add(this.UsernameTextBox);
@@ -146,7 +180,7 @@
             this.Controls.Add(this.TheGenericsLabel);
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ClientLogIn";
-            this.Text = "Log In";
+            this.Text = "Online Spreadsheet Suite";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -162,9 +196,12 @@
         private System.Windows.Forms.TextBox UsernameTextBox;
         private System.Windows.Forms.TextBox PasswordTextBox;
         private System.Windows.Forms.Label PasswordLabel;
-        private System.Windows.Forms.Button LogInButton;
         private System.Windows.Forms.TextBox AddressTextBox;
         private System.Windows.Forms.Label AddressLabel;
+        private System.Windows.Forms.ListBox ListOfSpreadsheets;
+        private System.Windows.Forms.Button EditSpreadsheetButton;
+        private System.Windows.Forms.Button NewSpreadsheetButton;
+        private System.Windows.Forms.Button ConnectButton;
     }
 }
 
