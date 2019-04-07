@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SpreadsheetUtilities;
 using SS;
 using System;
 using System.Collections.Generic;
@@ -74,6 +75,32 @@ namespace CS3505
             // Set up the loop
             ss.CallMe = ReceiveEdit;
 
+            // Create a dynamic type for processing the kind of message sent
+            var recieve = new
+            {
+                type = ""
+            };
+
+            var message = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), recieve);
+            
+            // ignore if it is the wrong kind of message
+            if(message.type != "list")
+            {
+                ss.sb.Clear();
+                return;
+            }
+
+            //Otherwise Process the message and output the lists
+            var list = new
+            {
+                type = "",
+                sheets = new string[0]
+            };
+
+            list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
+
+
+
             //TODO send an open message SET UP SOME KIND OF EVENT LOOP WITH CLIENT
             // send desired spreadsheet
             // send desired username
@@ -104,6 +131,8 @@ namespace CS3505
             //TODO Process edit and send to server
             // 
             // TODO MAKE SURE THAT AN ACTUAL AND VALID CHANGE HAS BEEN MADE BY THE CLIENT
+
+            
             throw new NotImplementedException();
         }
 
@@ -139,11 +168,50 @@ namespace CS3505
         {
 
             //TODO Process Full Send
-            ProcessFullSend(ss.sb.ToString());
-            //or
-            ProcessError(ss.sb.ToString());
+            string totalData = ss.sb.ToString();
+            string[] parts = Regex.Split(totalData, @"(?<=[\n\n])");
 
-            throw new NotImplementedException();
+            foreach (string p in parts)
+            {
+                // ignore empty strings
+                if(p.Length == 0)
+                {
+                    continue;
+                }
+                // if the last two chars are not new lines then there are
+                // no more full messages be evaluated
+                if (p[p.Length - 1] != '\n' && p[p.Length -2] != '\n')
+                {
+                    break;
+                }
+
+                // Create a dynamic type for processing the kind of message sent
+                var recieve = new
+                {
+                    type = ""
+                };
+
+                var check = JsonConvert.DeserializeAnonymousType(p, recieve);
+
+                if (check.type == "error")
+                {
+                    ProcessError(p);
+
+                }
+                else if (check.type == "full send")
+                {
+                    ProcessFullSend(p);
+    
+
+                }
+                // if unexpected message comes ignore it for now?? ...
+
+                ss.sb.Remove(0, p.Length);
+
+            }
+
+            // ask for more data
+            Networking.GetData(ss);
         }
 
         /// <summary>
@@ -152,7 +220,28 @@ namespace CS3505
         /// <param name="v"></param>
         private void ProcessError(string message)
         {
-            throw new NotImplementedException();
+            var error = new
+            {
+                type = "",
+                code = 0,
+                source = ""
+            };
+
+            error = JsonConvert.DeserializeAnonymousType(message, error);
+
+            if( error.code == 1)
+            {
+                // TODO notify client
+            }
+            else // code 2
+            {
+                // TODO notify client
+                string source = error.source;
+            }
+
+            //TODO send error to client
+
+
         }
 
         /// <summary>
@@ -161,7 +250,45 @@ namespace CS3505
         /// <param name="sb"></param>
         private void ProcessFullSend(string message)
         {
-            throw new NotImplementedException();
+            var fullsend = new
+            {
+                type = "",
+                spreadsheet = new Spreadsheet()
+            };
+
+            fullsend = JsonConvert.DeserializeAnonymousType(message, fullsend);
+            Spreadsheet edits = fullsend.spreadsheet;
+            // process all of the edits
+            foreach (string cell in edits.GetNamesOfAllNonemptyCells())
+            {
+                 
+                object contents = edits.GetCellContents(cell);
+                //check what kind of object GetCellContents returned
+                if(contents is string)
+                {
+                    // TODO
+                    // if it is an empty string it is actually a delete
+                    this.sheet.SetContentsOfCell(cell, (string)edits.GetCellContents(cell));
+                    
+                } else if (contents is double)
+                {
+                    this.sheet.SetContentsOfCell(cell, (string) edits.GetCellContents(cell));
+                }
+                else // else it is a formula
+                {
+                    Formula formulaContents = (Formula) contents;
+
+                    string formulaString = formulaContents.ToString();
+
+                    this.sheet.SetContentsOfCell(cell, "=" + formulaString);
+
+                }
+
+            }
+
+
+
+
         }
     }
 }
