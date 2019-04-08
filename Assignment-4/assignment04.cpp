@@ -19,7 +19,7 @@
  * deficient design here.  Get the code to compile and match the given
  * design.  Later, you will describe possible fixes in essay questions.
  *
- * Richard Timpson  // TODO -- change this or lose a point.
+ * Richard Timpson 
  * April 1, 2019
  */
 
@@ -34,14 +34,7 @@ class observer;  // Never defined or used.
  * My value class *
  ******************/
 
-// TODO:  Declare the value class and define the constructor and destructor.
-//   (The body of the constructor and destructor will just have two
-//   statements each for printing out that they are starting / ending
-//   execution.  Use the same indentation and style as shown in the 
-//   example output and the set and get functions below.)
-//
-// Do NOT use a .h file.  Just put the declaration of the class above
-//   the definitions (right here).  In other words, keep it simple.
+
 class value
 {
 private:
@@ -87,15 +80,6 @@ int value::get ()
 /*************************
  * My remote value class *
  *************************/
-
-// TODO:  Declare the remote class and define the constructor and destructor.
-//   (The body of the constructor and destructor will just have two
-//   statements each for printing out that they are starting / ending
-//   execution.  Use the same indentation and style as shown in the 
-//   example output and the set and get functions below.)
-//
-// Do NOT use a .h file.  Just put the declaration of the class above
-//   the definitions (right here).  In other words, keep it simple.
 
 class remote : public virtual value
 {
@@ -188,16 +172,6 @@ void remote::set_remote_value(int v)
  * My observable class *
  ***********************/
 
-// TODO:  Declare the observable class and define the constructor and destructor.
-//   (The body of the constructor and destructor will just have two
-//   statements each for printing out that they are starting / ending
-//   execution.  Use the same indentation and style as shown in the 
-//   example output and the set and get functions below.)
-//
-// Do NOT use a .h file.  Just put the declaration of the class above
-//   the definitions (right here).  In other words, keep it simple.
-
-
 class observable : public virtual value 
 {
 public:
@@ -232,9 +206,8 @@ void observable::set (int new_value)
   // Only change the value and send out notifications 
   //   if the new value is different than the current value in 'this'.
 
-  if (new_value != this->get() ) // TODO:  Fix this condition to match the comment above.
+  if (new_value != this->get() ) 
     {
-      // TODO:  Change superclass field, keep the new value 
       value::set(new_value);
       notify_observers ();
     }
@@ -259,19 +232,6 @@ void observable::register_observer (observer *)
 /**************************
  * My task_priority class *
  **************************/
-
-// TODO:  Declare the task_priority class and define the constructor and destructor.
-//   (The body of the constructor and destructor will just have two
-//   statements each for printing out that they are starting / ending
-//   execution.  Indent two spaces.)
-//
-// Do NOT use a .h file.  Just put the declaration of the class above
-//   the definitions (right here).  In other words, keep it simple.
-
-// TODO:  Additionally, you will need to override a function to make it work.
-//   This is not shown in the class diagram, you are to figure out what
-//   you need (and why).  There will only be a couple of actually useful
-//   statements (and the debugging output statements, indented two spaces).
 
 class task_priority : public remote, public observable
 {
@@ -302,11 +262,6 @@ void task_priority::set(int v)
   remote::set(v);
   cout << "  <-- task_priority::set" << endl;
 }
-
-
-
-
-// TODO:  Nothing else is needed beyond this point.  Do not change main at all.
 
 
 
