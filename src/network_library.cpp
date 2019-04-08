@@ -19,6 +19,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
 #include "network_library.h"
+#include "chat_server_client.h"
 
 using namespace boost::asio::ip;
 
@@ -34,11 +35,18 @@ chat_server_client::chat_server_client(tcp::socket socket, chat_server* server)
 
 void chat_server_client::do_read()
 {
+    std::cout << "trying to read from client" << std::endl;
     boost::asio::async_read(socket_, boost::asio::buffer(buff, 256), 
         [this](boost::system::error_code ec, std::size_t ){
+            std::cout << "received  Message" << std::endl;
             if (!ec)
             {
-                server_->write_to_clients();
+                server_->write_to_clients(buff);
+                do_read();
+            }
+            else 
+            {
+                std::cout << ec.message() << std::endl;
             }
         });
 }
@@ -46,6 +54,7 @@ void chat_server_client::do_read()
 void chat_server_client::add_to_server()
 {
     server_->add_client(shared_from_this());
+    do_read();
 }
 
 // void chat_server_client::do_write()
@@ -69,6 +78,10 @@ void chat_server::accept_connection()
             std::make_shared<chat_server_client>(std::move(socket), this)->add_to_server();
             std::cout << "Accepting connection from client" << std::endl;
         }
+        else 
+        {
+            std::cout << ec.message() << std::endl;
+        }
         accept_connection();
     });
 }
@@ -83,9 +96,22 @@ void chat_server::add_client(std::shared_ptr<chat_server_client> client)
     clients.insert(client);
 }
 
-void write_to_clients()
+void chat_server::write_to_clients(char buff[256])
 {
-
+    for (auto client: clients)
+    {
+        boost::asio::async_write(client->socket_, boost::asio::buffer(buff, 256), 
+            [this, buff](boost::system::error_code ec, std::size_t){
+                if (!ec)
+                {
+                    std::cout << "writing message" << std::string(buff) << std::endl;
+                }
+                else
+                {
+                    std::cout << "Error sending message " << ec.message() << std::endl;
+                }
+            });
+    }
 }
 
 /**************************************
@@ -130,11 +156,42 @@ void network_library::start_client()
         tcp::endpoint endpoint(address::from_string("127.0.0.1"), 81);
         tcp::socket socket(io_context);
         std::cout << "client connection to server..." << std::endl;
-        socket.connect(endpoint);
-        std::cout << "Clicent connection successfull" << std::endl;
+        socket.async_connect(endpoint, [](const boost::system::error_code &ec){
+            if (!ec)
+            {
+                std::cout << "client connection successful" << std::endl;
+            }
+            else 
+            {
+                std::cout << "error connecting" << std::endl;
+            }
+        });
+        // std::thread t([&io_context](){
+            io_context.run();
+        // });
 
-        // socket.async_read_some(boost::asio::buffer(network_library::buff), ReadHandler);
-        io_context.run();
+        char line[4];
+        while(std::cin.getline(line, 4))
+        {
+            std::cout << "trying to write message " << std::string(line) << std::endl;
+            // boost::asio::post(io_context, [&socket, line](){
+            //     std::cout << "posting" << std::endl;
+                boost::asio::async_write(socket, boost::asio::buffer(line, 4), 
+                    [](boost::system::error_code ec, std::size_t bytes_transferred) {
+                        std::cout << "async writing" << std::endl;
+                        if (!ec)
+                        {
+                            std::cout << "succesfully wrote message " << std::endl;
+                        }
+                        else
+                        {
+                            std::cout << "error writing message" << std::endl;
+                        }
+                        
+                    });
+            // });
+        }
+        // t.join();
     }
     catch (std::exception &e)
     {

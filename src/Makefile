@@ -13,7 +13,7 @@ spreadsheet_controller: spreadsheet_controller.cpp spreadsheet_controller.h
 network_controller: network_library network_controller.cpp network_controller.h
 	g++ -std=c++11  -o ../bin/network_controller.o -c  network_controller.cpp 
 
-network_library: network_library.cpp network_library.h
+network_library: network_library.cpp network_library.h chat_server_client.h
 	g++ -std=c++11 -o ../bin/network_library.o -c  network_library.cpp
 
 
