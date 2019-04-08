@@ -23,8 +23,11 @@ namespace CS3505
         public delegate void SpreadsheetUpdatedEventHandler();
         public event SpreadsheetUpdatedEventHandler SpreadsheetUpdated;
 
-        public delegate void SpreadsheetReceivedHandler();
-        public event SpreadsheetReceivedHandler SpreadsheetReceived;
+        public delegate void SpreadsheetErrorEventHandler(int code, string source);
+        public event SpreadsheetErrorEventHandler SpreadsheetError;
+
+        public delegate void SpreadsheetsReceivedHandler();
+        public event SpreadsheetsReceivedHandler SpreadsheetsReceived;
 
         /// <summary>
         /// LogIn Username
@@ -45,7 +48,23 @@ namespace CS3505
         /// The representation of a spreadsheet that will be updated
         /// as changes are sent to the server and verified
         /// </summary>
-        private Spreadsheet sheet; 
+        private Spreadsheet sheet;
+
+        /// <summary>
+        /// The list of sheets available to the user
+        /// </summary>
+        private string[] SheetOptions;
+
+        /// <summary>
+        /// Public property for accessing the list of sheets available
+        /// </summary>
+        public string[] Sheets
+        {
+            get
+            {
+                return SheetOptions;
+            }
+        }
 
         public SpreadsheetController(Spreadsheet spreadsheet)
         {
@@ -57,7 +76,7 @@ namespace CS3505
         /// <param name="ipAddress"></param>
         public void Connect(string ipAddress, string username, string password)
         {
-            
+
             Username = username;
             Password = password;
             theServer = Networking.ConnectToServer(ipAddress, RecieveSpreadsheetsList);
@@ -82,9 +101,9 @@ namespace CS3505
             };
 
             var message = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), recieve);
-            
+
             // ignore if it is the wrong kind of message
-            if(message.type != "list")
+            if (message.type != "list")
             {
                 ss.sb.Clear();
                 return;
@@ -99,52 +118,69 @@ namespace CS3505
 
             list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
 
+            this.SheetOptions = list.sheets;
 
-
-            //TODO send an open message SET UP SOME KIND OF EVENT LOOP WITH CLIENT
-            // send desired spreadsheet
-            // send desired username
-            // send password
-
-            // Networking.Send(ss.theSocket, Username + ENDOFMESSAGE);
-            // Networking.GetData(ss);
-
-            //var mess = new
-            //{
-            //    type = ss.sb.ToString(),
-            //    cell = "A1",
-                
-            //};
-            //JsonConvert.SerializeObject(mess);
-
-            ///string message = Json(mess);
-
+            // Notify the client that new spreadsheets are available
+            SpreadsheetsReceived();
         }
+
+        /// <summary>
+        /// Public method to be called by Client to communicate to the server
+        /// The desired spreadsheet to be opened
+        /// </summary>
+        /// <param name="sheet"></param>
+        public void ChooseSpreadsheet(string sheetName)
+        {
+            // create the JSon object to be sent
+            var open = new
+            {
+                type = "open",
+                name = sheetName,
+                username = Username,
+                password = Password
+            };
+
+            // send the request to the server
+            string message = JsonConvert.SerializeObject(open) + ENDOFMESSAGE;
+            Networking.Send(theServer, message);
+
+            //FIXME?
+            // Get Date from the server
+            SocketState ss = new SocketState(theServer, 0);
+            Networking.GetData(ss);
+        }
+
 
         /// <summary>
         /// Method that the CLient will call when a spreadsheet cell is updated
         /// </summary>
         /// <param name="cellName"></param>
         /// <param name="cellContents"></param>
-        public void ClientUpdate(string cellName, string cellContents)
+        public void ClientEdit(string cellName, string cellContents)
         {
-            //TODO Process edit and send to server
-            // 
-            // TODO MAKE SURE THAT AN ACTUAL AND VALID CHANGE HAS BEEN MADE BY THE CLIENT
+            // if a formula is entered
+            if (cellContents[0] == '=')
+            {
+                //TODO FINISH
+                //Formula edit = 
+            }
+            else
+            {
 
-            
+            }
+
             throw new NotImplementedException();
         }
 
         /// <summary>
         /// Method that the client will call when a spreadsheet undo is requested
         /// </summary>
-        /// <param name="cellName"></param>
-        /// <param name="cellContents"></param>
-        public void ClientUndo(string cellName, string cellContents)
+        public void ClientUndo()
         {
-            // TODO Send an undo request
-            throw new NotImplementedException();
+            // create the request
+            var undo = new { type = "undo" };
+            // send the message
+            Networking.Send(theServer, JsonConvert.SerializeObject(undo) + ENDOFMESSAGE);
         }
 
 
@@ -153,12 +189,14 @@ namespace CS3505
         /// </summary>
         /// <param name="cellName"></param>
         /// <param name="cellContents"></param>
-        public void ClientRevert(string cellName, string cellContents)
+        public void ClientRevert(string cellName)
         {
-            // TODO Send an revert request
-            throw new NotImplementedException();
-        }
+            // create the request
+            var revert = new { type = "revert", cell = cellName };
+            // send the message
+            Networking.Send(theServer, JsonConvert.SerializeObject(revert) + ENDOFMESSAGE);
 
+        }
 
         /// <summary>
         /// Basic function for receiving edits in the server-client edit loop
@@ -174,13 +212,13 @@ namespace CS3505
             foreach (string p in parts)
             {
                 // ignore empty strings
-                if(p.Length == 0)
+                if (p.Length == 0)
                 {
                     continue;
                 }
                 // if the last two chars are not new lines then there are
                 // no more full messages be evaluated
-                if (p[p.Length - 1] != '\n' && p[p.Length -2] != '\n')
+                if (p[p.Length - 1] != '\n' && p[p.Length - 2] != '\n')
                 {
                     break;
                 }
@@ -201,15 +239,17 @@ namespace CS3505
                 else if (check.type == "full send")
                 {
                     ProcessFullSend(p);
-    
+
 
                 }
+                // FIXME?
                 // if unexpected message comes ignore it for now?? ...
-
                 ss.sb.Remove(0, p.Length);
 
             }
-
+            // let the subscribers (client) know that the spreadsheet has been
+            // updated
+            SpreadsheetUpdated();
             // ask for more data
             Networking.GetData(ss);
         }
@@ -220,6 +260,7 @@ namespace CS3505
         /// <param name="v"></param>
         private void ProcessError(string message)
         {
+            //Deserialize the message
             var error = new
             {
                 type = "",
@@ -229,19 +270,16 @@ namespace CS3505
 
             error = JsonConvert.DeserializeAnonymousType(message, error);
 
-            if( error.code == 1)
+            if (error.code == 1)
             {
-                // TODO notify client
+                // notify the client
+                SpreadsheetError(error.code, "");
             }
             else // code 2
             {
-                // TODO notify client
-                string source = error.source;
+                // notify the client
+                SpreadsheetError(error.code, error.source);
             }
-
-            //TODO send error to client
-
-
         }
 
         /// <summary>
@@ -261,22 +299,23 @@ namespace CS3505
             // process all of the edits
             foreach (string cell in edits.GetNamesOfAllNonemptyCells())
             {
-                 
+
                 object contents = edits.GetCellContents(cell);
                 //check what kind of object GetCellContents returned
-                if(contents is string)
+                if (contents is string)
                 {
                     // TODO
                     // if it is an empty string it is actually a delete
                     this.sheet.SetContentsOfCell(cell, (string)edits.GetCellContents(cell));
-                    
-                } else if (contents is double)
+
+                }
+                else if (contents is double)
                 {
-                    this.sheet.SetContentsOfCell(cell, (string) edits.GetCellContents(cell));
+                    this.sheet.SetContentsOfCell(cell, (string)edits.GetCellContents(cell));
                 }
                 else // else it is a formula
                 {
-                    Formula formulaContents = (Formula) contents;
+                    Formula formulaContents = (Formula)contents;
 
                     string formulaString = formulaContents.ToString();
 
@@ -285,10 +324,6 @@ namespace CS3505
                 }
 
             }
-
-
-
-
         }
     }
 }
