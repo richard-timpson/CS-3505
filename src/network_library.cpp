@@ -1,118 +1,143 @@
+/**
+ * This is a network library used for the spreadsheet project
+ * It should be a standalone library and only concern itself with
+ * the transfer of the data back and forth between this server
+ * and the client. It makes use of the boost::asio library
+ * Most of the code is copied from this tutorial, so far
+ * 
+ * 
+ * http://think-async.com/Asio/boost_asio_1_12_2/doc/html/boost_asio/tutorial/tutdaytime3/src.html
+ * 
+ * Author: Richard Timpson
+ * Date: 4/2/5/2019
+*/
 
-//
-// server.cpp
-// ~~~~~~~~~~
-//
-// Copyright (c) 2003-2018 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-
-#include <ctime>
 #include <iostream>
 #include <string>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
+#include "network_library.h"
 
-using boost::asio::ip::tcp;
+using namespace boost::asio::ip;
 
-std::string make_daytime_string()
+/****************************************
+ * chat_server_client class
+ * **************************************/
+
+chat_server_client::chat_server_client(tcp::socket socket, chat_server* server)
+    : socket_(std::move(socket))
 {
-  using namespace std; // For time_t, time and ctime;
-  time_t now = time(0);
-  return ctime(&now);
+    server_ = server;
 }
 
-class tcp_connection
-  : public boost::enable_shared_from_this<tcp_connection>
+void chat_server_client::do_read()
 {
-public:
-  typedef boost::shared_ptr<tcp_connection> pointer;
+    boost::asio::async_read(socket_, boost::asio::buffer(buff, 256), 
+        [this](boost::system::error_code ec, std::size_t ){
+            if (!ec)
+            {
+                server_->write_to_clients();
+            }
+        });
+}
 
-  static pointer create(boost::asio::io_context& io_context)
-  {
-    return pointer(new tcp_connection(io_context));
-  }
-
-  tcp::socket& socket()
-  {
-    return socket_;
-  }
-
-  void start()
-  {
-    message_ = make_daytime_string();
-
-    boost::asio::async_write(socket_, boost::asio::buffer(message_),
-        boost::bind(&tcp_connection::handle_write, shared_from_this(),
-          boost::asio::placeholders::error,
-          boost::asio::placeholders::bytes_transferred));
-  }
-
-private:
-  tcp_connection(boost::asio::io_context& io_context)
-    : socket_(io_context)
-  {
-  }
-
-  void handle_write(const boost::system::error_code& /*error*/,
-      size_t /*bytes_transferred*/)
-  {
-  }
-
-  tcp::socket socket_;
-  std::string message_;
-};
-
-class tcp_server
+void chat_server_client::add_to_server()
 {
-public:
-  tcp_server(boost::asio::io_context& io_context)
-    : acceptor_(io_context, tcp::endpoint(tcp::v4(), 13))
-  {
-    start_accept();
-  }
+    server_->add_client(shared_from_this());
+}
 
-private:
-  void start_accept()
-  {
-    tcp_connection::pointer new_connection =
-      tcp_connection::create(acceptor_.get_executor().context());
+// void chat_server_client::do_write()
+// {
+//     boost::asio::async_write(socket_, boost::asio::buffer())
+// }
 
-    acceptor_.async_accept(new_connection->socket(),
-        boost::bind(&tcp_server::handle_accept, this, new_connection,
-          boost::asio::placeholders::error));
-  }
+/****************************************
+ * chat_server class
+ * ***************************************/
+chat_server::chat_server(boost::asio::io_context &io_context, const tcp::endpoint &endpoint)
+    : acceptor_(io_context, endpoint)
+{
+}
 
-  void handle_accept(tcp_connection::pointer new_connection,
-      const boost::system::error_code& error)
-  {
-    if (!error)
+void chat_server::accept_connection()
+{
+    acceptor_.async_accept([this](boost::system::error_code ec, tcp::socket socket) {
+        if (!ec)
+        {
+            std::make_shared<chat_server_client>(std::move(socket), this)->add_to_server();
+            std::cout << "Accepting connection from client" << std::endl;
+        }
+        accept_connection();
+    });
+}
+
+void chat_server::accept_connections()
+{
+    accept_connection();
+}
+
+void chat_server::add_client(std::shared_ptr<chat_server_client> client)
+{
+    clients.insert(client);
+}
+
+void write_to_clients()
+{
+
+}
+
+/**************************************
+ * network_library static class
+ * ************************************/
+
+void network_library::start_server()
+{
+    // start the server, and tell it to listen for client connections.
+    // if we get a new connection, start it async and store that client connection in a list of connections
+    // every time the server receives a new message from the clients, send that message to the rest of the clients.
+
+    try
     {
-      new_connection->start();
+        boost::asio::io_context io_context;
+        tcp::endpoint endpoint(tcp::v4(), 81);
+        tcp::socket socket(io_context);
+        std::cout << "Server waiting for connection " << std::endl;
+
+        chat_server server(io_context, endpoint);
+        server.accept_connections();
+        io_context.run();
+
     }
+    catch (std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+}
 
-    start_accept();
-  }
-
-  tcp::acceptor acceptor_;
-};
-
-int main()
+void network_library::start_client()
 {
-  try
-  {
-    boost::asio::io_context io_context;
-    tcp_server server(io_context);
-    io_context.run();
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-  }
 
-  return 0;
+    // make a chat system
+    // start the server, and tell it to listen for client connections.
+    // if we get a new connection, start it async and store that client connection in a list of connections
+    // every time the server receives a new message from the clients, send that message to the rest of the clients.
+
+    try
+    {
+        boost::asio::io_context io_context;
+        tcp::endpoint endpoint(address::from_string("127.0.0.1"), 81);
+        tcp::socket socket(io_context);
+        std::cout << "client connection to server..." << std::endl;
+        socket.connect(endpoint);
+        std::cout << "Clicent connection successfull" << std::endl;
+
+        // socket.async_read_some(boost::asio::buffer(network_library::buff), ReadHandler);
+        io_context.run();
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 }

@@ -10,7 +10,7 @@ spreadsheet_model: spreadsheet_model.cpp spreadsheet_model.h
 spreadsheet_controller: spreadsheet_controller.cpp spreadsheet_controller.h
 	g++ -std=c++11  -o ../bin/spreadsheet_controller.o -c spreadsheet_controller.cpp
 
-network_controller: ../bin/network_library.o network_controller.cpp network_controller.h
+network_controller: network_library network_controller.cpp network_controller.h
 	g++ -std=c++11  -o ../bin/network_controller.o -c  network_controller.cpp 
 
 network_library: network_library.cpp network_library.h

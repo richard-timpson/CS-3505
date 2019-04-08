@@ -1,24 +1,31 @@
-#include <asio.hpp>
+#include <string>
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/asio.hpp>
 
-using asio::ip::tcp;
+using boost::asio::ip::tcp;
 
 class network_library
 {
   public:
     static void start_server();
+    static void start_client();
 };
+
 class tcp_connection
-    : public std::enable_shared_from_this<tcp_connection>
+    : public boost::enable_shared_from_this<tcp_connection>
 {
   public:
-    typedef std::shared_ptr<tcp_connection> pointer;
-    static pointer create(asio::io_context &io_context);
+    typedef boost::shared_ptr<tcp_connection> pointer;
+
+    static pointer create(boost::asio::io_context &io_context);
     tcp::socket &socket();
     void start();
 
   private:
-    tcp_connection(asio::io_context &io_context);
-    void handle_write(const asio::error_code & /*error*/, size_t /*bytes_transferred*/);
+    tcp_connection(boost::asio::io_context &io_context);
+    void handle_write(const boost::system::error_code & error, size_t size);
 
     tcp::socket socket_;
     std::string message_;
@@ -27,11 +34,9 @@ class tcp_connection
 class tcp_server
 {
   public:
-    tcp_server(asio::io_context &io_context);
+    tcp_server(boost::asio::io_context &io_context);
   private:
-    void handle_accept(tcp_connection::pointer new_connection, const asio::error_code &error);
     void start_accept();
-
+    void handle_accept(tcp_connection::pointer new_connection, const boost::system::error_code &error);
     tcp::acceptor acceptor_;
 };
-
