@@ -181,7 +181,6 @@ namespace CS3505
             }
             catch (System.Net.Sockets.SocketException e)
             {
-                //e.Message;
                 Timeout();
                 return;
             }

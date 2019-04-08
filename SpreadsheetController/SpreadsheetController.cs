@@ -74,11 +74,8 @@ namespace CS3505
         /// Connects to the given server initiating the client server handshake
         /// </summary>
         /// <param name="ipAddress"></param>
-        public void Connect(string ipAddress, string username, string password)
+        public void Connect(string ipAddress)
         {
-
-            Username = username;
-            Password = password;
             theServer = Networking.ConnectToServer(ipAddress, RecieveSpreadsheetsList);
         }
 
@@ -129,8 +126,10 @@ namespace CS3505
         /// The desired spreadsheet to be opened
         /// </summary>
         /// <param name="sheet"></param>
-        public void ChooseSpreadsheet(string sheetName)
+        public void ChooseSpreadsheet(string sheetName, string username, string password)
         {
+            Username = username;
+            Password = password;
             // create the JSon object to be sent
             var open = new
             {

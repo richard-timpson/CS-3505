@@ -14,7 +14,7 @@ namespace ClientGUI
     public partial class ClientLogIn : Form
     {
         /// <summary>
-        /// Used to connect to the server
+        /// Holds onto the spreadsheet and server connection
         /// </summary>
         private SpreadsheetController ssController;
 
@@ -22,18 +22,25 @@ namespace ClientGUI
         {
             InitializeComponent();
 
+            //--------------------ssController Initialization-------------------------------
             //On start up, set the Spreadsheet in the controller to null, since there
             //is no Spreadsheet associated with the client yet.
             ssController = new SpreadsheetController(null);
-            
+            //Subscribe To Spreadsheets Received by updating ListOfSpreadsheets
+            ssController.SpreadsheetsReceived += UpdateListOfSpreadsheets;
+            //------------------------------------------------------------------------------
 
-            //The client has not connected, disable the list of Spreadsheets
+            //----------ListOfSpreadsheets Initialization-------------------------------
+            //There is no connection to the server yet, disable the ListOfSpreadsheets
             ListOfSpreadsheets.Enabled = false;
+            //Only allow one Spreadsheet selection at a time
+            ListOfSpreadsheets.SelectionMode = SelectionMode.One;
+            //--------------------------------------------------------------------------
 
-            //Initial Connect before username/password?
+            //--------------------------Button Initialization---------------------------
             EditSpreadsheetButton.Enabled = false;
             NewSpreadsheetButton.Enabled = false;
-
+            //--------------------------------------------------------------------------
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -41,28 +48,31 @@ namespace ClientGUI
 
         }
 
-        private void TestPopulateListView()
+        /// <summary>
+        /// Method is called when the List of Spreadsheets from the server has been updated.
+        /// Update the ListOfSpreadsheets to reflect as such.
+        /// </summary>
+        private void UpdateListOfSpreadsheets()
         {
             ListOfSpreadsheets.Enabled = true;
-            // Set the selection mode to one. Should we be able to select multiple?
-            ListOfSpreadsheets.SelectionMode = SelectionMode.One;
 
-            // Shutdown the painting of the ListView as items are added.
+
+            // Shutdown the ListOfSpreadsheets as items are added.
             ListOfSpreadsheets.BeginUpdate();
-            // Loop through and add 100 items to the ListView.
-            Random rng = new Random();
-            for (int x = 1; x <= 100; x++)
+
+            //If there are no Spreadsheets, don't update
+            if (ssController.Sheets != null)
             {
-                string s = "";
-                for (int i = 0; i < 5; i++)
+                //Go through the list of spreadsheets in the controller, and add them to the ListOfSpreadsheets
+                for (int i = 0; i < ssController.Sheets.Length; i++)
                 {
-                    s += (char)(65 + rng.Next(27));
+                    ListOfSpreadsheets.Items.Add(ssController.Sheets[i]);
                 }
-                ListOfSpreadsheets.Items.Add(s);
             }
-            // Allow the ListView to repaint and display the new items.
+
+            //After the painting has been finished, (Spreadsheets have been added)
+            //Unlock the ListOfSpreadsheets
             ListOfSpreadsheets.EndUpdate();
-            //
         }
 
         /// <summary>
@@ -73,7 +83,8 @@ namespace ClientGUI
         /// <param name="e"></param>
         private void EditSpreadsheetButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(ListOfSpreadsheets.SelectedItem.ToString());
+
+            ssController.ChooseSpreadsheet(ListOfSpreadsheets.SelectedItem.ToString(), UsernameTextBox.Text, PasswordTextBox.Text);
         }
 
         /// <summary>
@@ -85,37 +96,29 @@ namespace ClientGUI
         /// <param name="e"></param>
         private void ConnectButton_Click(object sender, EventArgs e)
         {
-            
-            
-                //If AddressTextBox is null, empty, or whitespace, connect to Generics Server.
-                if (String.IsNullOrWhiteSpace(AddressTextBox.Text))
-                {
+            //DisableEverything();
+            //If AddressTextBox is null, empty, or whitespace, connect to Generics Server.
+            if (String.IsNullOrWhiteSpace(AddressTextBox.Text))
+            {
                 //use the controller to connect to the Generics Server
-                //connectedToServer = true;
-                }
-                else //Otherwise, connect with the given address
+            }
+            else //Otherwise, connect with the given address
+            {
+                try //To connect to server with given address
                 {
-                    try
-                    {
-                        //connectedToServer = true;
-                        //Maybe make another connect method with only an address argument?
-                        ssController.Connect(AddressTextBox.Text, "", "");
-                
-                    }
-                    catch //Fails to connect because of invalid address.
-                    {
-                        //connectedToServer = false;
-                        //Handle invalid server error gracefully.
-                        MessageBox.Show("Invalid Server Address.\n\nPlease enter a different address.",
-                                        "Failed To Connect",
-                                        MessageBoxButtons.OK,
-                                        MessageBoxIcon.Error);
-                    }
+                    ssController.Connect(AddressTextBox.Text);
+                    NewSpreadsheetButton.Enabled = true;
+
                 }
-                TestPopulateListView();
-                NewSpreadsheetButton.Enabled = true;
-                
-            
+                catch //Fails to connect because of invalid address.
+                {
+                    //Handle invalid server error gracefully.
+                    MessageBox.Show("Invalid Server Address.\n\nPlease enter a different address.",
+                                    "Failed To Connect",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                }
+            }
         }
 
         /// <summary>
@@ -129,5 +132,14 @@ namespace ClientGUI
         {
             EditSpreadsheetButton.Enabled = true;
         }
+
+
+        //private void DisableEverything()
+        //{
+        //    NewSpreadsheetButton.Enabled = false;
+        //    EditSpreadsheetButton.Enabled = false;
+        //    ConnectButton = false;
+
+        //}
     }
 }
