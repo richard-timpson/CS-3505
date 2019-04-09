@@ -54,25 +54,8 @@ namespace ClientGUI
         /// </summary>
         private void UpdateListOfSpreadsheets()
         {
-            ListOfSpreadsheets.Enabled = true;
-
-
-            // Shutdown the ListOfSpreadsheets as items are added.
-            ListOfSpreadsheets.BeginUpdate();
-
-            //If there are no Spreadsheets, don't update
-            if (ssController.Sheets != null)
-            {
-                //Go through the list of spreadsheets in the controller, and add them to the ListOfSpreadsheets
-                for (int i = 0; i < ssController.Sheets.Length; i++)
-                {
-                    ListOfSpreadsheets.Items.Add(ssController.Sheets[i]);
-                }
-            }
-
-            //After the painting has been finished, (Spreadsheets have been added)
-            //Unlock the ListOfSpreadsheets
-            ListOfSpreadsheets.EndUpdate();
+            MethodInvoker m = new MethodInvoker(() => this.PopulateListOfSpreadsheets());
+            this.Invoke(m);
         }
 
         /// <summary>
@@ -83,7 +66,7 @@ namespace ClientGUI
         /// <param name="e"></param>
         private void EditSpreadsheetButton_Click(object sender, EventArgs e)
         {
-
+            System.Diagnostics.Debug.WriteLine(ListOfSpreadsheets.SelectedItem.ToString());
             ssController.ChooseSpreadsheet(ListOfSpreadsheets.SelectedItem.ToString(), UsernameTextBox.Text, PasswordTextBox.Text);
         }
 
@@ -134,12 +117,28 @@ namespace ClientGUI
         }
 
 
-        //private void DisableEverything()
-        //{
-        //    NewSpreadsheetButton.Enabled = false;
-        //    EditSpreadsheetButton.Enabled = false;
-        //    ConnectButton = false;
+        private void PopulateListOfSpreadsheets()
+        {
+            ListOfSpreadsheets.Enabled = true;
 
-        //}
+
+            // Shutdown the ListOfSpreadsheets as items are added.
+            ListOfSpreadsheets.BeginUpdate();
+
+            //If there are no Spreadsheets, don't update
+            if (ssController.Sheets != null)
+            {
+                ListOfSpreadsheets.Items.Clear();
+                //Go through the list of spreadsheets in the controller, and add them to the ListOfSpreadsheets
+                for (int i = 0; i < ssController.Sheets.Length; i++)
+                {
+                    ListOfSpreadsheets.Items.Add(ssController.Sheets[i]);
+                }
+            }
+
+            //After the painting has been finished, (Spreadsheets have been added)
+            //Unlock the ListOfSpreadsheets
+            ListOfSpreadsheets.EndUpdate();
+        }
     }
 }

@@ -19,6 +19,7 @@ namespace CS3505
     public class SpreadsheetController
     {
         private Socket theServer;
+        private SocketState theServerState;
 
         public delegate void SpreadsheetUpdatedEventHandler();
         public event SpreadsheetUpdatedEventHandler SpreadsheetUpdated;
@@ -85,21 +86,25 @@ namespace CS3505
         /// <param name="ss"></param>
         private void RecieveSpreadsheetsList(SocketState ss)
         {
-            // Set up the loop
-            ss.CallMe = ReceiveEdit;
+            
 
             // Create a dynamic type for processing the kind of message sent
-            var recieve = new
+            var receive = new
             {
                 type = ""
             };
-
-            var message = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), recieve);
+            
+            if (ss.sb.ToString().Length != 0)
+            { 
+               receive = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), receive);
+            }
 
             // ignore if it is the wrong kind of message
-            if (message.type != "list")
+            if (receive.type != "list")
             {
+                //FIXME fix the way messages are parsed
                 ss.sb.Clear();
+                Networking.GetData(ss);
                 return;
             }
 
@@ -107,15 +112,17 @@ namespace CS3505
             var list = new
             {
                 type = "",
-                sheets = new string[0]
+                spreadsheets = new string[0]
             };
 
             list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
 
-            this.SheetOptions = list.sheets;
+            this.SheetOptions = list.spreadsheets;
 
             // Notify the client that new spreadsheets are available
             SpreadsheetsReceived();
+            theServerState = ss;
+            Networking.GetData(ss);
         }
 
         /// <summary>
@@ -125,6 +132,8 @@ namespace CS3505
         /// <param name="sheet"></param>
         public void ChooseSpreadsheet(string sheetName, string username, string password)
         {
+
+
             Username = username;
             Password = password;
             // create the JSon object to be sent
@@ -140,10 +149,8 @@ namespace CS3505
             string message = JsonConvert.SerializeObject(open) + ENDOFMESSAGE;
             Networking.Send(theServer, message);
 
-            //FIXME?
-            // Get Date from the server
-            SocketState ss = new SocketState(theServer, 0);
-            Networking.GetData(ss);
+            theServerState.CallMe = ReceiveEdit;
+            Networking.GetData(theServerState);
         }
 
 

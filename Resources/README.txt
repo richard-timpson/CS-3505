@@ -24,3 +24,7 @@ JSON SERIALIZE?
             //    cell = "A1",
             //};
             //JsonConvert.SerializeObject(mess);
+
+
+			Test JSON
+		    {"type":"list","spreadsheets":["hello.sprd","foxy spreadsheet"]}
