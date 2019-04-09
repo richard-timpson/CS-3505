@@ -16,23 +16,34 @@
 
 bool Server::spreadsheet::validate(std::string alpha, std::string beta)
 {
-    std::list <std::string> saved_users;
-    std::list<std::string>::iterator it = saved_users.begin();
+    std::list <std::string> saved_users_list;
+    std::list<std::string>::iterator it;
 
 
     int index;
     int it_index;
 
-    for (it = saved_users.begin; it != saved_users.end(); it++)
-    {
+    // Looping through the list of saved users, and checking if the input
+    // is an already made user.
+    for (it = saved_users_list.begin; it != saved_users_list.end(); it++)
+    { 
+      // Check if it is the same username.
+      if (alpha == *it.get_username())
+	{
+	  // Check if the password matches, if yes send speadsheet, if not send error.
+	  if (beta == it.get_password())
+	    {
+	      // Send spreadsheet
+	    }
+	  else
+	    {
+	      // Send back error
+	    }
+	  
+	}
 
     }
-    for(index = 0; index < saved_users.size(); index++)
-    {
-        if(alpha != beta)
-        {
-
-        }
-    }
+    //if user does not exist, make new user and save to list.
+    
  
 }
