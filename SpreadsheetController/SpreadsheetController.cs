@@ -85,9 +85,6 @@ namespace CS3505
         /// <param name="ss"></param>
         private void RecieveSpreadsheetsList(SocketState ss)
         {
-            // TODO Process List of Spreadsheets
-            // IGNORE MESSAGES OTHER THAN THE LIST OF SPREADSHEETS
-
             // Set up the loop
             ss.CallMe = ReceiveEdit;
 
@@ -157,16 +154,22 @@ namespace CS3505
         /// <param name="cellContents"></param>
         public void ClientEdit(string cellName, string cellContents)
         {
+            string[] depend = new string[0];
             // if a formula is entered
             if (cellContents[0] == '=')
             {
-                //TODO FINISH
-                //Formula edit = 
+                // create a formula 
+                Formula formula = new Formula(cellContents.Substring(1));
+                depend = formula.GetVariables().ToArray();
             }
-            else
+            // create a JSon object
+            var edit = new
             {
-
-            }
+                type = "edit",
+                cell = cellName,
+                value = cellContents, //FIXME? If it is a number versus a string?
+                dependencies = depend
+            };
 
             throw new NotImplementedException();
         }
@@ -194,7 +197,6 @@ namespace CS3505
             var revert = new { type = "revert", cell = cellName };
             // send the message
             Networking.Send(theServer, JsonConvert.SerializeObject(revert) + ENDOFMESSAGE);
-
         }
 
         /// <summary>
@@ -203,8 +205,6 @@ namespace CS3505
         /// <param name="ss"></param>
         private void ReceiveEdit(SocketState ss)
         {
-
-            //TODO Process Full Send
             string totalData = ss.sb.ToString();
             string[] parts = Regex.Split(totalData, @"(?<=[\n\n])");
 
@@ -303,10 +303,8 @@ namespace CS3505
                 //check what kind of object GetCellContents returned
                 if (contents is string)
                 {
-                    // TODO
                     // if it is an empty string it is actually a delete
                     this.sheet.SetContentsOfCell(cell, (string)edits.GetCellContents(cell));
-
                 }
                 else if (contents is double)
                 {
