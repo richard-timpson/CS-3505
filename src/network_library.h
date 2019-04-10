@@ -16,8 +16,8 @@ using boost::asio::ip::tcp;
 class network_library
 {
   public:
-    static void start_server();
-    static void start_client();
+    static void start_server(std::string address, int port);
+    static void start_client(std::string address, int port);
 };
 
 class chat_server

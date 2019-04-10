@@ -118,7 +118,7 @@ void chat_server::write_to_clients(char buff[256])
  * network_library static class
  * ************************************/
 
-void network_library::start_server()
+void network_library::start_server(std::string address, int port)
 {
     // start the server, and tell it to listen for client connections.
     // if we get a new connection, start it async and store that client connection in a list of connections
@@ -127,7 +127,7 @@ void network_library::start_server()
     try
     {
         boost::asio::io_context io_context;
-        tcp::endpoint endpoint(tcp::v4(), 81);
+        tcp::endpoint endpoint(tcp::v4(), port);
         tcp::socket socket(io_context);
         std::cout << "Server waiting for connection " << std::endl;
 
@@ -142,9 +142,9 @@ void network_library::start_server()
     }
 }
 
-void network_library::start_client()
+void network_library::start_client(std::string address, int port)
 {
-
+    std::cout << "htting start_client" << std::endl;
     // make a chat system
     // start the server, and tell it to listen for client connections.
     // if we get a new connection, start it async and store that client connection in a list of connections
@@ -153,7 +153,7 @@ void network_library::start_client()
     try
     {
         boost::asio::io_context io_context;
-        tcp::endpoint endpoint(address::from_string("127.0.0.1"), 81);
+        tcp::endpoint endpoint(address::from_string("155.98.111.121"), 2112);
         tcp::socket socket(io_context);
         std::cout << "client connection to server..." << std::endl;
         socket.async_connect(endpoint, [](const boost::system::error_code &ec){
