@@ -88,7 +88,7 @@ namespace CS3505
         {
             // begin parsing the data
             string totalData = ss.sb.ToString();
-            string[] parts = Regex.Split(totalData, @"(?<=[\n\n])");
+            string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
 
             foreach (string p in parts)
             {
@@ -100,7 +100,7 @@ namespace CS3505
                 // if the last two chars are not new lines then there are
                 // no more full messages be evaluated
                 //FIXME CHANGED FOR TESTING Change to OR
-                if (p[p.Length - 1] != '\n' && p[p.Length - 2] != '\n')
+                if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
                 {
                     break;
                 }
@@ -233,7 +233,7 @@ namespace CS3505
         private void ReceiveEdit(SocketState ss)
         {
             string totalData = ss.sb.ToString();
-            string[] parts = Regex.Split(totalData, @"(?<=[\n\n])");
+            string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
 
             foreach (string p in parts)
             {
