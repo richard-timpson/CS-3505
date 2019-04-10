@@ -23,6 +23,7 @@ namespace JSonTest
             Console.WriteLine(JsonConvert.SerializeObject(mess));
 
             string json = JsonConvert.SerializeObject(mess);
+            Console.WriteLine(json);
 
             var receive = new
             {

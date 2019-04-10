@@ -19,6 +19,7 @@ namespace CS3505
     public class SpreadsheetController
     {
         private Socket theServer;
+        private SocketState theServerState;
 
         public delegate void SpreadsheetUpdatedEventHandler();
         public event SpreadsheetUpdatedEventHandler SpreadsheetUpdated;
@@ -76,46 +77,72 @@ namespace CS3505
         /// <param name="ipAddress"></param>
         public void Connect(string ipAddress)
         {
-            theServer = Networking.ConnectToServer(ipAddress, RecieveSpreadsheetsList);
+            theServer = Networking.ConnectToServer(ipAddress, ReceiveSpreadsheetsList);
         }
 
         /// <summary>
         /// Receive a list of available spreadsheets
         /// </summary>
         /// <param name="ss"></param>
-        private void RecieveSpreadsheetsList(SocketState ss)
+        private void ReceiveSpreadsheetsList(SocketState ss)
         {
-            // Set up the loop
-            ss.CallMe = ReceiveEdit;
+            // begin parsing the data
+            string totalData = ss.sb.ToString();
+            string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
 
-            // Create a dynamic type for processing the kind of message sent
-            var recieve = new
+            foreach (string p in parts)
             {
-                type = ""
-            };
+                // ignore empty strings
+                if (p.Length == 0)
+                {
+                    continue;
+                }
+                // if the last two chars are not new lines then there are
+                // no more full messages be evaluated
+                //FIXME CHANGED FOR TESTING Change to OR
+                if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
+                {
+                    break;
+                }
 
-            var message = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), recieve);
 
-            // ignore if it is the wrong kind of message
-            if (message.type != "list")
-            {
-                ss.sb.Clear();
-                return;
+                // Create a dynamic type for processing the kind of message sent
+                var receive = new
+                {
+                    type = ""
+                };
+
+                //if (ss.sb.ToString().Length != 0)
+                //{ 
+                receive = JsonConvert.DeserializeAnonymousType(p, receive);
+
+
+                // ignore if it is the wrong kind of message
+                if (receive.type != "list")
+                {
+                    ss.sb.Remove(0, p.Length);
+                    Networking.GetData(ss);
+                    return;
+                }
+
+                //Otherwise Process the message and output the lists
+                var list = new
+                {
+                    type = "",
+                    spreadsheets = new string[0]
+                };
+
+                list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
+
+                this.SheetOptions = list.spreadsheets;
+
+                // Notify the client that new spreadsheets are available
+                SpreadsheetsReceived();
+                theServerState = ss;
+                //Networking.GetData(ss);
+                ss.sb.Remove(0, p.Length);
             }
-
-            //Otherwise Process the message and output the lists
-            var list = new
-            {
-                type = "",
-                sheets = new string[0]
-            };
-
-            list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
-
-            this.SheetOptions = list.sheets;
-
-            // Notify the client that new spreadsheets are available
-            SpreadsheetsReceived();
+            Networking.GetData(ss);
         }
 
         /// <summary>
@@ -125,6 +152,8 @@ namespace CS3505
         /// <param name="sheet"></param>
         public void ChooseSpreadsheet(string sheetName, string username, string password)
         {
+
+
             Username = username;
             Password = password;
             // create the JSon object to be sent
@@ -140,10 +169,8 @@ namespace CS3505
             string message = JsonConvert.SerializeObject(open) + ENDOFMESSAGE;
             Networking.Send(theServer, message);
 
-            //FIXME?
-            // Get Date from the server
-            SocketState ss = new SocketState(theServer, 0);
-            Networking.GetData(ss);
+            theServerState.CallMe = ReceiveEdit;
+            Networking.GetData(theServerState);
         }
 
 
@@ -206,7 +233,7 @@ namespace CS3505
         private void ReceiveEdit(SocketState ss)
         {
             string totalData = ss.sb.ToString();
-            string[] parts = Regex.Split(totalData, @"(?<=[\n\n])");
+            string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
 
             foreach (string p in parts)
             {
@@ -217,7 +244,7 @@ namespace CS3505
                 }
                 // if the last two chars are not new lines then there are
                 // no more full messages be evaluated
-                if (p[p.Length - 1] != '\n' && p[p.Length - 2] != '\n')
+                if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
                 {
                     break;
                 }

@@ -181,7 +181,7 @@ namespace CS3505
             }
             catch (System.Net.Sockets.SocketException e)
             {
-                Timeout();
+                System.Diagnostics.Debug.WriteLine(e.Message);
                 return;
             }
             // Start an event loop to receive data from the server/ client.
