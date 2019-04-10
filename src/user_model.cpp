@@ -22,3 +22,13 @@ Server::user::~user()
   this->username = "";
   this->password = "";
 }
+
+std::string Server::user::get_username()
+{
+  return this->username;
+}
+
+std::string Server::user::get_password()
+{
+  return this->password;
+}

@@ -14,10 +14,10 @@
 #include "spreadsheet_model.h"
 #include "user_model.h"
 
-bool Server::spreadsheet::validate(std::string alpha, std::string beta)
+bool Server::spreadsheet::validate(std::string input_username, std::string input_password)
 {
-    std::list <std::string> saved_users_list;
-    std::list<std::string>::iterator it;
+    std::list <user> saved_users_list;
+    std::list<user>::iterator it;
 
 
     int index;
@@ -25,22 +25,22 @@ bool Server::spreadsheet::validate(std::string alpha, std::string beta)
 
     // Looping through the list of saved users, and checking if the input
     // is an already made user.
-    for (it = saved_users_list.begin; it != saved_users_list.end(); it++)
+    for (it = saved_users_list.begin(); it != saved_users_list.end(); ++it)
     { 
       // Check if it is the same username.
-      if (alpha == *it.get_username())
-	{
+      if (input_username == it->get_username())
+	  {
 	  // Check if the password matches, if yes send speadsheet, if not send error.
-	  if (beta == it.get_password())
-	    {
+	    if (input_password == it->get_password())
+	      {
 	      // Send spreadsheet
-	    }
-	  else
-	    {
+	      }
+	    else
+	      {
 	      // Send back error
-	    }
+	      }
 	  
-	}
+	    }
 
     }
     //if user does not exist, make new user and save to list.

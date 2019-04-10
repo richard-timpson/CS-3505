@@ -24,6 +24,8 @@ namespace Server
   public:
 
     user(nlohmann::json input);
+    std::string get_username();
+    std::string get_password();
     ~user();
 
   private:
