@@ -1,5 +1,8 @@
+cade: user_model spreadsheet_model spreadsheet_controller network_controller network_library main.cpp
+	g++ -std=c++11  -o ../bin/main  main.cpp ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o ../bin/network_library.o -lpthread -I ../libs/boost/include
+
 all: user_model spreadsheet_model spreadsheet_controller network_controller network_library main.cpp
-	g++ -std=c++11  -o ../bin/main  main.cpp ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o ../bin/network_library.o
+	g++ -std=c++11  -o ../bin/main  main.cpp ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o ../bin/network_library.o 
 
 user_model: user_model.cpp user_model.h
 	g++ -std=c++11  -o ../bin/user_model.o -c user_model.cpp
