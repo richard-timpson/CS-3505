@@ -77,51 +77,71 @@ namespace CS3505
         /// <param name="ipAddress"></param>
         public void Connect(string ipAddress)
         {
-            theServer = Networking.ConnectToServer(ipAddress, RecieveSpreadsheetsList);
+            theServer = Networking.ConnectToServer(ipAddress, ReceiveSpreadsheetsList);
         }
 
         /// <summary>
         /// Receive a list of available spreadsheets
         /// </summary>
         /// <param name="ss"></param>
-        private void RecieveSpreadsheetsList(SocketState ss)
+        private void ReceiveSpreadsheetsList(SocketState ss)
         {
-            
+            // begin parsing the data
+            string totalData = ss.sb.ToString();
+            string[] parts = Regex.Split(totalData, @"(?<=[\n\n])");
 
-            // Create a dynamic type for processing the kind of message sent
-            var receive = new
+            foreach (string p in parts)
             {
-                type = ""
-            };
-            
-            if (ss.sb.ToString().Length != 0)
-            { 
-               receive = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), receive);
+                // ignore empty strings
+                if (p.Length == 0)
+                {
+                    continue;
+                }
+                // if the last two chars are not new lines then there are
+                // no more full messages be evaluated
+                //FIXME CHANGED FOR TESTING Change to OR
+                if (p[p.Length - 1] != '\n' && p[p.Length - 2] != '\n')
+                {
+                    break;
+                }
+
+
+                // Create a dynamic type for processing the kind of message sent
+                var receive = new
+                {
+                    type = ""
+                };
+
+                //if (ss.sb.ToString().Length != 0)
+                //{ 
+                receive = JsonConvert.DeserializeAnonymousType(p, receive);
+
+
+                // ignore if it is the wrong kind of message
+                if (receive.type != "list")
+                {
+                    ss.sb.Remove(0, p.Length);
+                    Networking.GetData(ss);
+                    return;
+                }
+
+                //Otherwise Process the message and output the lists
+                var list = new
+                {
+                    type = "",
+                    spreadsheets = new string[0]
+                };
+
+                list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
+
+                this.SheetOptions = list.spreadsheets;
+
+                // Notify the client that new spreadsheets are available
+                SpreadsheetsReceived();
+                theServerState = ss;
+                //Networking.GetData(ss);
+                ss.sb.Remove(0, p.Length);
             }
-
-            // ignore if it is the wrong kind of message
-            if (receive.type != "list")
-            {
-                //FIXME fix the way messages are parsed
-                ss.sb.Clear();
-                Networking.GetData(ss);
-                return;
-            }
-
-            //Otherwise Process the message and output the lists
-            var list = new
-            {
-                type = "",
-                spreadsheets = new string[0]
-            };
-
-            list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
-
-            this.SheetOptions = list.spreadsheets;
-
-            // Notify the client that new spreadsheets are available
-            SpreadsheetsReceived();
-            theServerState = ss;
             Networking.GetData(ss);
         }
 
@@ -224,7 +244,7 @@ namespace CS3505
                 }
                 // if the last two chars are not new lines then there are
                 // no more full messages be evaluated
-                if (p[p.Length - 1] != '\n' && p[p.Length - 2] != '\n')
+                if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
                 {
                     break;
                 }
