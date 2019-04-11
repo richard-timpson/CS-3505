@@ -36,7 +36,7 @@ chat_server_client::chat_server_client(tcp::socket socket, chat_server* server)
 void chat_server_client::do_read()
 {
     std::cout << "trying to read from client" << std::endl;
-    boost::asio::async_read(socket_, boost::asio::buffer(buff, 256), 
+    boost::asio::async_read(socket_, boost::asio::buffer(buff, 7), 
         [this](boost::system::error_code ec, std::size_t ){
             std::cout << "received  Message" << std::endl;
             if (!ec)
@@ -96,15 +96,15 @@ void chat_server::add_client(std::shared_ptr<chat_server_client> client)
     clients.insert(client);
 }
 
-void chat_server::write_to_clients(char buff[256])
+void chat_server::write_to_clients(char buff[7])
 {
     for (auto client: clients)
     {
-        boost::asio::async_write(client->socket_, boost::asio::buffer(buff, 256), 
+        boost::asio::async_write(client->socket_, boost::asio::buffer(buff, 7), 
             [this, buff](boost::system::error_code ec, std::size_t){
                 if (!ec)
                 {
-                    std::cout << "writing message" << std::string(buff) << std::endl;
+                    std::cout << "writing message " << std::string(buff) << std::endl;
                 }
                 else
                 {
@@ -118,7 +118,7 @@ void chat_server::write_to_clients(char buff[256])
  * network_library static class
  * ************************************/
 
-void network_library::start_server(std::string address, int port)
+void network_library::start_server(int port)
 {
     // start the server, and tell it to listen for client connections.
     // if we get a new connection, start it async and store that client connection in a list of connections
@@ -142,7 +142,7 @@ void network_library::start_server(std::string address, int port)
     }
 }
 
-void network_library::start_client(std::string address, int port)
+void network_library::start_client(int port)
 {
     std::cout << "htting start_client" << std::endl;
     // make a chat system
@@ -153,7 +153,7 @@ void network_library::start_client(std::string address, int port)
     try
     {
         boost::asio::io_context io_context;
-        tcp::endpoint endpoint(address::from_string("155.98.111.121"), 2112);
+        tcp::endpoint endpoint(address::from_string("127.0.0.1"), 2112);
         tcp::socket socket(io_context);
         std::cout << "client connection to server..." << std::endl;
         socket.async_connect(endpoint, [](const boost::system::error_code &ec){
@@ -166,17 +166,29 @@ void network_library::start_client(std::string address, int port)
                 std::cout << "error connecting" << std::endl;
             }
         });
-        // std::thread t([&io_context](){
+        // std::thread t([&io_context](){   
             io_context.run();
         // });
 
-        char line[4];
-        while(std::cin.getline(line, 4))
+        char line[7]="hello\n";
+        char read[7];
+        boost::asio::async_read(socket, boost::asio::buffer(read, 7), 
+        [read](boost::system::error_code ec, std::size_t ){
+            std::cout << "received  Message" << std::endl;
+            if (!ec)
+            {
+                std::cout << read << std::endl;
+            }
+            else 
+            {
+                std::cout << ec.message() << std::endl;
+            }
+        });
+        char waste[10];
+        while(std::cin.getline(waste, 10))
         {
             std::cout << "trying to write message " << std::string(line) << std::endl;
-            // boost::asio::post(io_context, [&socket, line](){
-            //     std::cout << "posting" << std::endl;
-                boost::asio::async_write(socket, boost::asio::buffer(line, 4), 
+                boost::asio::async_write(socket, boost::asio::buffer(line, 7), 
                     [](boost::system::error_code ec, std::size_t bytes_transferred) {
                         std::cout << "async writing" << std::endl;
                         if (!ec)
@@ -189,9 +201,7 @@ void network_library::start_client(std::string address, int port)
                         }
                         
                     });
-            // });
         }
-        // t.join();
     }
     catch (std::exception &e)
     {

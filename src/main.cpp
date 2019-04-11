@@ -8,19 +8,14 @@
 
 int main(int argc, char ** argv)
 {
-    std::string address(argv[2]);
-    std::cout << "hitting before conversion" << std::endl;
-    std::cout << address << argv[3] << std::endl;
-    int port = std::atoi(argv[3]);
-    std::cout << "going past conversion " << std::endl;
+    int port = std::atoi(argv[2]);
     if (argv[1][0] == 's')
     {
-        network_library::start_server(address, port);
+        network_library::start_server(port);
     }
     else
     {
-        std::cout << "starting client" << std::endl;
-        network_library::start_client(address, port);    
+        network_library::start_client(port);    
     } 
     
 
