@@ -1,11 +1,23 @@
+cade: user_model spreadsheet_model spreadsheet_controller network_controller network_library main.cpp
+	g++ -std=c++11  -o ../bin/main  main.cpp ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o ../bin/network_library.o -lpthread -I ../libs/boost/include
+
+all: user_model spreadsheet_model spreadsheet_controller network_controller network_library main.cpp
+	g++ -std=c++11  -o ../bin/main  main.cpp ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o ../bin/network_library.o 
+
+user_model: user_model.cpp user_model.h
+	g++ -std=c++11  -o ../bin/user_model.o -c user_model.cpp
+
+spreadsheet_model: spreadsheet_model.cpp spreadsheet_model.h
+	g++ -std=c++11  -o ../bin/spreadsheet_model.o -c spreadsheet_model.cpp
+
 spreadsheet_controller: spreadsheet_controller.cpp spreadsheet_controller.h
-	g++ -std=c++11  -o ../bin/spreadsheet_controller.o spreadsheet_controller.cpp
+	g++ -std=c++11  -o ../bin/spreadsheet_controller.o -c spreadsheet_controller.cpp
 
-network_controller: ../bin/network_library.o network_controller.cpp network_controller.h
-	g++ -std=c++11  -o ../bin/network_controller.o -c  network_controller.cpp ../bin/network_library.o
+network_controller: network_library network_controller.cpp network_controller.h
+	g++ -std=c++11  -o ../bin/network_controller.o -c  network_controller.cpp 
 
-network_library: network_library.cpp network_library.h
-	g++ -std=c++11 -I ../libs/asio-1.12.2/include/ -lpthread -o ../bin/network_library.o -c  network_library.cpp
+network_library: network_library.cpp network_library.h chat_server_client.h
+	g++ -std=c++11 -o ../bin/network_library.o -c  network_library.cpp
 
 
 
