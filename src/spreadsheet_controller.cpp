@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 
 
 
@@ -28,7 +28,5 @@
  * Send sheet to user
  *
  */
-=======
 #include <iostream>
 #include "spreadsheet_controller.h"
->>>>>>> master
