@@ -55,6 +55,7 @@ void Server::add_client_to_list(std::shared_ptr<ClientConnection> connection)
 
 void Server::send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> connection)
 {
+    //hey
     char message[256] ="Sending list of spreadsheets to client\n";
     // std::string message = "Sending list of spreadsheet to client";
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message, strlen(message)), 
