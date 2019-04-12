@@ -153,7 +153,7 @@ namespace ClientGUI
         /// <summary>
         /// Subscribes and updates a spreadsheet
         /// </summary>
-        private void UpdateSpreadsheet()
+        private void UpdateSpreadsheet(List<string> updates)
         {
             //Is the spreadsheet already open?
             if (ssView == null)
@@ -162,13 +162,17 @@ namespace ClientGUI
                 ssView = new SpreadsheetView(ssController);
                 ssView.ShowDialog();
             }
-
-
         }
 
         private void NewSpreadsheetButton_Click(object sender, EventArgs e)
         {
             string s = Interaction.InputBox("Please enter the password:", "Password", "", -1, -1);
         }
+
+
     }
+
+
+
 }
+

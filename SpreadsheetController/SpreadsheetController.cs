@@ -21,7 +21,7 @@ namespace CS3505
         private Socket theServer;
         private SocketState theServerState;
 
-        public delegate void SpreadsheetUpdatedEventHandler();
+        public delegate void SpreadsheetUpdatedEventHandler(List<string> updatedCells);
         public event SpreadsheetUpdatedEventHandler SpreadsheetUpdated;
 
         public delegate void SpreadsheetErrorEventHandler(int code, string source);
@@ -51,9 +51,10 @@ namespace CS3505
         /// </summary>
         private Spreadsheet sheet;
 
-        public Spreadsheet Sheet 
+        public Spreadsheet Sheet
         {
-            get {
+            get
+            {
                 return sheet;
             }
 
@@ -210,8 +211,6 @@ namespace CS3505
                 value = cellContents, //FIXME? If it is a number versus a string?
                 dependencies = depend
             };
-
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -248,52 +247,51 @@ namespace CS3505
             string totalData = ss.sb.ToString();
             string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
 
-            foreach (string p in parts)
+            lock (sheet)
             {
-                // ignore empty strings
-                if (p.Length == 0)
+                foreach (string p in parts)
                 {
-                    continue;
+                    // ignore empty strings
+                    if (p.Length == 0)
+                    {
+                        continue;
+                    }
+                    // if the last two chars are not new lines then there are
+                    // no more full messages be evaluated
+
+                    if (p.Length < 3)
+                    {
+                        continue;
+                    }
+                    if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
+                    {
+                        break;
+                    }
+
+                    // Create a dynamic type for processing the kind of message sent
+                    var recieve = new
+                    {
+                        type = ""
+                    };
+
+                    var check = JsonConvert.DeserializeAnonymousType(p, recieve);
+
+                    if (check.type == "error")
+                    {
+                        ProcessError(p);
+
+                    }
+                    else if (check.type == "full send")
+                    {
+                        ProcessFullSend(p);
+                    }
+                    // FIXME?
+                    // if unexpected message comes ignore it for now?? ...
+                    ss.sb.Remove(0, p.Length);
+
                 }
-                // if the last two chars are not new lines then there are
-                // no more full messages be evaluated
-
-                if (p.Length < 3)
-                {
-                    continue;
-                }
-                if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
-                {
-                    break;
-                }
-
-                // Create a dynamic type for processing the kind of message sent
-                var recieve = new
-                {
-                    type = ""
-                };
-
-                var check = JsonConvert.DeserializeAnonymousType(p, recieve);
-
-                if (check.type == "error")
-                {
-                    ProcessError(p);
-
-                }
-                else if (check.type == "full send")
-                {
-                    ProcessFullSend(p);
-
-
-                }
-                // FIXME?
-                // if unexpected message comes ignore it for now?? ...
-                ss.sb.Remove(0, p.Length);
-
             }
-            // let the subscribers (client) know that the spreadsheet has been
-            // updated
-            SpreadsheetUpdated();
+
             // ask for more data
             Networking.GetData(ss);
         }
@@ -340,30 +338,36 @@ namespace CS3505
 
             fullsend = JsonConvert.DeserializeAnonymousType(message, fullsend);
             Spreadsheet edits = fullsend.spreadsheet;
-            // process all of the edits
-            foreach (string cell in edits.GetNamesOfAllNonemptyCells())
+            lock (sheet)
             {
-
-                object contents = edits.GetCellContents(cell);
-                //check what kind of object GetCellContents returned
-                if (contents is string)
+                List<string> updatedCells = new List<string>();
+                // process all of the edits
+                foreach (string cell in edits.GetNamesOfAllNonemptyCells())
                 {
-                    // if it is an empty string it is actually a delete
-                    this.sheet.SetContentsOfCell(cell, (string)edits.GetCellContents(cell));
-                }
-                else if (contents is double)
-                {
-                    this.sheet.SetContentsOfCell(cell, (string)edits.GetCellContents(cell));
-                }
-                else // else it is a formula
-                {
-                    Formula formulaContents = (Formula)contents;
+                    updatedCells.Add(cell);
+                    object contents = edits.GetCellContents(cell);
+                    //check what kind of object GetCellContents returned
+                    if (contents is string)
+                    {
+                        // if it is an empty string it is actually a delete
+                        this.sheet.SetContentsOfCell(cell, (string)edits.GetCellContents(cell));
+                    }
+                    else if (contents is double)
+                    {
+                        this.sheet.SetContentsOfCell(cell, (string)edits.GetCellContents(cell));
+                    }
+                    else // else it is a formula
+                    {
+                        Formula formulaContents = (Formula)contents;
 
-                    string formulaString = formulaContents.ToString();
+                        string formulaString = formulaContents.ToString();
 
-                    this.sheet.SetContentsOfCell(cell, "=" + formulaString);
+                        this.sheet.SetContentsOfCell(cell, "=" + formulaString);
 
+                    }
                 }
+                // let the subscribers (client) know that the spreadsheet has been updated
+                SpreadsheetUpdated(updatedCells);
 
             }
         }

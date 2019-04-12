@@ -66,6 +66,8 @@ namespace SpreadsheetGUI
             this.CellNameText = new System.Windows.Forms.TextBox();
             this.ValueDisplayBox = new System.Windows.Forms.TextBox();
             this.fileSystemWatcher1 = new System.IO.FileSystemWatcher();
+            this.UndoButton = new System.Windows.Forms.Button();
+            this.Revert = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.eventLog1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher1)).BeginInit();
@@ -351,11 +353,33 @@ namespace SpreadsheetGUI
             this.fileSystemWatcher1.EnableRaisingEvents = true;
             this.fileSystemWatcher1.SynchronizingObject = this;
             // 
-            // Form1
+            // UndoButton
+            // 
+            this.UndoButton.Location = new System.Drawing.Point(315, 28);
+            this.UndoButton.Name = "UndoButton";
+            this.UndoButton.Size = new System.Drawing.Size(82, 20);
+            this.UndoButton.TabIndex = 6;
+            this.UndoButton.Text = "Undo";
+            this.UndoButton.UseVisualStyleBackColor = true;
+            this.UndoButton.Click += new System.EventHandler(this.UndoButton_Click);
+            // 
+            // Revert
+            // 
+            this.Revert.Location = new System.Drawing.Point(404, 28);
+            this.Revert.Name = "Revert";
+            this.Revert.Size = new System.Drawing.Size(75, 20);
+            this.Revert.TabIndex = 7;
+            this.Revert.Text = "Revert";
+            this.Revert.UseVisualStyleBackColor = true;
+            this.Revert.Click += new System.EventHandler(this.Revert_Click);
+            // 
+            // SpreadsheetView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.Revert);
+            this.Controls.Add(this.UndoButton);
             this.Controls.Add(this.ValueDisplayBox);
             this.Controls.Add(this.CellNameText);
             this.Controls.Add(this.SetCellContentsButton);
@@ -364,7 +388,7 @@ namespace SpreadsheetGUI
             this.Controls.Add(this.menuStrip1);
             this.HelpButton = true;
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
+            this.Name = "SpreadsheetView";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
@@ -415,6 +439,8 @@ namespace SpreadsheetGUI
         private System.Windows.Forms.ToolStripMenuItem chooseSongToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stopToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem musicToolStripMenuItem2;
+        private System.Windows.Forms.Button UndoButton;
+        private System.Windows.Forms.Button Revert;
     }
 }
 

@@ -51,7 +51,7 @@ namespace SpreadsheetGUI
             music = new SoundPlayer(Directory.GetCurrentDirectory() + "\\WiiMusic.wav");
             this.ssController = ssController;
 
-
+            ssController.SpreadsheetUpdated += SpreadsheetUpdate;
             formSheet = ssController.Sheet;
             //formSheet = new Spreadsheet(x => true, x => x.ToUpper(), "ps6");
 
@@ -61,6 +61,9 @@ namespace SpreadsheetGUI
             spreadsheetPanel1.SetSelection(0, 0);
             SetCellContentsText.Focus();
         }
+
+
+        #region(oldocde)
         /// <summary>
         /// Method for detecting what key has been released for key navigation
         /// </summary>
@@ -332,17 +335,16 @@ namespace SpreadsheetGUI
         {
 
 
-            setSelectedCell();
+            // setSelectedCell();
+            SendEdit();
 
         }
-
+        #endregion
         /// <summary>
-        /// The logic function that takes the currently selected cell and inputs the information given to it
-        /// by the setContentsText box into the underlying spreadsheet data
+        /// Helper method that uses the Spreadsheet controller to send an edit Request to the server
         /// </summary>
-        private void setSelectedCell()
+        private void SendEdit()
         {
-            // get the information about where the selection has been made
             int col;
             int row;
 
@@ -351,6 +353,67 @@ namespace SpreadsheetGUI
             // get the appropriate column letter and cell name
             char columnLetter = getColumnLetter(col);
             string cellName = columnLetter.ToString() + (row + 1).ToString();
+
+            ssController.ClientEdit(cellName, SetCellContentsText.Text);
+
+        }
+
+        /// <summary>
+        /// Helper function that subscribes to srpeadsheet controller's spreadsheetupdated event
+        /// Tells the GUI to update the contents of the given cells
+        /// </summary>
+        /// <param name="updatedCells"></param>
+        private void SpreadsheetUpdate(List<string> updatedCells)
+        {
+            lock (this.formSheet)
+            {
+                foreach (string cell in updatedCells)
+                {
+                   object edit = ssController.Sheet.GetCellContents(cell);
+
+                    if (edit is string)
+                    {
+                        //FIXME??
+                        MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, edit.ToString()));
+                        this.Invoke(m);
+                       // setSelectedCell(cell, edit.ToString());
+                    }
+                    else if (edit is double)
+                    {
+                        //FIXME??
+                        MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, edit.ToString()));
+                        this.Invoke(m);
+                        //setSelectedCell(cell, edit.ToString());
+                    }
+                    else // else it is a formula
+                    {
+
+                        //FIXME??
+                        MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, "=" + edit.ToString()));
+                        this.Invoke(m);
+                        // setSelectedCell(cell, "=" + edit.ToString());
+
+                    }
+
+                }
+            }
+        }
+
+        /// <summary>
+        /// The logic function that takes the currently selected cell and inputs the information given to it
+        /// by the setContentsText box into the underlying spreadsheet data
+        /// </summary>
+        private void setSelectedCell(string cellName, string setcellcontents)
+        {
+            // get the information about where the selection has been made
+            //int col;
+            //int row;
+
+            //spreadsheetPanel1.GetSelection(out col, out row);
+
+            //// get the appropriate column letter and cell name
+            //char columnLetter = getColumnLetter(col);
+            //string cellName = columnLetter.ToString() + (row + 1).ToString();
             IEnumerable<string> dependentList;
             try
             {
@@ -361,8 +424,8 @@ namespace SpreadsheetGUI
                 foreach (string dependent in dependentList)
                 {
                     // get the location of the dependent cell
-                    col = (int)dependent[0] - 65;
-                    row = int.Parse(dependent.Substring(1)) - 1;
+                    int col = (int)dependent[0] - 65;
+                    int row = int.Parse(dependent.Substring(1)) - 1;
                     //set the new value to the dependent cells                
                     spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(dependent).ToString());
                 }
@@ -384,7 +447,7 @@ namespace SpreadsheetGUI
 
         }
 
-
+        #region(oldocde)
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             save();
@@ -872,6 +935,28 @@ namespace SpreadsheetGUI
             MessageBox.Show("Wav files can be played through the spreadsheet through a built in soundplayer."
                 + " A default song has been set but under the music menu there are options for playing the"
                 + " chosen music, choosing a new wav file, and stopping the music.", "Help - Music");
+        }
+        #endregion
+
+        private void UndoButton_Click(object sender, EventArgs e)
+        {
+            ssController.ClientUndo();
+        }
+
+        private void Revert_Click(object sender, EventArgs e)
+        {
+
+            // get the information about where the selection has been made
+            int col;
+            int row;
+
+            spreadsheetPanel1.GetSelection(out col, out row);
+
+            // get the appropriate column letter and cell name
+            char columnLetter = getColumnLetter(col);
+            string cellName = columnLetter.ToString() + (row + 1).ToString();
+
+            ssController.ClientRevert(cellName);
         }
     }
 
