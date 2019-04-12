@@ -27,6 +27,23 @@ using namespace boost::asio::ip;
  * chat_server_client class
  * **************************************/
 
+
+
+// Server class 
+    // executable
+        // should create and start a server object that listens for client connections
+        // when a client connects, create a new ClientConnection and add it to the list of ClientConnections
+        // once a client has connected, tell it to listen for login string. 
+        // use the network_controller to parse the string correcltly, and send back the correct edit.
+        // the network_controller will take in the ClientConnection as it's paramter. 
+        // the client_connections need a reference to the server, so the network_controller can tell the server 
+        // to update all of the clientconnections using the network_controller. 
+
+
+
+
+
+
 chat_server_client::chat_server_client(tcp::socket socket, chat_server* server)
     : socket_(std::move(socket))
 {
@@ -72,6 +89,8 @@ chat_server::chat_server(boost::asio::io_context &io_context, const tcp::endpoin
 
 void chat_server::accept_connection()
 {
+    // acceptor_.accept();
+    // std::cout << "Accepted connection from client" << std::endl;
     acceptor_.async_accept([this](boost::system::error_code ec, tcp::socket socket) {
         if (!ec)
         {
@@ -167,40 +186,41 @@ void network_library::start_client(int port)
             }
         });
         // std::thread t([&io_context](){   
-            io_context.run();
         // });
 
         char line[7]="hello\n";
         char read[7];
-        boost::asio::async_read(socket, boost::asio::buffer(read, 7), 
-        [read](boost::system::error_code ec, std::size_t ){
-            std::cout << "received  Message" << std::endl;
-            if (!ec)
-            {
-                std::cout << read << std::endl;
-            }
-            else 
-            {
-                std::cout << ec.message() << std::endl;
-            }
-        });
         char waste[10];
         while(std::cin.getline(waste, 10))
         {
             std::cout << "trying to write message " << std::string(line) << std::endl;
-                boost::asio::async_write(socket, boost::asio::buffer(line, 7), 
-                    [](boost::system::error_code ec, std::size_t bytes_transferred) {
-                        std::cout << "async writing" << std::endl;
-                        if (!ec)
-                        {
-                            std::cout << "succesfully wrote message " << std::endl;
-                        }
-                        else
-                        {
-                            std::cout << "error writing message" << std::endl;
-                        }
-                        
-                    });
+            boost::asio::async_write(socket, boost::asio::buffer(line, 7), 
+                [](boost::system::error_code ec, std::size_t bytes_transferred) {
+                    std::cout << "async writing" << std::endl;
+                    if (!ec)
+                    {
+                        std::cout << "succesfully wrote message " << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "error writing message" << std::endl;
+                    }
+                    
+                });
+            std::cout << "trying to receive message " << std::endl;
+            boost::asio::async_read(socket, boost::asio::buffer(read, 7), 
+            [read](boost::system::error_code ec, std::size_t ){
+                std::cout << "received  Message " << read << std::endl;
+                if (!ec)
+                {
+                    std::cout << read << std::endl;
+                }
+                else 
+                {
+                    std::cout << ec.message() << std::endl;
+                }
+            });
+            io_context.run();
         }
     }
     catch (std::exception &e)
