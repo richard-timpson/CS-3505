@@ -7,7 +7,6 @@
  * 
  * 
  * http://think-async.com/Asio/boost_asio_1_12_2/doc/html/boost_asio/tutorial/tutdaytime3/src.html
- * 
  * Author: Richard Timpson
  * Date: 4/2/5/2019
 */
