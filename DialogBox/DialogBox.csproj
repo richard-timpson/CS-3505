@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F50891BF-7F53-493F-A950-39DC34F01B61}</ProjectGuid>
+    <ProjectGuid>{2871DB95-BB11-4DF3-90B4-39FBD382EBC6}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>ClientGUI</RootNamespace>
-    <AssemblyName>ClientGUI</AssemblyName>
+    <RootNamespace>DialogBox</RootNamespace>
+    <AssemblyName>DialogBox</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -33,10 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Spreadsheet">
-      <HintPath>..\Resources\Libraries\Spreadsheet.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -50,16 +46,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientGUI.cs">
+    <Compile Include="DialogTextBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ClientGUI.Designer.cs">
-      <DependentUpon>ClientGUI.cs</DependentUpon>
+    <Compile Include="DialogTextBox.Designer.cs">
+      <DependentUpon>DialogTextBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="ClientGUI.resx">
-      <DependentUpon>ClientGUI.cs</DependentUpon>
+    <EmbeddedResource Include="DialogTextBox.resx">
+      <DependentUpon>DialogTextBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -82,20 +78,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NewSpreadsheetDialog\NewSpreadsheetDialog.csproj">
-      <Project>{4B5F74DE-BE9B-46A4-B3B1-EA2BC38A50E3}</Project>
-      <Name>NewSpreadsheetDialog</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SpreadsheetController\SpreadsheetController.csproj">
-      <Project>{499D6F44-F42B-42AB-9DF2-6C29C1DBDA25}</Project>
-      <Name>SpreadsheetController</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SpreadsheetGUI\SpreadsheetGUI.csproj">
-      <Project>{F9945146-5679-4B8E-A29E-33F63D38AC97}</Project>
-      <Name>SpreadsheetGUI</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

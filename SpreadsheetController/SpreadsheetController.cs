@@ -51,6 +51,15 @@ namespace CS3505
         /// </summary>
         private Spreadsheet sheet;
 
+        public Spreadsheet Sheet 
+        {
+            get {
+                return sheet;
+            }
+
+        }
+
+
         /// <summary>
         /// The list of sheets available to the user
         /// </summary>
@@ -100,6 +109,10 @@ namespace CS3505
                 // if the last two chars are not new lines then there are
                 // no more full messages be evaluated
                 //FIXME CHANGED FOR TESTING Change to OR
+                if (p.Length < 3)
+                {
+                    continue;
+                }
                 if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
                 {
                     break;
@@ -244,6 +257,11 @@ namespace CS3505
                 }
                 // if the last two chars are not new lines then there are
                 // no more full messages be evaluated
+
+                if (p.Length < 3)
+                {
+                    continue;
+                }
                 if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
                 {
                     break;

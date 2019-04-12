@@ -2,7 +2,7 @@
 
 namespace SpreadsheetGUI
 {
-    partial class Form1
+    partial class SpreadsheetView
     {
         /// <summary>
         /// Required designer variable.

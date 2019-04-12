@@ -10,10 +10,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Media;
+using CS3505;
 
 namespace SpreadsheetGUI
 {
-    public partial class Form1 : Form
+    public partial class SpreadsheetView : Form
     {
         /// <summary>
         /// Underlying data structure that keeps track of the contents of the cells and values for updating and 
@@ -37,7 +38,9 @@ namespace SpreadsheetGUI
         /// </summary>
         private SoundPlayer music;
 
-        public Form1()
+        private SpreadsheetController ssController;
+
+        public SpreadsheetView(SpreadsheetController ssController)
         {
             InitializeComponent();
             spreadsheetPanel1.SelectionChanged += OnSelectionChanged;
@@ -46,10 +49,11 @@ namespace SpreadsheetGUI
             SetCellContentsText.PreviewKeyDown += KeyPressed;
             // SetCellContentsText.KeyDown += KeyReleased;
             music = new SoundPlayer(Directory.GetCurrentDirectory() + "\\WiiMusic.wav");
+            this.ssController = ssController;
 
 
-
-            formSheet = new Spreadsheet(x => true, x => x.ToUpper(), "ps6");
+            formSheet = ssController.Sheet;
+            //formSheet = new Spreadsheet(x => true, x => x.ToUpper(), "ps6");
 
             this.AcceptButton = SetCellContentsButton;
             
@@ -611,7 +615,7 @@ namespace SpreadsheetGUI
         /// </summary>
         private void newWindow()
         {
-            SpreadsheetAplicationContext.getAppContext().RunForm(new Form1());
+            SpreadsheetAplicationContext.getAppContext().RunForm(new SpreadsheetView(null));
         }
 
         private void eventLog1_EntryWritten(object sender, System.Diagnostics.EntryWrittenEventArgs e)

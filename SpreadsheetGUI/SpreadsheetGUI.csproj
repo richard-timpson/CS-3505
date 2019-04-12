@@ -86,16 +86,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MultiThreading.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="SpreadsheetView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="SpreadsheetView.Designer.cs">
+      <DependentUpon>SpreadsheetView.cs</DependentUpon>
     </Compile>
     <Compile Include="SpreadsheetGUI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="SpreadsheetView.resx">
+      <DependentUpon>SpreadsheetView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -121,6 +121,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="WiiMusic.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpreadsheetController\SpreadsheetController.csproj">
+      <Project>{499D6F44-F42B-42AB-9DF2-6C29C1DBDA25}</Project>
+      <Name>SpreadsheetController</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

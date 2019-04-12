@@ -275,6 +275,8 @@ namespace CS3505
             }
             catch (Exception e)
             {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                System.Diagnostics.Debug.WriteLine(e.StackTrace);
                 ss.theSocket.Close();
             }
             // continue the loop -- actually happens in ss.CallMe

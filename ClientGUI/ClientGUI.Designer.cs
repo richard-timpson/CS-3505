@@ -149,6 +149,7 @@
             this.NewSpreadsheetButton.TabIndex = 12;
             this.NewSpreadsheetButton.Text = "New Spreadsheet";
             this.NewSpreadsheetButton.UseVisualStyleBackColor = true;
+            this.NewSpreadsheetButton.Click += new System.EventHandler(this.NewSpreadsheetButton_Click);
             // 
             // ConnectButton
             // 

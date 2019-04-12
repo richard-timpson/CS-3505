@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SpreadsheetGUI
+namespace DialogBox
 {
-    static class SpreadsheetGUI
+    static class Program
     {
         /// <summary>
         /// The main entry point for the application.
@@ -16,14 +16,7 @@ namespace SpreadsheetGUI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            // Start an application context and run one form inside it
-            SpreadsheetAplicationContext appContext = SpreadsheetAplicationContext.getAppContext();
-            appContext.RunForm(new SpreadsheetView(null));
-            Application.Run(appContext);
-
-
-            //****
-            //Application.Run(new Form1());
+            Application.Run(new DialogTextBox());
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using CS3505;
+using SpreadsheetGUI;
+using SS;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,11 +10,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.VisualBasic;
+using NewSpreadsheetDialog;
 
 namespace ClientGUI
 {
     public partial class ClientLogIn : Form
     {
+        private SpreadsheetView ssView;
+
         /// <summary>
         /// Holds onto the spreadsheet and server connection
         /// </summary>
@@ -25,9 +31,10 @@ namespace ClientGUI
             //--------------------ssController Initialization-------------------------------
             //On start up, set the Spreadsheet in the controller to null, since there
             //is no Spreadsheet associated with the client yet.
-            ssController = new SpreadsheetController(null);
+            ssController = new SpreadsheetController(new Spreadsheet(x => true, x => x.ToUpper(), "cs3505"));
             //Subscribe To Spreadsheets Received by updating ListOfSpreadsheets
             ssController.SpreadsheetsReceived += UpdateListOfSpreadsheets;
+            ssController.SpreadsheetUpdated += UpdateSpreadsheet;
             //------------------------------------------------------------------------------
 
             //----------ListOfSpreadsheets Initialization-------------------------------
@@ -41,6 +48,8 @@ namespace ClientGUI
             EditSpreadsheetButton.Enabled = false;
             NewSpreadsheetButton.Enabled = false;
             //--------------------------------------------------------------------------
+
+            ssView = null;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -79,7 +88,7 @@ namespace ClientGUI
         /// <param name="e"></param>
         private void ConnectButton_Click(object sender, EventArgs e)
         {
-            //DisableEverything();
+
             //If AddressTextBox is null, empty, or whitespace, connect to Generics Server.
             if (String.IsNullOrWhiteSpace(AddressTextBox.Text))
             {
@@ -139,6 +148,27 @@ namespace ClientGUI
             //After the painting has been finished, (Spreadsheets have been added)
             //Unlock the ListOfSpreadsheets
             ListOfSpreadsheets.EndUpdate();
+        }
+
+        /// <summary>
+        /// Subscribes and updates a spreadsheet
+        /// </summary>
+        private void UpdateSpreadsheet()
+        {
+            //Is the spreadsheet already open?
+            if (ssView == null)
+            {
+                //Open a new SpreadsheetGUI if it isn't
+                ssView = new SpreadsheetView(ssController);
+                ssView.ShowDialog();
+            }
+
+
+        }
+
+        private void NewSpreadsheetButton_Click(object sender, EventArgs e)
+        {
+            string s = Interaction.InputBox("Please enter the password:", "Password", "", -1, -1);
         }
     }
 }
