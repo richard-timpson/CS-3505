@@ -27,6 +27,10 @@ JSON SERIALIZE?
 
 
 			Test JSON
+			// spreadsheet list
 		    {"type":"list","spreadsheets":["hello.sprd","foxy spreadsheet"]}
+			
+			//Full Send
+			{"type": "full send", "spreadsheet": {"A2": "=2*A1+1", "A1": 3}}
 
 

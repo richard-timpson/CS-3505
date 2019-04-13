@@ -90,6 +90,7 @@ namespace CS3505
             theServer = Networking.ConnectToServer(ipAddress, ReceiveSpreadsheetsList);
         }
 
+
         /// <summary>
         /// Receive a list of available spreadsheets
         /// </summary>
@@ -324,6 +325,8 @@ namespace CS3505
             }
         }
 
+       
+
         /// <summary>
         /// Helper Method for Processing a Full Send message from the server
         /// </summary>
@@ -333,43 +336,27 @@ namespace CS3505
             var fullsend = new
             {
                 type = "",
-                spreadsheet = new Spreadsheet()
+                spreadsheet = new Dictionary<string, string>()
             };
 
             fullsend = JsonConvert.DeserializeAnonymousType(message, fullsend);
-            Spreadsheet edits = fullsend.spreadsheet;
+            Dictionary<string, string> edits = fullsend.spreadsheet;
+
             lock (sheet)
             {
-                List<string> updatedCells = new List<string>();
-                // process all of the edits
-                foreach (string cell in edits.GetNamesOfAllNonemptyCells())
+                // process changes
+                foreach (string cell in edits.Keys)
                 {
-                    updatedCells.Add(cell);
-                    object contents = edits.GetCellContents(cell);
-                    //check what kind of object GetCellContents returned
-                    if (contents is string)
-                    {
-                        // if it is an empty string it is actually a delete
-                        this.sheet.SetContentsOfCell(cell, (string)edits.GetCellContents(cell));
-                    }
-                    else if (contents is double)
-                    {
-                        this.sheet.SetContentsOfCell(cell, (string)edits.GetCellContents(cell));
-                    }
-                    else // else it is a formula
-                    {
-                        Formula formulaContents = (Formula)contents;
-
-                        string formulaString = formulaContents.ToString();
-
-                        this.sheet.SetContentsOfCell(cell, "=" + formulaString);
-
-                    }
+                    this.sheet.SetContentsOfCell(cell, edits[cell]);
                 }
-                // let the subscribers (client) know that the spreadsheet has been updated
-                SpreadsheetUpdated(updatedCells);
+
+
 
             }
+            // let the subscribers (client) know that the spreadsheet has been updated
+            SpreadsheetUpdated(edits.Keys.ToList());
+
         }
     }
 }
+

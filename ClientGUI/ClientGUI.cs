@@ -163,6 +163,14 @@ namespace ClientGUI
                 ssView.ShowDialog();
             }
         }
+        
+        //private async Task<DialogResult> ShowDialogAsync(this Form @this)
+        //{
+        //    await Task.Yield();
+        //    if (@this.IsDisposed)
+        //        return DialogResult.OK;
+        //    return @this.ShowDialog();
+        //}
 
         private void NewSpreadsheetButton_Click(object sender, EventArgs e)
         {
@@ -171,7 +179,16 @@ namespace ClientGUI
 
 
     }
-
+    internal static class DialogExt
+    {
+        public static async Task<DialogResult> ShowDialogAsync(this Form @this)
+        {
+            await Task.Yield();
+            if (@this.IsDisposed)
+                return DialogResult.OK;
+            return @this.ShowDialog();
+        }
+    }
 
 
 }

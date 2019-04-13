@@ -62,6 +62,8 @@ namespace SpreadsheetGUI
             SetCellContentsText.Focus();
         }
 
+       
+
 
         #region(oldocde)
         /// <summary>
@@ -356,6 +358,15 @@ namespace SpreadsheetGUI
 
             ssController.ClientEdit(cellName, SetCellContentsText.Text);
 
+        }
+
+        /// <summary>
+        /// Helper method for when the spreadsheet panel opens to set all of the non-empy cells
+        /// In the ssController
+        /// </summary>
+        public void PopulateSpreadsheet()
+        {
+            SpreadsheetUpdate(ssController.Sheet.GetNamesOfAllNonemptyCells().ToList());
         }
 
         /// <summary>
