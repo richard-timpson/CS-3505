@@ -21,7 +21,8 @@ namespace CS3505
         private Socket theServer;
         private SocketState theServerState;
 
-        public delegate void SpreadsheetUpdatedEventHandler(List<string> updatedCells);
+        //public delegate void SpreadsheetUpdatedEventHandler(List<string> updatedCells);
+        public delegate void SpreadsheetUpdatedEventHandler(Dictionary<string, IEnumerable<string>> updatedDependencies);
         public event SpreadsheetUpdatedEventHandler SpreadsheetUpdated;
 
         public delegate void SpreadsheetErrorEventHandler(int code, string source);
@@ -198,20 +199,38 @@ namespace CS3505
         {
             string[] depend = new string[0];
             // if a formula is entered
-            if (cellContents[0] == '=')
+            if (cellContents.Length != 0 && cellContents[0] == '=')
             {
                 // create a formula 
                 Formula formula = new Formula(cellContents.Substring(1));
                 depend = formula.GetVariables().ToArray();
             }
-            // create a JSon object
-            var edit = new
+
+            double contents;
+            if (double.TryParse(cellContents, out contents))
             {
-                type = "edit",
-                cell = cellName,
-                value = cellContents, //FIXME? If it is a number versus a string?
-                dependencies = depend
-            };
+                var edit = new
+                {
+                    type = "edit",
+                    cell = cellName,
+                    value = contents, 
+                    dependencies = depend
+                };
+                Networking.Send(theServer, JsonConvert.SerializeObject(edit) + ENDOFMESSAGE);
+            }
+            else
+            {
+                // create a JSon object
+                var edit = new
+                {
+                    type = "edit",
+                    cell = cellName,
+                    value = cellContents, 
+                    dependencies = depend
+                };
+                Networking.Send(theServer, JsonConvert.SerializeObject(edit) + ENDOFMESSAGE);
+            }
+           
         }
 
         /// <summary>
@@ -248,7 +267,7 @@ namespace CS3505
             string totalData = ss.sb.ToString();
             string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
 
-            lock (sheet)
+           // lock (sheet)
             {
                 foreach (string p in parts)
                 {
@@ -342,19 +361,21 @@ namespace CS3505
             fullsend = JsonConvert.DeserializeAnonymousType(message, fullsend);
             Dictionary<string, string> edits = fullsend.spreadsheet;
 
-            lock (sheet)
+            Dictionary<string, IEnumerable<string>> cellDependencies = new Dictionary<string, IEnumerable<string>>();
+           // lock (sheet)
             {
                 // process changes
                 foreach (string cell in edits.Keys)
                 {
-                    this.sheet.SetContentsOfCell(cell, edits[cell]);
+                   cellDependencies[cell] = this.sheet.SetContentsOfCell(cell, edits[cell]);
                 }
 
 
 
             }
             // let the subscribers (client) know that the spreadsheet has been updated
-            SpreadsheetUpdated(edits.Keys.ToList());
+            // SpreadsheetUpdated(edits.Keys.ToList());
+            SpreadsheetUpdated(cellDependencies);
 
         }
     }

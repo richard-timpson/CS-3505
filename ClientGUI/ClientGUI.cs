@@ -153,14 +153,19 @@ namespace ClientGUI
         /// <summary>
         /// Subscribes and updates a spreadsheet
         /// </summary>
-        private void UpdateSpreadsheet(List<string> updates)
+        private void UpdateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependencies)
         {
             //Is the spreadsheet already open?
             if (ssView == null)
             {
                 //Open a new SpreadsheetGUI if it isn't
                 ssView = new SpreadsheetView(ssController);
-                ssView.ShowDialog();
+                MethodInvoker m = new MethodInvoker(() => SpreadsheetAplicationContext.getAppContext().RunForm(ssView));//new SpreadsheetView(ssController)));
+                this.Invoke(m);
+                System.Diagnostics.Debug.WriteLine("Opened new form");
+
+                ssView.PopulateSpreadsheet(cellDependencies);
+                
             }
         }
         
@@ -179,17 +184,5 @@ namespace ClientGUI
 
 
     }
-    internal static class DialogExt
-    {
-        public static async Task<DialogResult> ShowDialogAsync(this Form @this)
-        {
-            await Task.Yield();
-            if (@this.IsDisposed)
-                return DialogResult.OK;
-            return @this.ShowDialog();
-        }
-    }
-
-
 }
 

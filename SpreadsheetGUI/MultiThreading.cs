@@ -10,7 +10,7 @@ namespace SpreadsheetGUI
     /// <summary>
     /// Keeps track of the number of forms that are running
     /// </summary>
-    class SpreadsheetAplicationContext : ApplicationContext
+    public class SpreadsheetAplicationContext : ApplicationContext
     {
 
         // Number of open forms

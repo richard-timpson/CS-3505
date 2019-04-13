@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SpreadsheetGUI;
 
 namespace ClientGUI
 {
@@ -16,7 +17,15 @@ namespace ClientGUI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ClientLogIn());
+
+            SpreadsheetAplicationContext appContext = SpreadsheetAplicationContext.getAppContext();
+            appContext.RunForm(new ClientLogIn());
+            Application.Run(appContext);
+
+            //SpreadsheetAplicationContext appContext = SpreadsheetAplicationContext.getAppContext();
+            //appContext.RunForm(new ClientLogIn());
+            //// Application.Run(new ClientLogIn());
+            //Application.Run(appContext);
         }
     }
 }

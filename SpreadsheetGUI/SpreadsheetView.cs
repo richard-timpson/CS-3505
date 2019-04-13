@@ -38,6 +38,9 @@ namespace SpreadsheetGUI
         /// </summary>
         private SoundPlayer music;
 
+        /// <summary>
+        /// Controller for sending and receiving edits from a server
+        /// </summary>
         private SpreadsheetController ssController;
 
         public SpreadsheetView(SpreadsheetController ssController)
@@ -49,6 +52,7 @@ namespace SpreadsheetGUI
             SetCellContentsText.PreviewKeyDown += KeyPressed;
             // SetCellContentsText.KeyDown += KeyReleased;
             music = new SoundPlayer(Directory.GetCurrentDirectory() + "\\WiiMusic.wav");
+
             this.ssController = ssController;
 
             ssController.SpreadsheetUpdated += SpreadsheetUpdate;
@@ -57,7 +61,7 @@ namespace SpreadsheetGUI
 
             this.AcceptButton = SetCellContentsButton;
             
-            // the initial selectioon should be the first cell
+            // the initial selection should be the first cell
             spreadsheetPanel1.SetSelection(0, 0);
             SetCellContentsText.Focus();
         }
@@ -267,7 +271,7 @@ namespace SpreadsheetGUI
 
             string cellName = (columnLetter.ToString() + row.ToString());
 
-            ValueDisplayBox.Text = formSheet.GetCellValue(cellName).ToString();
+            ValueDisplayBox.Text = ssController.Sheet.GetCellValue(cellName).ToString();
         }
 
         /// <summary>
@@ -364,9 +368,10 @@ namespace SpreadsheetGUI
         /// Helper method for when the spreadsheet panel opens to set all of the non-empy cells
         /// In the ssController
         /// </summary>
-        public void PopulateSpreadsheet()
+        public void PopulateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependies)
         {
-            SpreadsheetUpdate(ssController.Sheet.GetNamesOfAllNonemptyCells().ToList());
+            //FIXME
+            SpreadsheetUpdate(cellDependies);
         }
 
         /// <summary>
@@ -374,40 +379,55 @@ namespace SpreadsheetGUI
         /// Tells the GUI to update the contents of the given cells
         /// </summary>
         /// <param name="updatedCells"></param>
-        private void SpreadsheetUpdate(List<string> updatedCells)
+        private void SpreadsheetUpdate(Dictionary<string, IEnumerable<string>> cellDependies)
         {
-            lock (this.formSheet)
+            #region(maybe)
+            //lock (this.formSheet)
+            //{
+            //    foreach (string cell in updatedCells)
+            //    {
+            //       object edit = ssController.Sheet.GetCellContents(cell);
+
+            //        if (edit is string)
+            //        {
+            //            //FIXME??
+            //            //MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, edit.ToString()));
+            //            //this.Invoke(m);
+            //            setSelectedCell(cell, edit.ToString());
+            //        }
+            //        else if (edit is double)
+            //        {
+            //            //FIXME??
+            //            //MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, edit.ToString()));
+            //            //this.Invoke(m);
+            //            setSelectedCell(cell, edit.ToString());
+            //        }
+            //        else // else it is a formula
+            //        {
+
+            //            //FIXME??
+            //            //MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, "=" + edit.ToString()));
+            //            //this.Invoke(m);
+            //             setSelectedCell(cell, "=" + edit.ToString());
+
+            //        }
+
+            //    }
+            //}
+            #endregion
+            //update the underlying spreadsheet and all of the values that rely on the updated cells
+            foreach (string dependent in cellDependies.Keys)
             {
-                foreach (string cell in updatedCells)
+                foreach(string cell in cellDependies[dependent])
                 {
-                   object edit = ssController.Sheet.GetCellContents(cell);
-
-                    if (edit is string)
-                    {
-                        //FIXME??
-                        MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, edit.ToString()));
-                        this.Invoke(m);
-                       // setSelectedCell(cell, edit.ToString());
-                    }
-                    else if (edit is double)
-                    {
-                        //FIXME??
-                        MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, edit.ToString()));
-                        this.Invoke(m);
-                        //setSelectedCell(cell, edit.ToString());
-                    }
-                    else // else it is a formula
-                    {
-
-                        //FIXME??
-                        MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, "=" + edit.ToString()));
-                        this.Invoke(m);
-                        // setSelectedCell(cell, "=" + edit.ToString());
-
-                    }
-
+                    // get the location of the dependent cell
+                    int col = (int)dependent[0] - 65;
+                    int row = int.Parse(dependent.Substring(1)) - 1;
+                    //set the new value to the dependent cells                
+                    spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(dependent).ToString());
                 }
             }
+
         }
 
         /// <summary>
@@ -428,7 +448,8 @@ namespace SpreadsheetGUI
             IEnumerable<string> dependentList;
             try
             {
-                dependentList = formSheet.SetContentsOfCell(cellName, SetCellContentsText.Text);
+               dependentList = formSheet.SetContentsOfCell(cellName, SetCellContentsText.Text);
+               //dependentList = formSheet.get
 
 
                 //update the underlying spreadsheet and all of the values that rely on the updated cell
