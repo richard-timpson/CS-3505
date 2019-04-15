@@ -2,7 +2,7 @@
 #include <string>
 #include "./Server.h"
 #include "ClientConnection.h"
-
+#include "../controllers/SpreadsheetController.h"
 using namespace boost::asio::ip;
 
 int main(int argc, char **argv)
@@ -55,12 +55,11 @@ void Server::add_client_to_list(std::shared_ptr<ClientConnection> connection)
 
 void Server::send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> connection)
 {
-    // some vector = get_list_of_spreadsheets. 
-    //std::string message = SpreadsheetController::get_list_of_spreadsheets();
-    char message[256] ="Sending list of spreadsheets to client\n";
-    // std::string message = "Sending list of spreadsheet to client";
-    boost::asio::async_write(connection->socket_, boost::asio::buffer(message, strlen(message)), 
-            [message, &connection, this](boost::system::error_code ec, std::size_t){
+    // char message[256] ="Sending list of spreadsheets to client\n";
+    std::string message = SpreadsheetController::get_list_of_spreadsheets();
+    message += "\n";
+    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
+            [message, connection, this](boost::system::error_code ec, std::size_t){
                 if (!ec)
                 {
                     std::cout << "writing message " << message << std::endl;
@@ -75,6 +74,7 @@ void Server::send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> c
 
 void Server::accept_spreadsheet_connection(std::shared_ptr<ClientConnection> connection)
 {
+    std::cout << "trying to accept spreadsheet connection " << std::endl;
     boost::asio::streambuf buff;
     boost::asio::async_read_until(connection->socket_, buff, '\n', 
         [&buff, &connection](boost::system::error_code ec, std::size_t size){
