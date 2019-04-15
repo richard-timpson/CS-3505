@@ -1,8 +1,8 @@
-cade: user_model spreadsheet_model spreadsheet_controller server_cade
-	g++ -std=c++11  -o ../bin/server  ../bin/server.o ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o  -lpthread -I ../libs/boost/include -DBOOST_SYSTEM_NO_DEPRECATED
+cade: user_model spreadsheet_model spreadsheet_controller dependency_graph network_controller server_cade
+	g++ -std=c++11  -o ../bin/server  ../bin/server.o ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o  -lpthread -I ../libs/boost/include -DBOOST_SYSTEM_NO_DEPRECATED
 
-all: user_model spreadsheet_model spreadsheet_controller  server_all
-	g++ -std=c++11  -o ../bin/server  ../bin/server.o ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o 
+all: user_model spreadsheet_model spreadsheet_controller dependency_graph network_controller  server_all
+	g++ -std=c++11  -o ../bin/server  ../bin/server.o ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/dependency_graph.o ../bin/network_controller.o
 
 client_all: ./test_client/client.cpp
 	g++ -std=c++11 -o ../bin/client ./test_client/client.cpp 
@@ -19,8 +19,11 @@ spreadsheet_model: ./models/spreadsheet_model.cpp ./models/spreadsheet_model.h
 spreadsheet_controller: ./controllers/spreadsheet_controller.cpp ./controllers/spreadsheet_controller.h
 	g++ -std=c++11  -o ../bin/spreadsheet_controller.o -c ./controllers/spreadsheet_controller.cpp
 
-network_controller: ./server/network_library ./controllers/network_controller.cpp ./controllers/network_controller.h
+network_controller:  ./controllers/network_controller.cpp ./controllers/network_controller.h
 	g++ -std=c++11  -o ../bin/network_controller.o -c  ./controllers/network_controller.cpp 
+
+dependency_graph: ./models/dependency_graph.cpp ./models/dependency_graph.h
+	g++ -std=c++11 -o ../bin/dependency_graph.o -c ./models/dependency_graph.cpp
 
 server_cade: ./server/Server.cpp ./server/Server.h ./server/ClientConnection.h
 	g++ -std=c++11 -o ../bin/server.o -c ./server/Server.cpp -I ../libs/boost/include
