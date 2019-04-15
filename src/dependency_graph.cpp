@@ -45,11 +45,11 @@ int Backend::dependency_graph::get_size_of_dependees(std::string input)
     }
   else
     {
-      return (depends_on_graph[found->second]).size();
+      return found->second.size();
     }
 }
 
-bool Backend::dependency_graph::has_depenndents(std::string input)
+bool Backend::dependency_graph::has_dependents(std::string input)
 {
   std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found = depended_on_by_graph.find(input);
   
@@ -60,11 +60,11 @@ bool Backend::dependency_graph::has_depenndents(std::string input)
     }
   else
     {
-      return ((depended_on_by_graph[found->second]).size() > 0);
+      return found->second.size() > 0;
     }
 }
 
-bool Backend::dependency_graph::has_depenndees(std::string input)
+bool Backend::dependency_graph::has_dependees(std::string input)
 {
 
   std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found = depends_on_graph.find(input);
@@ -76,7 +76,7 @@ bool Backend::dependency_graph::has_depenndees(std::string input)
     }
   else
     {
-      return ((depends_on_graph[found->second]).size() > 0);
+      return found->second.size() > 0; 
     }
 }
 
@@ -85,7 +85,7 @@ bool Backend::dependency_graph::has_depenndees(std::string input)
 
 
 
-std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator Backend::dependency_graph::get_dependents(std::string input)
+void Backend::dependency_graph::get_dependents(std::string input)
 {
 
   std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found = depended_on_by_graph.find(input);
@@ -102,7 +102,7 @@ std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator
 
 }
 
-std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator Backend::dependency_graph::get_dependees(std::string input)
+void Backend::dependency_graph::get_dependees(std::string input)
 {
 
   std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found = depends_on_graph.find(input);
