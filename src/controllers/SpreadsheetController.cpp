@@ -1,4 +1,5 @@
 #include "SpreadsheetController.h"
+#include <iostream>
 #include <fstream>
 
 using json = nlohmann::json;
@@ -16,6 +17,7 @@ std::string SpreadsheetController::get_list_of_spreadsheets()
     }
     if (count != 0)
     {
+        std::cout << "count is 0" << std::endl;
         json spreadsheets;
         for (std::vector<std::string>::iterator it = spreadsheet_names.begin(); it != spreadsheet_names.end(); it++)
         {

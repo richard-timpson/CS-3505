@@ -2,4 +2,6 @@
 *.out
 /libs/boost*
 #*
-bin/*
+bin/objects/*
+bin/tests/*
+bin/executables/*
