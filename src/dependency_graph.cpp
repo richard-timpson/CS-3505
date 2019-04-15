@@ -123,8 +123,8 @@ void Backend::dependency_graph::get_dependees(std::string input)
 
 void Backend::dependency_graph::add_dependency(std::string first_par, std::string second_par)
 {
-  std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found_depends = depends_on_graph.find(second_par);
-  std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found_depended = depended_on_by_graph.find(first_par);
+  std::unordered_map<std::string, std::unordered_set<std::string>>::iterator found_depends = depends_on_graph.find(second_par);
+  std::unordered_map<std::string, std::unordered_set<std::string>>::iterator found_depended = depended_on_by_graph.find(first_par);
 
   
   // Dealing with first parameter
@@ -134,7 +134,8 @@ void Backend::dependency_graph::add_dependency(std::string first_par, std::strin
     }
   else
     {
-      std::pair<std::string, std::unordered_set<std::string>> new_pair (second_par, std::unordered_set<std::string>);
+      std::unordered_set<std::string> new_set;
+      std::pair<std::string, std::unordered_set<std::string>> new_pair (second_par, new_set);
       depends_on_graph.insert(new_pair);
       found_depends->second.insert(first_par);
     }
@@ -148,7 +149,8 @@ void Backend::dependency_graph::add_dependency(std::string first_par, std::strin
     }
   else
     {
-      std::pair<std::string, std::unordered_set<std::string>> new_pair (first_par, std::unordered_set<std::string>);
+      std::unordered_set<std::string> new_set;
+      std::pair<std::string, std::unordered_set<std::string>> new_pair (first_par, new_set);
       depended_on_by_graph.insert(new_pair);
       found_depended->second.insert(second_par);
     }
@@ -159,18 +161,18 @@ void Backend::dependency_graph::add_dependency(std::string first_par, std::strin
 
 void Backend::dependency_graph::remove_dependency(std::string first_par, std::string second_par)
 {
-  std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found_depends = depends_on_graph.find(second_par);
-  std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found_depended = depended_on_by_graph.find(first_par);
+  std::unordered_map<std::string, std::unordered_set<std::string>>::iterator found_depends = depends_on_graph.find(second_par);
+  std::unordered_map<std::string, std::unordered_set<std::string>>::iterator found_depended = depended_on_by_graph.find(first_par);
 
-  std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found_s = depends_on_graph[found->second].find(first_par);
-  std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found_t = depended_on_by_graph[found->second].find(second_par);
+  std::unordered_set<std::string>::iterator found_s = (found_depends->second).find(first_par);
+  std::unordered_set<std::string>::iterator found_t = (found_depended->second).find(second_par);
 
   if (found_depended != depended_on_by_graph.end() && found_depends != depends_on_graph.end())
     {
-      if (found_s != found->second.end() && found_t != found->second.end())
+      if (found_s != found_depends->second.end() && found_t != found_depended->second.end())
 	{
-	  found->second.erase(second_par);
-	  found->second.erase(first_par);
+	  found_depended->second.erase(second_par);
+	  found_depends->second.erase(first_par);
 	}
     }
   
