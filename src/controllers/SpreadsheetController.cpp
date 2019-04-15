@@ -14,10 +14,17 @@ std::string SpreadsheetController::get_list_of_spreadsheets()
         spreadsheet_names.push_back(line);
         count ++;
     }
-    json spreadsheets;
-    for (std::vector<std::string>::iterator it = spreadsheet_names.begin(); it != spreadsheet_names.end(); it++)
+    if (count != 0)
     {
-        spreadsheets.push_back(*it);
+        json spreadsheets;
+        for (std::vector<std::string>::iterator it = spreadsheet_names.begin(); it != spreadsheet_names.end(); it++)
+        {
+            spreadsheets.push_back(*it);
+        }
+        return spreadsheets.dump();
     }
-    return spreadsheets.dump();
+    else 
+    {
+        return "[]";
+    }
 }
