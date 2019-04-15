@@ -4,6 +4,9 @@ cade: user_model spreadsheet_model spreadsheet_controller network_controller net
 all: user_model spreadsheet_model spreadsheet_controller network_controller dependency_graph network_library main.cpp
 	g++ -std=c++11  -o ../bin/main  main.cpp ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o ../bin/network_library.o ../bin/dependency_graph.o
 
+jabrail: user_model spreadsheet_model spreadsheet_controller network_controller network_library main.cpp
+	g++ -std=c++11  -o ../bin/main  main.cpp ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o ../bin/network_library.o -lpthread -I ../../../boost/include
+
 user_model: user_model.cpp user_model.h
 	g++ -std=c++11  -o ../bin/user_model.o -c user_model.cpp
 

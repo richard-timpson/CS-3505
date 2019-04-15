@@ -1,0 +1,14 @@
+/**
+ * Cell class for storing values of the spreadsheet.
+ *
+ *
+ *
+ */
+
+
+namespace Backend
+{
+  class cell
+  {
+  }
+}
