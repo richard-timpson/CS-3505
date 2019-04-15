@@ -1,5 +1,9 @@
-// Hi
-
+/*
+ * The dependency graph class is for dealing with seeing the cells on
+ * the spreadsheet that relate to other cells. This class will keep,
+ *  track of which cells are a dependent or depeende of other cells.
+ *
+ */
 
 #include "dependency_graph.h"
 #include <string>
