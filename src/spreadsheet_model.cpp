@@ -13,6 +13,7 @@
 #include "../libs/json.hpp"
 #include "spreadsheet_model.h"
 #include "user_model.h"
+#include "network_controller.h"
 
 bool Server::spreadsheet::validate(std::string input_username, std::string input_password)
 {
@@ -22,6 +23,7 @@ bool Server::spreadsheet::validate(std::string input_username, std::string input
 
     int index;
     int it_index;
+    Network::network_controller net_control;
 
     // Looping through the list of saved users, and checking if the input
     // is an already made user.
@@ -30,20 +32,20 @@ bool Server::spreadsheet::validate(std::string input_username, std::string input
       // Check if it is the same username.
       if (input_username == it->get_username())
 	  {
-	  // Check if the password matches, if yes send speadsheet, if not send error.
+	    // Check if the password matches, if yes send speadsheet, if not send error.
 	    if (input_password == it->get_password())
 	      {
-	      // Send spreadsheet
+		net_control.send_message("Full Send");
 	      }
 	    else
 	      {
-	      // Send back error
+		net_control.send_message("Error");
 	      }
 	  
 	    }
 
     }
     //if user does not exist, make new user and save to list.
-    
+    return true;
  
 }
