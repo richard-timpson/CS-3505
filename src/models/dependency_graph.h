@@ -1,4 +1,9 @@
-
+/*
+ * The dependency graph class is for dealing with seeing the cells on
+ * the spreadsheet that relate to other cells. This class will keep,
+ *  track of which cells are a dependent or depeende of other cells.
+ *
+ */
 
 #ifndef DEPENDENCY_GRAPH_H
 #define DEPENDENCY_GRAPH_H
