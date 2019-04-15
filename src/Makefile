@@ -1,8 +1,8 @@
 cade: user_model spreadsheet_model spreadsheet_controller network_controller network_library main.cpp
 	g++ -std=c++11  -o ../bin/main  main.cpp ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o ../bin/network_library.o -lpthread -I ../libs/boost/include
 
-all: user_model spreadsheet_model spreadsheet_controller network_controller network_library main.cpp
-	g++ -std=c++11  -o ../bin/main  main.cpp ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o ../bin/network_library.o 
+all: user_model spreadsheet_model spreadsheet_controller network_controller dependency_graph network_library main.cpp
+	g++ -std=c++11  -o ../bin/main  main.cpp ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o ../bin/network_library.o ../bin/dependency_graph.o
 
 user_model: user_model.cpp user_model.h
 	g++ -std=c++11  -o ../bin/user_model.o -c user_model.cpp
@@ -18,6 +18,9 @@ network_controller: network_library network_controller.cpp network_controller.h
 
 network_library: network_library.cpp network_library.h chat_server_client.h
 	g++ -std=c++11 -o ../bin/network_library.o -c  network_library.cpp
+
+dependency_graph: dependency_graph.cpp dependency_graph.h
+	g++ -std=c++11 -o ../bin/dependency_graph.o -c dependency_graph.cpp
 
 
 
