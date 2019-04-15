@@ -98,6 +98,7 @@ void Backend::dependency_graph::get_dependents(std::string input)
   else
     {
       //return (found->second.begin());
+      //return //Empty iterator
     }
 
 }
@@ -114,7 +115,7 @@ void Backend::dependency_graph::get_dependees(std::string input)
     }
   else
     {
-      //return (depends_on_graph[found->second].begin());
+      //return found->second.begin();
     }
 
 }
