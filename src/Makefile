@@ -2,7 +2,7 @@ cade: user_model spreadsheet_model spreadsheet_controller server_cade
 	g++ -std=c++11  -o ../bin/server  ../bin/server.o ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o  -lpthread -I ../libs/boost/include -DBOOST_SYSTEM_NO_DEPRECATED
 
 all: user_model spreadsheet_model spreadsheet_controller  server_all
-	g++ -std=c++11  -o ../bin/server  ../bin/server.o ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o ../bin/network_controller.o
+	g++ -std=c++11  -o ../bin/server  ../bin/server.o ../bin/user_model.o ../bin/spreadsheet_model.o ../bin/spreadsheet_controller.o 
 
 client_all: ./test_client/client.cpp
 	g++ -std=c++11 -o ../bin/client ./test_client/client.cpp 

@@ -1,2 +1,2 @@
 clean:
-	rm -rf *.o
+	rm -rf *.o server client
