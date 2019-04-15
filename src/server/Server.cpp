@@ -55,20 +55,45 @@ void Server::add_client_to_list(std::shared_ptr<ClientConnection> connection)
 
 void Server::send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> connection)
 {
-    // 
+    // some vector = get_list_of_spreadsheets. 
+    //std::string message = SpreadsheetController::get_list_of_spreadsheets();
     char message[256] ="Sending list of spreadsheets to client\n";
     // std::string message = "Sending list of spreadsheet to client";
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message, strlen(message)), 
-            [message](boost::system::error_code ec, std::size_t){
+            [message, &connection, this](boost::system::error_code ec, std::size_t){
                 if (!ec)
                 {
                     std::cout << "writing message " << message << std::endl;
+                    accept_spreadsheet_connection(connection);
                 }
                 else
                 {
                     std::cout << "Error sending message " << ec.message() << std::endl;
                 }
             });
+}
+
+void Server::accept_spreadsheet_connection(std::shared_ptr<ClientConnection> connection)
+{
+    boost::asio::streambuf buff;
+    boost::asio::async_read_until(connection->socket_, buff, '\n', 
+        [&buff, &connection](boost::system::error_code ec, std::size_t size){
+            if (!ec)
+            {
+                boost::asio::streambuf::const_buffers_type bufs = buff.data();
+                std::string message(boost::asio::buffers_begin(bufs),
+                boost::asio::buffers_begin(bufs) + size);
+                std::cout << "Accepting spreadsheet selection " << message <<  std::endl;
+                // needs to validate correct string, and exit if not
+                // t
+
+            }
+            else
+            {
+                std::cout << "Error reading spreadsheet selection " << std::endl;
+            }
+            
+        });
 }
 
 

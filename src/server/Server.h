@@ -16,6 +16,7 @@ class Server
     void accept_clients();
     void add_client_to_list(std::shared_ptr<ClientConnection> connection);
     void send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> connection);
+    void accept_spreadsheet_connection(std::shared_ptr<ClientConnection> connection);
   private:
     tcp::acceptor acceptor_;
     std::set<std::shared_ptr<ClientConnection>> connections;
