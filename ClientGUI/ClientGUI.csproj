@@ -84,10 +84,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NewSpreadsheetDialog\NewSpreadsheetDialog.csproj">
-      <Project>{4B5F74DE-BE9B-46A4-B3B1-EA2BC38A50E3}</Project>
-      <Name>NewSpreadsheetDialog</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SpreadsheetController\SpreadsheetController.csproj">
       <Project>{499D6F44-F42B-42AB-9DF2-6C29C1DBDA25}</Project>
       <Name>SpreadsheetController</Name>

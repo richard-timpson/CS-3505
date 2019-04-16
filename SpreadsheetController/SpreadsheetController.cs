@@ -27,9 +27,15 @@ namespace CS3505
 
         public delegate void SpreadsheetErrorEventHandler(int code, string source);
         public event SpreadsheetErrorEventHandler SpreadsheetError;
-
         public delegate void SpreadsheetsReceivedHandler();
         public event SpreadsheetsReceivedHandler SpreadsheetsReceived;
+
+        /// <summary>
+        /// Usernames cannot have whitespace, this lets the client know
+        /// that the username contains a whitespace
+        /// </summary>
+        public delegate void InvalidUsernameHandler();
+        public event InvalidUsernameHandler InvalidUsername;
 
         /// <summary>
         /// LogIn Username
@@ -168,9 +174,16 @@ namespace CS3505
         /// <param name="sheet"></param>
         public void ChooseSpreadsheet(string sheetName, string username, string password)
         {
-
-
             Username = username;
+
+            //Usernames cannot have whitespaces. If the given username has a whitespace,
+            //Alert the client and do not proceed with the request.
+            if (Username.Contains(" "))
+            {
+                InvalidUsername();
+                return;
+            }
+
             Password = password;
             // create the JSon object to be sent
             var open = new
