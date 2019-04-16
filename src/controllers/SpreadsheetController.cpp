@@ -1,6 +1,12 @@
 #include "SpreadsheetController.h"
 #include <iostream>
 #include <fstream>
+#include "../../libs/json.hpp"
+#include "../models/user_model.h"
+#include "./network_controller.h"
+#include <string>
+#include <iterator>
+#include <list>
 
 using json = nlohmann::json;
 
@@ -35,6 +41,7 @@ std::string SpreadsheetController::get_list_of_spreadsheets()
     }
 }
 
+<<<<<<< HEAD
 bool SpreadsheetController::validate_user(std::string json_message, std::string &error_message)
 {
     json message = json::parse(json_message);
@@ -94,3 +101,28 @@ std::vector<std::string> split(std::string s, std::string delimiter)
     res.push_back(s.substr(pos_start));
     return res;
 }
+=======
+
+
+/*
+ * The spreadsheet model class is for dealing with seeing the users on
+ * the spreadsheet part of the connection process. This class will verify,
+ * and validate user logins when they attempt to open a spreadsheet and 
+ *  are on the spreadsheet.
+ *
+ */
+
+bool  SpreadsheetController::validate(std::string input_username, std::string input_password)
+{
+
+  // Go line by line to find if user matches, then check if the assword matches, then check if the spreadsheet exists.
+
+  std::ifstream file("../../data/logins.txt");
+  std::string line;
+  while (std::getline(file, line))
+  {
+    
+  }
+
+}
+>>>>>>> f9af9cfde85df9f1d62f186ef9d072449d3fe177
