@@ -80,13 +80,6 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
             std::cout << "async read handler called" << std::endl;
             if (!ec)
             {
-<<<<<<< HEAD
-                boost::asio::streambuf::const_buffers_type bufs = buff.data();
-                std::string message(boost::asio::buffers_begin(bufs),
-                boost::asio::buffers_begin(bufs) + size);
-                std::cout << "Accepting spreadsheet selection " << message <<  std::endl;
-                // call Spreadsheet::validate(json)
-=======
                 // get the message from the client
                 buff.commit(size);
                 std::istream istrm(&buff);
@@ -111,7 +104,6 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
 
 
                 // need to validate user login
->>>>>>> ddebdf4da13d79ca010fcfdc00f344a3b6e2c4d4
 
             }
             else
