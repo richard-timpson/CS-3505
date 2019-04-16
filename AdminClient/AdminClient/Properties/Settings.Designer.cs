@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace blah.Properties
+namespace AdminClient.Properties
 {
 
 
