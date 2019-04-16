@@ -87,20 +87,20 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                 istrm >> message;
                 std::cout << "message is " << message << std::endl;
 
-                std::string error_message;
-                bool valid_user = SpreadsheetController::validate_user(message, error_message);
-                if (!valid_user)
-                {
-                    // print error message
-                }
+                // std::string error_message;
+                // bool valid_user = SpreadsheetController::validate_user(message, error_message);
+                // if (!valid_user)
+                // {
+                //     // print error message
+                // }
 
-                SpreadsheetModel* s_model;
-                bool valid_model = SpreadsheetController:validate_model(message, s_model, error_message )
-                if (!valid_model)
-                {
-                    // print error message
-                }
-                
+                // SpreadsheetModel* s_model;
+                // bool valid_model = SpreadsheetController:validate_model(message, s_model, error_message )
+                // if (!valid_model)
+                // {
+                //     // print error message
+                // }
+
 
 
                 // need to validate user login
