@@ -84,8 +84,7 @@ void Server::accept_spreadsheet_connection(std::shared_ptr<ClientConnection> con
                 std::string message(boost::asio::buffers_begin(bufs),
                 boost::asio::buffers_begin(bufs) + size);
                 std::cout << "Accepting spreadsheet selection " << message <<  std::endl;
-                // needs to validate correct string, and exit if not
-                // t
+                // call Spreadsheet::validate(json)
 
             }
             else

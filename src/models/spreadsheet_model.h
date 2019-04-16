@@ -21,7 +21,7 @@ namespace Server
         private:
 
         public:
-        bool validate(std::string input_one, std::string input_two);
+        
     };
   
 }
