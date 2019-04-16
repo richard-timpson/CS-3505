@@ -38,10 +38,10 @@ dependency_graph: ./models/dependency_graph.cpp ./models/dependency_graph.h
 # tests
 ########################
 client_all: ./tests/client.cpp
-	g++ -std=c++11 -o ../bin/tests/client ./test_client/client.cpp 
+	g++ -std=c++11 -o ../bin/tests/client ./tests/client.cpp 
 
 client_cade: ./tests/client.cpp
-	g++ -std=c++11 -o ../bin/tests/client ./test_client/client.cpp -I ../libs/boost/include -lpthread
+	g++ -std=c++11 -o ../bin/tests/client ./tests/client.cpp -I ../libs/boost/include -lpthread
 
 spreadsheet_controller_tests: ./tests/spreadsheet_controller_tests.cpp
 	g++ -std=c++11 -o ../bin/tests/spreadsheet_controller ./tests/spreadsheet_controller_tests.cpp ../bin/objects/spreadsheet_controller.o

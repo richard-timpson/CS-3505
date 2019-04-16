@@ -57,13 +57,13 @@ void Server::send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> c
 {
     // char message[256] ="Sending list of spreadsheets to client\n";
     std::string message = SpreadsheetController::get_list_of_spreadsheets();
-    message += "\n";
+    message += "\n\n";
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
             [message, connection, this](boost::system::error_code ec, std::size_t){
                 if (!ec)
                 {
                     std::cout << "writing message " << message << std::endl;
-                    accept_spreadsheet_connection(connection);
+                    accept_spreadsheet_selection(connection);
                 }
                 else
                 {
@@ -72,20 +72,38 @@ void Server::send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> c
             });
 }
 
-void Server::accept_spreadsheet_connection(std::shared_ptr<ClientConnection> connection)
+void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> connection)
 {
-    std::cout << "trying to accept spreadsheet connection " << std::endl;
-    boost::asio::streambuf buff;
-    boost::asio::async_read_until(connection->socket_, buff, '\n', 
-        [&buff, &connection](boost::system::error_code ec, std::size_t size){
+    std::cout << "trying to accept spreadsheet selection " << std::endl;
+    boost::asio::async_read_until(connection->socket_, buff, "\n\n", 
+        [connection, this](boost::system::error_code ec, std::size_t size){
+            std::cout << "async read handler called" << std::endl;
             if (!ec)
             {
-                boost::asio::streambuf::const_buffers_type bufs = buff.data();
-                std::string message(boost::asio::buffers_begin(bufs),
-                boost::asio::buffers_begin(bufs) + size);
-                std::cout << "Accepting spreadsheet selection " << message <<  std::endl;
-                // needs to validate correct string, and exit if not
-                // t
+                // get the message from the client
+                buff.commit(size);
+                std::istream istrm(&buff);
+                std::string message;
+                istrm >> message;
+                std::cout << "message is " << message << std::endl;
+
+                std::string error_message;
+                bool valid_user = SpreadsheetController::validate_user(message, error_message);
+                if (!valid_user)
+                {
+                    // print error message
+                }
+
+                SpreadsheetModel* s_model;
+                bool valid_model = SpreadsheetController:validate_model(message, s_model, error_message )
+                if (!valid_model)
+                {
+                    // print error message
+                }
+                
+
+
+                // need to validate user login
 
             }
             else
