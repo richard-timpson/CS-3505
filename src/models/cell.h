@@ -14,10 +14,10 @@ namespace Backend
   class cell
   {
   public:
-    cell(object input);
+    cell(std::string input);
     ~cell();
-    void set_cell_value(object input);
-    object get_cell_value();
+    void set_cell_value(std::string input);
+    std::string get_cell_contents();
   private:
     objcet current_value;
   }

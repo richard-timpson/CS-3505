@@ -12,19 +12,25 @@
 
 #include <string>
 #include <iostream>
-#include "../../libs/json.hpp"
+#include <unordered_map>
+#include "./cell.h"
+#include "dependency_graph.h"
 
-namespace Server
-{
-    class spreadsheet
+
+    class spreadsheet_model
     {
-        private:
-
-        public:
-        
+    public:
+spreadsheet_model(std::string filepath);
+open_Json_ss_file();
+write_Json_ss_file();
+      bool edit_made;
+std::string name;
+    private:
+      std::unordered_map<std::string, cell> cell_dictionary;
+      dependency_graph main_graph;
+      
+      
     };
-  
-}
 
 
 #endif 

@@ -41,7 +41,6 @@ std::string SpreadsheetController::get_list_of_spreadsheets()
     }
 }
 
-<<<<<<< HEAD
 bool SpreadsheetController::validate_user(std::string json_message, std::string &error_message)
 {
     json message = json::parse(json_message);
@@ -101,7 +100,6 @@ std::vector<std::string> split(std::string s, std::string delimiter)
     res.push_back(s.substr(pos_start));
     return res;
 }
-=======
 
 
 /*
@@ -125,4 +123,3 @@ bool  SpreadsheetController::validate(std::string input_username, std::string in
   }
 
 }
->>>>>>> f9af9cfde85df9f1d62f186ef9d072449d3fe177
