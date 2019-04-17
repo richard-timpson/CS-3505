@@ -133,7 +133,7 @@ std::vector<std::string> split(std::string s, std::string delimiter)
  *
  */
 
-bool  SpreadsheetController::validate(std::string input_username, std::string input_password)
+/**bool  SpreadsheetController::validate(std::string input_username, std::string input_password)
 {
 
   // Go line by line to find if user matches, then check if the assword matches, then check if the spreadsheet exists.
@@ -146,4 +146,9 @@ bool  SpreadsheetController::validate(std::string input_username, std::string in
   }
 
 }
+<<<<<<< HEAD
 >>>>>>> 0e8710cd67b3e990ce6e0bc6fc1f7a49dd8ab3df
+=======
+*/
+
+>>>>>>> SpreadsheetModel

@@ -15,10 +15,17 @@ class Cell
     cell(std::string input);
     ~cell();
     void set_cell_value(std::string input);
+<<<<<<< HEAD
     std::string get_cell_contents();
 
   private:
     std::string current_value;
+=======
+    std::string get_cell_value();
+  private:
+    std::string current_value;
+  };
+>>>>>>> SpreadsheetModel
 }
 
 #endif
