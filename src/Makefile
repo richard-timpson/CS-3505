@@ -1,8 +1,8 @@
 ############################
 # Cade
 ############################
-cade: spreadsheet_model spreadsheet_controller dependency_graph server_cade
-	g++ -std=c++11  -o ../bin/executables/server  ./server/main.cpp ../bin/objects/server.o  ../bin/objects/spreadsheet_model.o ../bin/objects/spreadsheet_controller.o  ../bin/objects/dependency_graph.o -lpthread -I ../libs/boost/include -DBOOST_SYSTEM_NO_DEPRECATED
+cade: spreadsheet_model spreadsheet_controller dependency_graph cell server_cade
+	g++ -std=c++11  -o ../bin/executables/server  ./server/main.cpp ../bin/objects/server.o  ../bin/objects/spreadsheet_model.o ../bin/objects/spreadsheet_controller.o  ../bin/objects/dependency_graph.o ../bin/objects/cell.o -lpthread -I ../libs/boost/include -DBOOST_SYSTEM_NO_DEPRECATED
 
 server_cade: ./server/Server.cpp ./server/Server.h ./server/ClientConnection.h
 	g++ -std=c++11 -o ../bin/objects/server.o -c ./server/Server.cpp -I ../libs/boost/include
@@ -10,7 +10,7 @@ server_cade: ./server/Server.cpp ./server/Server.h ./server/ClientConnection.h
 ############################
 # Normal
 ############################
-all: spreadsheet_model spreadsheet_controller dependency_graph server_all
+all: spreadsheet_model spreadsheet_controller dependency_graph cell server_all
 	g++ -std=c++11  -o ../bin/executables/server  ./server/main.cpp  ../bin/objects/server.o ../bin/objects/spreadsheet_model.o ../bin/objects/dependency_graph.o ../bin/objects/cell.o ../bin/objects/spreadsheet_controller.o
 
 server_all: ./server/Server.cpp ./server/Server.h ./server/ClientConnection.h
