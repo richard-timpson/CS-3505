@@ -74,6 +74,7 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                     Server::send_type_1_error(connection);
                 }
                 bool is_in_list = check_if_spreadsheet_in_list(json_message);
+                bool is_in_storage = check_if_spreadsheet_in_storage();
                 // bool valid_spreadsheet = SpreadsheetController::validate_spreadsheet();
 
             }

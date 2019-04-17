@@ -12,22 +12,21 @@
 #include <string>
 #include <iostream>
 #include <unordered_map>
-#include "./cell.h"
-#include "dependency_graph.h"
+#include "Cell.h"
+#include "DependencyGraph.h"
 
-<<<<<<< HEAD:src/models/SpreadsheetModel.h
 class SpreadsheetModel
 {
   public:
     SpreadsheetModel(std::string filepath, bool new_ss);
-    void open_Json_ss_file();
-    void write_Json_ss_file();
+    void open_json_ss_file();
+    void write_json_ss_file();
     std::string get_name();
     void set_name(std::string name);
     bool edit_made;
   private:
-    std::unordered_map<std::string, cell> cell_dictionary;
-    dependency_graph main_graph;
+    std::unordered_map<std::string, Cell> cell_dictionary;
+    DependencyGraph main_graph;
     std::string name;
     
     
@@ -35,20 +34,3 @@ class SpreadsheetModel
 
 
 #endif
-=======
-class spreadsheet_model
-    {
-    public:
-      spreadsheet_model(std::string filepath, bool new_ss);
-      void open_Json_ss_file();
-      void write_Json_ss_file();
-      bool edit_made;
-      std::string name;
-    private:
-      std::unordered_map<std::string, Backend::cell> cell_dictionary;
-      Backend::dependency_graph main_graph;
-      
-      
-    };
-#endif 
->>>>>>> SpreadsheetModel:src/models/spreadsheet_model.h

@@ -12,20 +12,12 @@
 class Cell
 {
   public:
-    cell(std::string input);
-    ~cell();
+    Cell(std::string input);
+    ~Cell();
     void set_cell_value(std::string input);
-<<<<<<< HEAD
-    std::string get_cell_contents();
-
-  private:
-    std::string current_value;
-=======
     std::string get_cell_value();
   private:
     std::string current_value;
-  };
->>>>>>> SpreadsheetModel
-}
+};
 
 #endif
