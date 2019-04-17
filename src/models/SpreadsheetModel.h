@@ -11,15 +11,26 @@
 
 #include <string>
 #include <iostream>
-#include "../../libs/json.hpp"
+#include <unordered_map>
+#include "./cell.h"
+#include "dependency_graph.h"
 
 class SpreadsheetModel
 {
   public:
+    spreadsheet_model(std::string filepath);
+    void open_Json_ss_file();
+    void write_Json_ss_file();
     std::string get_name();
     void set_name(std::string name);
+    bool edit_made;
   private:
+    std::unordered_map<std::string, cell> cell_dictionary;
+    dependency_graph main_graph;
     std::string name;
+    
+    
 };
+
 
 #endif
