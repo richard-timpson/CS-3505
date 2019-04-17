@@ -246,6 +246,9 @@ namespace SpreadsheetGUI
         /// <param name="ss"></param>
         private void OnSelectionChanged(SpreadsheetPanel ss)
         {
+            //TODO SET TEXT BOX FOR EDITING THE CELL DIRECTLY
+
+          
             // set the cursor to the set cell contents text box when a new cell is selected
             SetCellContentsText.Focus();
             displayCellName(ss);
@@ -313,15 +316,23 @@ namespace SpreadsheetGUI
 
             string cellName = (columnLetter.ToString() + row.ToString());
 
+            cellEditBox.Location = new Point(col * 80 + 29, row * 20 + 90);
 
             if (formSheet.GetCellContents(cellName) is SpreadsheetUtilities.Formula)
             {
                 SetCellContentsText.Text = "=" + formSheet.GetCellContents(cellName).ToString();
+                this.cellEditBox.Visible = true;
+                cellEditBox.Text = "=" + formSheet.GetCellContents(cellName).ToString();
+                cellEditBox.Focus();
             }
             else
             {
                 //********** Set the Contents of the text box to the contents of the selected cell ****
                 SetCellContentsText.Text = formSheet.GetCellContents(cellName).ToString();
+
+                this.cellEditBox.Visible = true;
+                cellEditBox.Text = formSheet.GetCellContents(cellName).ToString();
+                cellEditBox.Focus();
             }
 
         }
@@ -356,10 +367,13 @@ namespace SpreadsheetGUI
 
             spreadsheetPanel1.GetSelection(out col, out row);
 
+            cellEditBox.Visible = false;
+
             // get the appropriate column letter and cell name
             char columnLetter = getColumnLetter(col);
             string cellName = columnLetter.ToString() + (row + 1).ToString();
 
+            SetCellContentsText.Text = cellEditBox.Text;
             ssController.ClientEdit(cellName, SetCellContentsText.Text);
 
         }
@@ -381,50 +395,17 @@ namespace SpreadsheetGUI
         /// <param name="updatedCells"></param>
         private void SpreadsheetUpdate(Dictionary<string, IEnumerable<string>> cellDependies)
         {
-            #region(maybe)
-            //lock (this.formSheet)
-            //{
-            //    foreach (string cell in updatedCells)
-            //    {
-            //       object edit = ssController.Sheet.GetCellContents(cell);
-
-            //        if (edit is string)
-            //        {
-            //            //FIXME??
-            //            //MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, edit.ToString()));
-            //            //this.Invoke(m);
-            //            setSelectedCell(cell, edit.ToString());
-            //        }
-            //        else if (edit is double)
-            //        {
-            //            //FIXME??
-            //            //MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, edit.ToString()));
-            //            //this.Invoke(m);
-            //            setSelectedCell(cell, edit.ToString());
-            //        }
-            //        else // else it is a formula
-            //        {
-
-            //            //FIXME??
-            //            //MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, "=" + edit.ToString()));
-            //            //this.Invoke(m);
-            //             setSelectedCell(cell, "=" + edit.ToString());
-
-            //        }
-
-            //    }
-            //}
-            #endregion
+           
             //update the underlying spreadsheet and all of the values that rely on the updated cells
             foreach (string dependent in cellDependies.Keys)
             {
                 foreach(string cell in cellDependies[dependent])
                 {
                     // get the location of the dependent cell
-                    int col = (int)dependent[0] - 65;
-                    int row = int.Parse(dependent.Substring(1)) - 1;
+                    int col = (int)cell[0] - 65;
+                    int row = int.Parse(cell.Substring(1)) - 1;
                     //set the new value to the dependent cells                
-                    spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(dependent).ToString());
+                    spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(cell).ToString());
                 }
             }
 
