@@ -26,6 +26,11 @@ spreadsheet_model(std::string filepath_input, bool new_ss)
 
 open_Json_ss__file()
 {
+  // go through file and set all jsons to cell objects
+  // add to dictioanry and dependencygraph using SetcontentsofCell
+  // function call
+
+  
 
 }
 
