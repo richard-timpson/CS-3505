@@ -6,7 +6,6 @@
  *
  */
 
-
 #ifndef SPREADSHEETMODEL_H
 #define SPREADSHEETMODEL_H
 
@@ -14,17 +13,13 @@
 #include <iostream>
 #include "../../libs/json.hpp"
 
-namespace Server
+class SpreadsheetModel
 {
-    class spreadsheet
-    {
-        private:
+  public:
+    std::string get_name();
+    void set_name(std::string name);
+  private:
+    std::string name;
+};
 
-        public:
-        
-    };
-  
-}
-
-
-#endif 
+#endif
