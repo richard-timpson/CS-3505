@@ -31,7 +31,13 @@ void spreadsheet_model::open_Json_ss_file()
   // add to dictioanry and dependencygraph using SetcontentsofCell
   // function call
 
+  std::ifstream input_file("../../data/" + this->name + ".json");
+  json jsons = json::parse(input_file);
   
+  for (auto it = jsons.begin(); it != jsons.end(); it++)
+    {
+      // Set contents of cell and dictionary of cells
+    }
 
 }
 
