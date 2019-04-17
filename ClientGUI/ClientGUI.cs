@@ -175,7 +175,10 @@ namespace ClientGUI
                 System.Diagnostics.Debug.WriteLine("Opened new form");
 
                 ssView.PopulateSpreadsheet(cellDependencies);
-                
+                MethodInvoker m1 = new MethodInvoker(() => this.Close());//new SpreadsheetView(ssController)));
+                this.Invoke(m1);
+                //  this.Close();
+
             }
         }
 

@@ -38,6 +38,8 @@ namespace SpreadsheetGUI
         /// </summary>
         private SoundPlayer music;
 
+        private static bool closing = false;
+
         /// <summary>
         /// Controller for sending and receiving edits from a server
         /// </summary>
@@ -200,18 +202,26 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void saveCheck(Object sender, FormClosingEventArgs e)
         {
-            if (!saved)
+            
+            //{
+            if (!closing)
             {
-                DialogResult saveResult = MessageBox.Show("Your data has not been saved. Would you like to save before continuing?", "Unsaved Data", MessageBoxButtons.YesNoCancel);
-                if (saveResult == DialogResult.Yes)
-                {
-                    save();
-                }
-                else if (saveResult == DialogResult.Cancel)
-                {
-                    e.Cancel = true;
-                }
+                closing = true;
+                MethodInvoker m = new MethodInvoker(() => this.Close());
+                this.Invoke(m);
             }
+            //if (!saved)
+            //{
+            //    DialogResult saveResult = MessageBox.Show("Your data has not been saved. Would you like to save before continuing?", "Unsaved Data", MessageBoxButtons.YesNoCancel);
+            //    if (saveResult == DialogResult.Yes)
+            //    {
+            //        save();
+            //    }
+            //    else if (saveResult == DialogResult.Cancel)
+            //    {
+            //        e.Cancel = true;
+            //    }
+            //}
         }
         /// <summary>
         /// A private helper method that, upon loading an existing sheet if the current sheet
