@@ -10,17 +10,18 @@ server_cade: ./server/Server.cpp ./server/Server.h ./server/ClientConnection.h
 ############################
 # Normal
 ############################
+all: spreadsheet_model spreadsheet_controller dependency_graph server_all
+	g++ -std=c++11  -o ../bin/executables/server  ./server/main.cpp  ../bin/objects/server.o ../bin/objects/spreadsheet_model.o ../bin/objects/dependency_graph.o ../bin/objects/cell.o ../bin/objects/spreadsheet_controller.o
+
 server_all: ./server/Server.cpp ./server/Server.h ./server/ClientConnection.h
 	g++ -std=c++11 -o ../bin/objects/server.o -c ./server/Server.cpp 
 
-all: spreadsheet_model spreadsheet_controller dependency_graph server_all
-	g++ -std=c++11  -o ../bin/executables/server  ./server/main.cpp  ../bin/objects/server.o ../bin/objects/spreadsheet_model.o ../bin/objects/spreadsheet_controller.o ../bin/objects/dependency_graph.o 
 
 ############################
 # Neutral
 ############################
-spreadsheet_model: ./models/SpreadsheetModel.cpp ./models/SpreadsheetModel.h dependency_graph cell
-	g++ -std=c++11  -o ../bin/objects/spreadsheet_model.o -c ./models/SpreadsheetModel.cpp ../bin/objects/dependency_graph.o ../bin/objects/cell.o
+spreadsheet_model: ./models/SpreadsheetModel.cpp ./models/SpreadsheetModel.h
+	g++ -std=c++11  -o ../bin/objects/spreadsheet_model.o -c ./models/SpreadsheetModel.cpp 
 
 spreadsheet_controller: ./controllers/SpreadsheetController.cpp ./controllers/SpreadsheetController.h
 	g++ -std=c++11  -o ../bin/objects/spreadsheet_controller.o -c ./controllers/SpreadsheetController.cpp
