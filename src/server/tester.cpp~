@@ -1,0 +1,12 @@
+#include <iostream>
+#include <string>
+#include "./Server.h"
+#include "ClientConnection.h"
+
+
+main(int argc, char **argv)
+{
+  std::shared_ptr<clientConnection> connection;
+  
+  std::cout << send_spreadsheet_;ist_to_client(connection) << std::endl;
+}
