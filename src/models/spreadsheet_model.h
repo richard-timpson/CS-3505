@@ -19,12 +19,19 @@
 class spreadsheet_model
     {
     public:
+
       spreadsheet_model(std::string filepath, bool new_ss);
+
       void open_Json_ss_file();
       void write_Json_ss_file();
       bool edit_made;
+
       std::string name;
+
     private:
+
+      void set_cell_contents(std::string name, std::string contents);
+
       std::unordered_map<std::string, Backend::cell> cell_dictionary;
       Backend::dependency_graph main_graph;
       
