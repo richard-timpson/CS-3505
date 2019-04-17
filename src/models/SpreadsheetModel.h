@@ -18,7 +18,7 @@
 class SpreadsheetModel
 {
   public:
-    spreadsheet_model(std::string filepath);
+    SpreadsheetModel(std::string filepath, bool new_ss);
     void open_Json_ss_file();
     void write_Json_ss_file();
     std::string get_name();
