@@ -12,22 +12,14 @@
 
 Backend::dependency_graph::dependency_graph()
 {
-  
-  //depends_on_graph;
-  
-  //depended_on_by_graph;
-
   num_pairs=0;
-
 }
 
 Backend::dependency_graph::~dependency_graph()
 {
-  //depends_on_graph = NULL;
-  
-  //depended_on_by_graph = NULL;
-
-  num_pairs=0;
+  this->depended_on_by_graph.clear();
+  this->depends_on_graph.clear();
+  this->num_pairs=0;
 
 }
 
@@ -84,11 +76,6 @@ bool Backend::dependency_graph::has_dependees(std::string input)
     }
 }
 
-
-
-
-
-
 void Backend::dependency_graph::get_dependents(std::string input)
 {
 
@@ -123,8 +110,6 @@ void Backend::dependency_graph::get_dependees(std::string input)
     }
 
 }
-
-
 
 void Backend::dependency_graph::add_dependency(std::string first_par, std::string second_par)
 {
