@@ -89,6 +89,23 @@ bool SpreadsheetController::validate_login_message(json & message)
     }
 }
 
+bool SpreadsheetController::check_if_spreadsheet_in_storage(json & message, std::string & spreadsheet)
+{
+    std::ifstream file("../../data/spreadsheets.txt");
+    std::string line;
+    std::vector<std::string> spreadsheet_names;
+    int count = 0;
+    while (std::getline(file, line))
+    {
+        if (message.value("name", "-1") == line)
+        {
+            spreadsheet = line;
+            return true;
+        }
+    }
+    return false;
+}
+
 
 std::string SpreadsheetController::create_type_1_error()
 {

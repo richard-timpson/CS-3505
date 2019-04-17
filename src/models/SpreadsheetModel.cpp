@@ -12,13 +12,17 @@
 using json = nlohmann::json;
 
 // Create new ss_model object
-SpreadsheetModel::SpreadsheetModel(std::string filepath_input, bool new_ss)
+
+
+SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
 {
     if (new_ss)
     {
+        this->name = input_name;
     }
     else
     {
+        // this->open_json_ss_file();
     }
 }
 

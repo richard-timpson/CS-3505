@@ -42,7 +42,7 @@ client_cade: ./tests/client.cpp
 	g++ -std=c++11 -o ../bin/tests/client ./tests/client.cpp -I ../libs/boost/include -lpthread
 
 spreadsheet_controller_tests: ./tests/spreadsheet_controller_tests.cpp
-	g++ -std=c++11 -o ../bin/tests/spreadsheet_controller ./tests/spreadsheet_controller_tests.cpp ../bin/objects/spreadsheet_controller.o ../bin/objects/server.o ../bin/objects/spreadsheet_model.o
+	g++ -std=c++11 -o ../bin/tests/spreadsheet_controller ./tests/spreadsheet_controller_tests.cpp ../bin/objects/spreadsheet_controller.o ../bin/objects/server.o ../bin/objects/spreadsheet_model.o ../bin/objects/dependency_graph.o ../bin/objects/cell.o
 
 
 ######################
