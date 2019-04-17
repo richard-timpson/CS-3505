@@ -1,0 +1,34 @@
+// .h File
+
+#ifndef FORMULA_H
+#define FORMULA_H
+
+#include <sring>
+
+class formula
+{
+  
+ public:
+  
+  formula(std::string formula_input);
+  
+
+
+
+ priavte:
+  
+  
+
+
+
+
+
+};
+
+
+
+
+
+
+
+#endif FORMULA_H

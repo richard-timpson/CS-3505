@@ -2,8 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include "../../libs/json.hpp"
-#include "../models/user_model.h"
-#include "./network_controller.h"
 #include <string>
 #include <iterator>
 #include <list>
@@ -41,15 +39,10 @@ std::string SpreadsheetController::get_list_of_spreadsheets()
     }
 }
 
-bool SpreadsheetController::validate_user(std::string json_message, std::string &error_message)
+bool SpreadsheetController::validate_user(json message, std::string &error_message)
 {
-    json message = json::parse(json_message);
-    if (message.value("username", "-1") == "-1" || message.value("password", "-1") == "-1" || message.value("type", "-1") == "-1")
-    {
-        error_message = "String not in valid form";
-        return false;
-    }
-    if ( message.value("type", " ") != "open")
+    if (!validate_login_message(message)) return false;
+    if (message.value("type", " ") != "open")
     {
         error_message = "Didn't send correct message type";
         return false;
@@ -64,7 +57,7 @@ bool SpreadsheetController::validate_user(std::string json_message, std::string 
         std::string username = *it;
         it++;
         std::string password = *it;
-        if (message.value("username", " ") != username && message.value("password", " " ) != password)
+        if (message.value("username", " ") != username && message.value("password", " ") != password)
         {
             valid_user = false;
         }
@@ -84,6 +77,28 @@ bool SpreadsheetController::validate_user(std::string json_message, std::string 
     return true;
 }
 
+bool SpreadsheetController::validate_login_message(json & message)
+{
+    if (message.value("username", "-1") == "-1" || message.value("password", "-1") == "-1" || message.value("type", "-1") == "-1" || message.value("name", "-1") == "-1")
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+std::string SpreadsheetController::create_type_1_error()
+{
+    json message = {
+        {"type", "error"},
+        {"code", 1},
+        {"source", " "}};
+    return message.dump();
+}
+
 std::vector<std::string> split(std::string s, std::string delimiter)
 {
     size_t pos_start = 0, pos_end, delim_len = delimiter.length();
@@ -100,28 +115,3 @@ std::vector<std::string> split(std::string s, std::string delimiter)
     res.push_back(s.substr(pos_start));
     return res;
 }
-
-
-/*
- * The spreadsheet model class is for dealing with seeing the users on
- * the spreadsheet part of the connection process. This class will verify,
- * and validate user logins when they attempt to open a spreadsheet and 
- *  are on the spreadsheet.
- *
- */
-
-/**bool  SpreadsheetController::validate(std::string input_username, std::string input_password)
-{
-
-  // Go line by line to find if user matches, then check if the assword matches, then check if the spreadsheet exists.
-
-  std::ifstream file("../../data/logins.txt");
-  std::string line;
-  while (std::getline(file, line))
-  {
-    
-  }
-
-}
-*/
-

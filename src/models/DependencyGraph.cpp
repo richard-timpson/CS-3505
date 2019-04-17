@@ -5,19 +5,19 @@
  *
  */
 
-#include "dependency_graph.h"
+#include "DependencyGraph.h"
 #include <string>
 
 
 
-Backend::dependency_graph::dependency_graph()
+DependencyGraph::DependencyGraph()
 {
 
   this->num_pairs=0;
 
 }
 
-Backend::dependency_graph::~dependency_graph()
+DependencyGraph::~DependencyGraph()
 {
   this->dependees.clear();
   
@@ -27,13 +27,13 @@ Backend::dependency_graph::~dependency_graph()
 
 }
 
-int Backend::dependency_graph::get_size()
+int DependencyGraph::get_size()
 {
   // Rewrite in Jabrail's way
   return this->num_pairs;
 }
 
-int Backend::dependency_graph::get_size_of_dependees(std::string input)
+int DependencyGraph::get_size_of_dependees(std::string input)
 {
 
 
@@ -50,7 +50,7 @@ int Backend::dependency_graph::get_size_of_dependees(std::string input)
     }
 }
 
-bool Backend::dependency_graph::has_dependents(std::string input)
+bool DependencyGraph::has_dependents(std::string input)
 {
   std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found = dependents.find(input);
   
@@ -65,7 +65,7 @@ bool Backend::dependency_graph::has_dependents(std::string input)
     }
 }
 
-bool Backend::dependency_graph::has_dependees(std::string input)
+bool DependencyGraph::has_dependees(std::string input)
 {
 
   std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found = dependees.find(input);
@@ -86,7 +86,7 @@ bool Backend::dependency_graph::has_dependees(std::string input)
 
 
 
-std::unordered_set<std::string>::const_iterator Backend::dependency_graph::get_dependents(std::string input)
+std::unordered_set<std::string>::const_iterator DependencyGraph::get_dependents(std::string input)
 {
 
   std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found = dependents.find(input);
@@ -104,7 +104,7 @@ std::unordered_set<std::string>::const_iterator Backend::dependency_graph::get_d
 
 }
 
-std::unordered_set<std::string>::const_iterator Backend::dependency_graph::get_dependees(std::string input)
+std::unordered_set<std::string>::const_iterator DependencyGraph::get_dependees(std::string input)
 {
 
   std::unordered_map<std::string, std::unordered_set<std::string>>::const_iterator found = dependees.find(input);
@@ -124,7 +124,7 @@ std::unordered_set<std::string>::const_iterator Backend::dependency_graph::get_d
 
 
 
-void Backend::dependency_graph::add_dependency(std::string first_par, std::string second_par)
+void DependencyGraph::add_dependency(std::string first_par, std::string second_par)
 {
   std::unordered_map<std::string, std::unordered_set<std::string>>::iterator found_dependees = dependees.find(second_par);
   std::unordered_map<std::string, std::unordered_set<std::string>>::iterator found_dependents = dependents.find(first_par);
@@ -162,7 +162,7 @@ void Backend::dependency_graph::add_dependency(std::string first_par, std::strin
 
 }
 
-void Backend::dependency_graph::remove_dependency(std::string first_par, std::string second_par)
+void DependencyGraph::remove_dependency(std::string first_par, std::string second_par)
 {
   std::unordered_map<std::string, std::unordered_set<std::string>>::iterator found_dependees = dependees.find(second_par);
   std::unordered_map<std::string, std::unordered_set<std::string>>::iterator found_dependents = dependents.find(first_par);
