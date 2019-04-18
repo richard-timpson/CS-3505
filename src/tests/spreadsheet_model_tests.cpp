@@ -58,7 +58,7 @@ void test2()
     dependents.push_back("A2");
     alpha.set_cell_contents("B6", "Reach", dependents);
 
-    std::vector<std::string>::iterator dependents_ = alpha.get_direct_dependents("B6").begin();
+    std::vector<std::string>::iterator dependents_ = alpha.get_cell_direct_dependents("B6").begin();
     bool success1 = *dependents_ == "A1";
     dependents_++;
     bool success2 = *dependents_ == "A2";
@@ -112,7 +112,7 @@ void test4()
     new_dependents.push_back("A2");
     alpha.set_cell_contents("A7", "Fargo", new_dependents);
 
-    std::vector<std::string>::iterator dependents_ = alpha.get_direct_dependents("A7").begin();
+    std::vector<std::string>::iterator dependents_ = alpha.get_cell_direct_dependents("A7").begin();
     bool success1 = *dependents_ == "A1";
     dependents_++;
     bool success2 = *dependents_ == "A2";

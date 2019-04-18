@@ -103,6 +103,32 @@ void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection,
             });
 }
 
+void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
+{
+    std::cout << "trying to accept edit" << std::endl;
+    boost::asio::async_read_until(connection->socket_, buff, "\n\n", 
+        [connection, this](boost::system::error_code ec, std::size_t size){
+            std::cout << "async read handler called" << std::endl;
+            if (!ec)
+            {
+                // get the message from the client
+                buff.commit(size);
+                std::istream istrm(&buff);
+                std::string message;
+                istrm >> message;
+                std::cout << "message is " << message << std::endl;
+                std::string error_message;
+                json json_message = json::parse(message);
+                // parse the message the correct way, edit the model, write back the edit, and then read again. 
+            }
+            else
+            {
+                std::cout << "Error reading spreadsheet selection " << std::endl;
+            }
+            
+        });
+}
+
 void Server::send_type_1_error(std::shared_ptr<ClientConnection> connection)
 {
     std::string message = SpreadsheetController::create_type_1_error();
