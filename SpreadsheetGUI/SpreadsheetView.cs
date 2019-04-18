@@ -53,6 +53,9 @@ namespace SpreadsheetGUI
             SetCellContentsText.KeyUp += KeyReleased;
             SetCellContentsText.PreviewKeyDown += KeyPressed;
 
+            cellEditBox.TextChanged += UpdateSetCellContentsText;
+            SetCellContentsText.TextChanged += UpdateCellEditBox;
+
             // SetCellContentsText.KeyDown += KeyReleased;
             music = new SoundPlayer(Directory.GetCurrentDirectory() + "\\WiiMusic.wav");
 
@@ -68,6 +71,28 @@ namespace SpreadsheetGUI
             // the initial selection should be the first cell
             spreadsheetPanel1.SetSelection(0, 0);
             SetCellContentsText.Focus();
+        }
+
+        /// <summary>
+        /// When the SetCellContents text box updates, update
+        /// the cellEditBox text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateCellEditBox(object sender, EventArgs e)
+        {
+            cellEditBox.Text = SetCellContentsText.Text;
+        }
+
+        /// <summary>
+        /// When the cellEditBox text box updates, update
+        /// the SetCellContents text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateSetCellContentsText(object sender, EventArgs e)
+        {
+            SetCellContentsText.Text = cellEditBox.Text;
         }
 
 
@@ -214,18 +239,7 @@ namespace SpreadsheetGUI
                 MethodInvoker m = new MethodInvoker(() => this.Close());
                 this.Invoke(m);
             }
-            //if (!saved)
-            //{
-            //    DialogResult saveResult = MessageBox.Show("Your data has not been saved. Would you like to save before continuing?", "Unsaved Data", MessageBoxButtons.YesNoCancel);
-            //    if (saveResult == DialogResult.Yes)
-            //    {
-            //        save();
-            //    }
-            //    else if (saveResult == DialogResult.Cancel)
-            //    {
-            //        e.Cancel = true;
-            //    }
-            //}
+      
         }
         /// <summary>
         /// A private helper method that, upon loading an existing sheet if the current sheet
@@ -382,7 +396,7 @@ namespace SpreadsheetGUI
             // only code 2 is processed by the spreadsheet view
             if (code == 2)
             {
-                MessageBox.Show("Circular Dependency Created in Cell: " + source + "\n\n The Requested Edit was not Applied to the Cell");
+                MessageBox.Show("Circular Dependency Created in Cell: " + source + "\n\n The Requested Edit was not Applied to the Cell", "Circular Dependency", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

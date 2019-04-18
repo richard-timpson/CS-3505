@@ -33,4 +33,7 @@ JSON SERIALIZE?
 			//Full Send
 			{"type": "full send", "spreadsheet": {"A2": "=2*A1+1", "A1": 3}}
 
+			//Error
+			{"type" : "error", "code" : 1, "source": ""}
+
 

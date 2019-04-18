@@ -44,6 +44,7 @@ namespace ClientGUI
             ssController.SpreadsheetsReceived += UpdateListOfSpreadsheets;
             ssController.SpreadsheetUpdated += UpdateSpreadsheet;
             ssController.InvalidUsername += UsernameInvalid;
+            ssController.SpreadsheetError += ProcessError;
             //------------------------------------------------------------------------------
 
             //----------ListOfSpreadsheets Initialization-------------------------------
@@ -177,9 +178,25 @@ namespace ClientGUI
         /// </summary>
         private void UpdateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependencies)
         {
+            // Launch the SpreadsheetView
             MethodInvoker m = new MethodInvoker(() => Program.runView(cellDependencies));
             this.Invoke(m);
+
+            // Close the Client GUI
+            MethodInvoker m1 = new MethodInvoker(() => this.Close());
+            this.Invoke(m1);
+            
         }
+
+
+        private void ProcessError(int code, string source)
+        {
+            if(code == 1)
+            {
+                MessageBox.Show(source, "Connection Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
         /// <summary>
         /// When the New Spreadsheet button is clicked, verify that the name

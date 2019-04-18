@@ -21,7 +21,7 @@ namespace CS3505
         private Socket theServer;
         private SocketState theServerState;
 
-        //public delegate void SpreadsheetUpdatedEventHandler(List<string> updatedCells);
+       
         public delegate void SpreadsheetUpdatedEventHandler(Dictionary<string, IEnumerable<string>> updatedDependencies);
         public event SpreadsheetUpdatedEventHandler SpreadsheetUpdated;
 
@@ -51,6 +51,11 @@ namespace CS3505
         /// JSON terminator string
         /// </summary>
         private const string ENDOFMESSAGE = "\n\n";
+
+        /// <summary>
+        /// Tracks the status of the client's connection
+        /// </summary>
+        private bool connected = false;
 
         /// <summary>
         /// The representation of a spreadsheet that will be updated
@@ -141,8 +146,17 @@ namespace CS3505
                 // ignore if it is the wrong kind of message
                 if (receive.type != "list")
                 {
-                    ss.sb.Remove(0, p.Length);
-                    Networking.GetData(ss);
+                    if(receive.type == "error")
+                    {
+                        ProcessError(p);
+
+                    }
+                    else
+                    {
+                        ss.sb.Remove(0, p.Length);
+                        Networking.GetData(ss);
+                    }
+                    
                     return;
                 }
 
@@ -160,6 +174,9 @@ namespace CS3505
                 // Notify the client that new spreadsheets are available
                 SpreadsheetsReceived();
                 theServerState = ss;
+
+                this.connected = true;
+
                 //Networking.GetData(ss);
                 ss.sb.Remove(0, p.Length);
             }
@@ -192,6 +209,8 @@ namespace CS3505
                 username = Username,
                 password = Password
             };
+
+            
 
             // send the request to the server
             string message = JsonConvert.SerializeObject(open) + ENDOFMESSAGE;
@@ -345,8 +364,25 @@ namespace CS3505
 
             if (error.code == 1)
             {
-                // notify the client
-                SpreadsheetError(error.code, "");
+                if (connected)
+                {
+
+
+                    // notify the client
+                    SpreadsheetError(error.code, "Invalid Authorization Please Verify Your Password");
+
+                    //Set the CallMe back to receivespreadsheet list
+                    theServerState.CallMe = ReceiveSpreadsheetsList;
+                }
+                else
+                {
+                    // notify the client
+                    SpreadsheetError(error.code, "Connection Failed Verify IPAddress and Try Again");
+
+                    // disconnect
+                    theServerState.theSocket.Close();
+
+                }
             }
             else // code 2
             {
@@ -370,7 +406,14 @@ namespace CS3505
             };
 
             fullsend = JsonConvert.DeserializeAnonymousType(message, fullsend);
+
             Dictionary<string, string> edits = fullsend.spreadsheet;
+
+            // ignore invalid messages
+            if(fullsend.spreadsheet == null)
+            {
+                return;
+            }
 
             Dictionary<string, IEnumerable<string>> cellDependencies = new Dictionary<string, IEnumerable<string>>();
            // lock (sheet)
@@ -381,8 +424,6 @@ namespace CS3505
                    cellDependencies[cell] = this.sheet.SetContentsOfCell(cell, edits[cell]);
                 }
 
-
-
             }
             // let the subscribers (client) know that the spreadsheet has been updated
             SpreadsheetUpdated(cellDependencies);
@@ -390,4 +431,3 @@ namespace CS3505
         }
     }
 }
-
