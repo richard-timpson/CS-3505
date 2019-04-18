@@ -43,6 +43,7 @@ int main()
     test5();
     test6();
     testSpreadsheetSelection();
+    test10();
 }
 
 void test1()
@@ -253,6 +254,25 @@ void testSpreadsheetSelection()
  */
 void test10()
 {
-    SpreadsheetModel sm("SM", true);
-    
+    SpreadsheetModel alpha("SM", true);
+    std::cout << "Test 10: Test for correct full send string" << std::endl;
+    std::vector<std::string> a1_dependents;
+    std::vector<std::string> a2_dependents{"A1"};
+    std::vector<std::string> a3_dependents{"A2"};
+    std::vector<std::string> a4_dependents{"A3"};
+    std::vector<std::string> a5_dependents{"A4"};
+    alpha.set_cell_contents("A1", "5", a1_dependents );
+    alpha.set_cell_contents("A2", "A1 + 5", a2_dependents );
+    alpha.set_cell_contents("A3", "A2 + 5", a3_dependents );
+    alpha.set_cell_contents("A4", "A3 + 5", a4_dependents );
+    alpha.set_cell_contents("A5", "A4 + 5", a5_dependents );
+    alpha.set_cell_contents("A6", "2.00012341234", a5_dependents );
+
+
+    std::unordered_map<std::string, Cell> cell_dictionary = alpha.get_cell_dictionary();
+    std::cout << "\t" << SpreadsheetController::full_send(cell_dictionary) << std::endl;
+
+    std::cout << "Test 10 finished" << std::endl;
+
+
 }
