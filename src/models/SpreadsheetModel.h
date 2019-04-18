@@ -29,6 +29,7 @@ class SpreadsheetModel
     std::vector<std::string> get_cells_to_recalculate(std::set<std::string> names);
     std::vector<std::string> get_direct_dependents(std::string name);
     void visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed);
+    std::string get_cell_contents(std::string name);
     bool edit_made;
   private:
     std::unordered_map<std::string, Cell> cell_dictionary;

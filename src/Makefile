@@ -44,6 +44,8 @@ client_cade: ./tests/client.cpp
 spreadsheet_controller_tests: ./tests/spreadsheet_controller_tests.cpp
 	g++ -std=c++11 -o ../bin/tests/spreadsheet_controller ./tests/spreadsheet_controller_tests.cpp ../bin/objects/spreadsheet_controller.o ../bin/objects/server.o ../bin/objects/spreadsheet_model.o ../bin/objects/dependency_graph.o ../bin/objects/cell.o
 
+spreadsheet_model_tests: ./tests/spreadsheet_model_tests.cpp
+	g++ -std=c++11 -o ../bin/tests/spreadsheet_model ../bin/objects/spreadsheet_model.o ../bin/objects/dependency_graph.o ../bin/objects/cell.o ./tests/spreadsheet_model_tests.cpp
 
 ######################
 # Cleaning binaries

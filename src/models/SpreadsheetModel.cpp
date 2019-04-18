@@ -98,6 +98,15 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     }
 }
 
+std::string SpreadsheetModel::get_cell_contents(std::string name)
+{
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    if (it != cell_dictionary.end())
+    {
+        return it->second.get_cell_contents();
+    }
+}
+
 std::string SpreadsheetModel::full_send()
 {
     json ss;
