@@ -26,7 +26,9 @@ class DependencyGraph
     std::unordered_set<std::string>::const_iterator get_dependees(std::string input);
     void add_dependency(std::string first, std::string second);
     void remove_dependency(std::string first, std::string second);
-    // Replace dependents and dependees methods go here.
+    void replace_dependents(std::string first, std::unordered_set<std::string>::const_iterator(std::string input));
+    void replace_dependees(std::string first, std::unordered_set<std::string>::const_iterator(std::string input));
+
 
     std::unordered_map<std::string, std::unordered_set<std::string>> dependees;
 

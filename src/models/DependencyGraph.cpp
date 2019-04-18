@@ -82,10 +82,6 @@ bool DependencyGraph::has_dependees(std::string input)
 }
 
 
-
-
-
-
 std::unordered_set<std::string>::const_iterator DependencyGraph::get_dependents(std::string input)
 {
 
@@ -179,6 +175,26 @@ void DependencyGraph::remove_dependency(std::string first_par, std::string secon
 	}
     }
   
+
+}
+
+void DependencyGraph::replace_dependents(std::string first_par, std::unordered_set<std::string>::const_iterator replace_dependents_set(std::string input))
+{
+    std::unordered_map<std::string, std::unordered_set<std::string>>::iterator found_dependents = dependents.find(first_par);
+
+      //DependencyGraph::remove_dependency();
+
+}
+
+void DependencyGraph::replace_dependees(std::string first_par, std::unordered_set<std::string>::const_iterator(std::string input))
+{
+    std::unordered_map<std::string, std::unordered_set<std::string>>::iterator found_dependees = dependees.find(first_par);
+
+        //Make a new hashset
+        //Convert for each loop to go through new hashset 
+        //DependencyGraph::remove_dependency();
+
+      //
 
 }
 
