@@ -1,6 +1,5 @@
-
-#include "Cell.h"
 #include <string>
+#include "Cell.h"
 
 Cell::Cell(std::string name, std::string type)
 {

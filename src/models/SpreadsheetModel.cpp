@@ -2,14 +2,14 @@
 #include <iostream>
 #include <unordered_map>
 #include <fstream>
-#include "../../libs/json.hpp"
-#include "./Cell.h"
-#include "DependencyGraph.h"
-#include "SpreadsheetModel.h"
 #include <vector>
 #include <set>
-#include "./CircularException.h"
 #include <boost/lexical_cast.hpp>
+
+#include "../../libs/json.hpp"
+#include "./Cell.h"
+#include "./CircularException.h"
+#include "SpreadsheetModel.h"
 
 using json = nlohmann::json;
 
