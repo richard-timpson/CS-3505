@@ -107,6 +107,15 @@ std::string SpreadsheetModel::get_cell_contents(std::string name)
     }
 }
 
+std::vector<std::string> SpreadsheetModel::get_cell_direct_dependents(std::string name)
+{
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    if (it != cell_dictionary.end())
+    {
+        return it->second.get_cell_direct_dependents();
+    }
+}
+
 std::string SpreadsheetModel::full_send()
 {
     json ss;
