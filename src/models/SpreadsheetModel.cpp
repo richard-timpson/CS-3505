@@ -6,6 +6,9 @@
 #include "./Cell.h"
 #include "DependencyGraph.h"
 #include "SpreadsheetModel.h"
+#include <vector>
+#include <set>
+#include "./CircularException.h"
 
 using json = nlohmann::json;
 
@@ -110,4 +113,42 @@ std::string SpreadsheetModel::full_send()
 std::string SpreadsheetModel::get_name()
 {
     return name;
+}
+
+std::vector<std::string> SpreadsheetModel::get_cells_to_recalculate(std::string name)
+{
+    std::set<std::string> names{name};
+    return get_cells_to_recalculate(names);
+}
+
+std::vector<std::string> SpreadsheetModel::get_cells_to_recalculate(std::set<std::string> names)
+{
+    std::vector<std::string> changed;
+    std::set<std::string> visited;
+    for (std::string name: names)
+    {
+        if (visited.find(name) == visited.end())
+        {
+            visit(name, name, visited, changed);
+        }
+    }
+    return changed;
+}
+
+
+
+void SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed)
+{
+    visited.insert(name);
+    for (std::string n : get_direct_dependents(name))
+    {
+        if (n == start)
+        {
+            throw CircularException();
+        }
+        else if (visited.find(n) == visited.end())
+        {
+            visit(start, n, visited, changed);
+        }
+    }
 }
