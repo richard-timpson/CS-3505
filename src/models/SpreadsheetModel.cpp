@@ -62,16 +62,16 @@ void SpreadsheetModel::write_json_ss_file()
   write_file.close();
 }
 
-void spreadsheet_model::set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents)
+void SpreadsheetModel::set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents)
 {
-  std::unordered_map<std::string,Backend::cell>::const_iterator it = cell_dictionary.find(name);
+  std::unordered_map<std::string, cell>::const_iterator it = cell_dictionary.find(name);
   
 
 
   // Cell doesn't exist
   if (it == cell_dictionary.end())
     {
-      Backend::cell new_cell(contents, dependents);
+      cell new_cell(contents, dependents);
       cell_dictionary.insert({name, new_cell});
       // Adding dependency
       for(std::vector<string>::const_iterator it_dep = dependents.begin(); it_dep != dependents.end(); it_dep++)
@@ -83,7 +83,7 @@ void spreadsheet_model::set_cell_contents(std::string name, std::string contents
   else
     {
       // Get cell, remove current dependencies,add new ones, change contents
-      Backend::cell current_cell = it->second;
+      cell current_cell = it->second;
       
       // Remove current dependencies
       for(vector<string>::const_iterator it_dep = current_cell.get_direct_dependents().begin(); it_dep != current_cell.get_direct_dependents().end(); it_dep++)
@@ -93,7 +93,7 @@ void spreadsheet_model::set_cell_contents(std::string name, std::string contents
       // Add new Dependencies
       for(vector<string>::const_iterator it_dep = dependents.begin(); it_dep != dependents.end(); it_dep++)
 	{
-	  main_graph.add_dependency(name, it_dep->first);
+	  MainGraph.add_dependency(name, it_dep->first);
 	}
       current_cell.set_cell_value(contents);
       current_cell.set_cell_direct_dependents(dependents);
