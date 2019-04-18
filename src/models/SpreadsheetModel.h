@@ -25,6 +25,7 @@ class SpreadsheetModel
     std::string full_send();
     void set_name(std::string name);
     void set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents);
+    std::string get_cell_contents(std::string name);
     bool edit_made;
   private:
     std::unordered_map<std::string, Cell> cell_dictionary;
