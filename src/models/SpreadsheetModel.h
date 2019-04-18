@@ -12,25 +12,29 @@
 #include <string>
 #include <iostream>
 #include <unordered_map>
+#include <set>
 #include "Cell.h"
-#include "DependencyGraph.h"
 
 class SpreadsheetModel
 {
   public:
     SpreadsheetModel(std::string filepath, bool new_ss);
+    void set_name(std::string name);
+    void set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents);
+    std::string get_name();
+    std::string get_cell_contents(std::string name);
+    std::string get_cell_type(std::string name);
+    std::vector<std::string> get_cell_direct_dependents(std::string name);
+    std::unordered_map<std::string, Cell> get_cell_dictionary();
     void open_json_ss_file();
     void write_json_ss_file();
-    std::string get_name();
-    void set_name(std::string name);
-    bool edit_made;
+    bool circular_dependency_check(std::string name);
+    bool circular_dependency_check(std::set<std::string> names);
   private:
+    bool visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed);
+    bool edit_made;
     std::unordered_map<std::string, Cell> cell_dictionary;
-    void set_cell_contents(std::string name, std::string contents);
-    DependencyGraph main_graph;
     std::string name;
-    
-    
 };
 
 
