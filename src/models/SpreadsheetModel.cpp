@@ -28,44 +28,6 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
     }
 }
 
-void SpreadsheetModel::open_json_ss_file()
-{
-    // go through file and set all jsons to cell objects
-    // add to dictioanry and dependencygraph using SetcontentsofCell
-    // function call
-
-    std::ifstream input_file("../../data/" + this->name + ".json");
-    json jsons = json::parse(input_file);
-
-    // for (auto it = jsons.begin(); it != jsons.end(); it++)
-    // {
-    //     set_cell_contents(it->first, it->second, it->third);
-    // }
-    input_file.close();
-}
-
-void SpreadsheetModel::write_json_ss_file()
-{
-    int cell_index;
-    std::ofstream write_file;
-    json current_json;
-
-    write_file.open("../../data/" + this->name + ".json", std::ios::out);
-    std::unordered_map<std::string, Cell>::iterator it = this->cell_dictionary.begin();
-
-    while (it != this->cell_dictionary.end())
-    {
-        current_json["name"] = it->first;
-        current_json["contents"] = it->second.get_cell_contents();
-        current_json["dependents"] = it->second.get_cell_direct_dependents();
-
-        write_file << current_json;
-        it++;
-    }
-
-    write_file.close();
-}
-
 void SpreadsheetModel::set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents)
 {
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
@@ -98,13 +60,13 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     else
     {
         Cell *current_cell = &it->second;
-        current_cell->set_cell_direct_dependents(dependents);
+        current_cell->set_direct_dependents(dependents);
 
         // get cells to recalculate with throw circular exception if there is one
         bool circular_dependency = circular_dependency_check(name);
         if (!circular_dependency)
         {
-            current_cell->set_cell_contents(contents);
+            current_cell->set_contents(contents);
             std::unordered_map<std::string, Cell>::iterator it1 = cell_dictionary.find(name);
             Cell *new_cell = &it1->second;
         }
@@ -120,30 +82,71 @@ std::string SpreadsheetModel::get_cell_contents(std::string name)
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.get_cell_contents();
+        return it->second.get_contents();
     }
 }
 
-std::vector<std::string> SpreadsheetModel::get_direct_dependents(std::string name)
+std::vector<std::string> SpreadsheetModel::get_cell_direct_dependents(std::string name)
 {
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.get_cell_direct_dependents();
+        return it->second.get_direct_dependents();
     }
 }
 
-std::string SpreadsheetModel::full_send()
+std::string SpreadsheetModel::get_cell_type(std::string name)
 {
-    json ss;
-    json cells;
-    for (std::pair<std::string, Cell> cell : this->cell_dictionary)
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    if (it != cell_dictionary.end())
     {
-        cells[cell.second.get_cell_name()] = cell.second.get_cell_contents();
+        return it->second.get_type();
     }
-    ss["type"] = "full send";
-    ss["spreadsheet"] = cells;
 }
+
+std::unordered_map<std::string, Cell> SpreadsheetModel::get_cell_dictionary()
+{
+    return this->cell_dictionary;
+}
+
+void SpreadsheetModel::open_json_ss_file()
+{
+    // go through file and set all jsons to cell objects
+    // add to dictioanry and dependencygraph using SetcontentsofCell
+    // function call
+
+    std::ifstream input_file("../../data/" + this->name + ".json");
+    json jsons = json::parse(input_file);
+
+    // for (auto it = jsons.begin(); it != jsons.end(); it++)
+    // {
+    //     set_cell_contents(it->first, it->second, it->third);
+    // }
+    input_file.close();
+}
+
+void SpreadsheetModel::write_json_ss_file()
+{
+    int cell_index;
+    std::ofstream write_file;
+    json current_json;
+
+    write_file.open("../../data/" + this->name + ".json", std::ios::out);
+    std::unordered_map<std::string, Cell>::iterator it = this->cell_dictionary.begin();
+
+    while (it != this->cell_dictionary.end())
+    {
+        current_json["name"] = it->first;
+        current_json["contents"] = it->second.get_contents();
+        current_json["dependents"] = it->second.get_direct_dependents();
+
+        write_file << current_json;
+        it++;
+    }
+
+    write_file.close();
+}
+
 
 std::string SpreadsheetModel::get_name()
 {
@@ -173,7 +176,7 @@ bool SpreadsheetModel::circular_dependency_check(std::set<std::string> names)
 bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std::string> &visited, std::vector<std::string> &changed)
 {
     visited.insert(name);
-    for (std::string n : get_direct_dependents(name))
+    for (std::string n : get_cell_direct_dependents(name))
     {
         if (n == start)
         {
@@ -186,6 +189,7 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
     }
     return false;
 }
+
 
 bool check_if_int(std::string &contents)
 {

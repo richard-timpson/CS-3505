@@ -19,16 +19,17 @@ class SpreadsheetModel
 {
   public:
     SpreadsheetModel(std::string filepath, bool new_ss);
-    void open_json_ss_file();
-    void write_json_ss_file();
-    std::string get_name();
-    std::string full_send();
     void set_name(std::string name);
     void set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents);
+    std::string get_name();
     std::string get_cell_contents(std::string name);
+    std::string get_cell_type(std::string name);
+    std::vector<std::string> get_cell_direct_dependents(std::string name);
+    std::unordered_map<std::string, Cell> get_cell_dictionary();
+    void open_json_ss_file();
+    void write_json_ss_file();
     bool circular_dependency_check(std::string name);
     bool circular_dependency_check(std::set<std::string> names);
-    std::vector<std::string> get_direct_dependents(std::string name);
   private:
     bool visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed);
     bool edit_made;

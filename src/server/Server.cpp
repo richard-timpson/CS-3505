@@ -74,7 +74,7 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                     Server::send_type_1_error(connection);
                 }
                 std::shared_ptr<SpreadsheetModel> sm = choose_spreadsheet(json_message);
-
+                send_full_spreadsheet(connection, sm);
             }
             else
             {
@@ -86,7 +86,8 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
 
 void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
 {
-    std::string message = sm->full_send();
+    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
+    std::string message = SpreadsheetController::full_send(cell_dictionary);
     message += "\n\n";
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
             [message, connection, this](boost::system::error_code ec, std::size_t){

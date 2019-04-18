@@ -39,6 +39,33 @@ std::string SpreadsheetController::get_list_of_spreadsheets()
     }
 }
 
+std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cell> & cell_dictionary)
+{
+    json ss;
+    json cells;
+    for (std::pair<std::string, Cell> cell : cell_dictionary)
+    {
+        std::string name = cell.second.get_name();
+        std::string contents = cell.second.get_contents();
+        std::string type = cell.second.get_type();
+        if (type == "int")
+        {
+            cells[name] = stoi(contents);
+        }
+        else if (type == "double")
+        {
+            cells[name] = stod(contents);
+        }
+        else
+        {
+            cells[name] = contents;
+        }
+    }
+    ss["type"] = "full send";
+    ss["spreadsheet"] = cells;
+    return ss.dump();
+}
+
 bool SpreadsheetController::validate_user(json message, std::string &error_message)
 {
     if (!validate_login_message(message)) return false;
