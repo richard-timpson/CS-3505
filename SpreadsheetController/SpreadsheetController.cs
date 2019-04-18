@@ -117,7 +117,6 @@ namespace CS3505
                 }
                 // if the last two chars are not new lines then there are
                 // no more full messages be evaluated
-                //FIXME CHANGED FOR TESTING Change to OR
                 if (p.Length < 3)
                 {
                     continue;
@@ -318,7 +317,6 @@ namespace CS3505
                     {
                         ProcessFullSend(p);
                     }
-                    // FIXME?
                     // if unexpected message comes ignore it for now?? ...
                     ss.sb.Remove(0, p.Length);
 
@@ -387,7 +385,6 @@ namespace CS3505
 
             }
             // let the subscribers (client) know that the spreadsheet has been updated
-            // SpreadsheetUpdated(edits.Keys.ToList());
             SpreadsheetUpdated(cellDependencies);
 
         }

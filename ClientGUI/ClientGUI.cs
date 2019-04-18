@@ -23,6 +23,15 @@ namespace ClientGUI
         /// </summary>
         private SpreadsheetController ssController;
 
+        public SpreadsheetView SSView
+        {
+            get
+            {
+                return ssView;
+            }
+
+        }
+       
         public ClientLogIn()
         {
             InitializeComponent();
@@ -49,7 +58,10 @@ namespace ClientGUI
             NewSpreadsheetButton.Enabled = false;
             //--------------------------------------------------------------------------
 
-            ssView = null;
+            //ssView = null;
+
+            ssView = new SpreadsheetView(ssController);
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -165,30 +177,9 @@ namespace ClientGUI
         /// </summary>
         private void UpdateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependencies)
         {
-            //Is the spreadsheet already open?
-            if (ssView == null)
-            {
-                //Open a new SpreadsheetGUI if it isn't
-                ssView = new SpreadsheetView(ssController);
-                MethodInvoker m = new MethodInvoker(() => SpreadsheetAplicationContext.getAppContext().RunForm(ssView));//new SpreadsheetView(ssController)));
-                this.Invoke(m);
-                System.Diagnostics.Debug.WriteLine("Opened new form");
-
-                ssView.PopulateSpreadsheet(cellDependencies);
-                MethodInvoker m1 = new MethodInvoker(() => this.Close());//new SpreadsheetView(ssController)));
-                this.Invoke(m1);
-                //  this.Close();
-
-            }
+            MethodInvoker m = new MethodInvoker(() => Program.runView(cellDependencies));
+            this.Invoke(m);
         }
-
-        //private async Task<DialogResult> ShowDialogAsync(this Form @this)
-        //{
-        //    await Task.Yield();
-        //    if (@this.IsDisposed)
-        //        return DialogResult.OK;
-        //    return @this.ShowDialog();
-        //}
 
         /// <summary>
         /// When the New Spreadsheet button is clicked, verify that the name
