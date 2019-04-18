@@ -9,8 +9,12 @@
 #include <vector>
 #include <set>
 #include "./CircularException.h"
+#include <boost/lexical_cast.hpp>
 
 using json = nlohmann::json;
+
+bool check_if_int(std::string &contents);
+bool check_if_double(std::string &contents);
 
 SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
 {
@@ -69,32 +73,67 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     // Cell doesn't exist
     if (it == cell_dictionary.end())
     {
-        Cell new_cell(name, contents, dependents);
+        std::string type;
+        bool is_int = check_if_int(contents);
+        if (is_int) 
+        {
+            type = "int";
+        }
+        else
+        {
+            bool is_double = check_if_double(contents);
+            if (is_double)
+            {
+                type = "double";
+            }
+            else 
+            {
+                type = "string";
+            }
+        }
+        
+        Cell new_cell(name, contents, dependents, type);
         cell_dictionary.insert({name, new_cell});
         // Adding dependency
-        for (std::string dependent: dependents)
-        {
-            main_graph.add_dependency(name, dependent);
-        }
+        // for (std::string dependent: dependents)
+        // {
+        //     main_graph.add_dependency(name, dependent);
+        // }
     }
     // Cell exists
     else
     {
+        try 
+        {
+            // get cells to recalculate with throw circular exception if there is one
+            std::vector<std::string> all_dependents = get_cells_to_recalculate(name);
+            // if there is no circular exception, we can set the cell contents and the dependents. 
+            Cell current_cell = it->second;
+            current_cell.set_cell_contents(contents);
+            current_cell.set_cell_direct_dependents(dependents);
+            
+        }
+        catch (CircularException& e)
+        {
+            // if we catch except, throw it again, so we know to return the error. 
+            std::cout << "Caught circular exception, throwing it again" << std::endl;
+            throw e;
+        }
         // Get cell, remove current dependencies,add new ones, change contents
-        Cell current_cell = it->second;
+        // Cell current_cell = it->second;
 
-        for (std::string direct_depedent : current_cell.get_cell_direct_dependents())
-        {
-            main_graph.remove_dependency(name, direct_depedent);
-        }
+        // for (std::string direct_depedent : current_cell.get_cell_direct_dependents())
+        // {
+        //     main_graph.remove_dependency(name, direct_depedent);
+        // }
 
-        for (std::string dependent : dependents)
-        {
-            main_graph.add_dependency(name, dependent);
-        }
+        // for (std::string dependent : dependents)
+        // {
+        //     main_graph.add_dependency(name, dependent);
+        // }
 
-        current_cell.set_cell_contents(contents);
-        current_cell.set_cell_direct_dependents(dependents);
+        // current_cell.set_cell_contents(contents);
+        // current_cell.set_cell_direct_dependents(dependents);
     }
 }
 
@@ -168,5 +207,33 @@ void SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
         {
             visit(start, n, visited, changed);
         }
+    }
+}
+
+bool check_if_int(std::string & contents)
+{
+    int number;
+    try 
+    {
+        number = boost::lexical_cast<int>(contents);
+        return true;
+    }
+    catch(boost::bad_lexical_cast &e)
+    {
+        return false;
+    }
+}
+
+bool check_if_double(std::string & contents)
+{
+    double number;
+    try 
+    {
+        number = boost::lexical_cast<double>(contents);
+        return true;
+    }
+    catch(boost::bad_lexical_cast &e)
+    {
+        return false;
     }
 }
