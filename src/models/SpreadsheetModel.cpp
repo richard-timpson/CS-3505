@@ -91,14 +91,8 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
                 type = "string";
             }
         }
-        std::cout << "Making new cell" << std::endl;
         Cell new_cell(name, contents, dependents, type);
         cell_dictionary.insert({name, new_cell});
-        // Adding dependency
-        // for (std::string dependent: dependents)
-        // {
-        //     main_graph.add_dependency(name, dependent);
-        // }
     }
     // Cell exists
     else
@@ -109,36 +103,19 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
             current_cell->set_cell_direct_dependents(dependents);
             // get cells to recalculate with throw circular exception if there is one
             std::vector<std::string> all_dependents = get_cells_to_recalculate(name);
-            std::cout << "got outside of get_cells_to_recalculate" << std::endl;
+
             // if there is no circular exception, we can set the cell contents and the dependents. 
-            std::cout << "The current cell contents before modification " << current_cell->get_cell_contents() << std::endl;
             current_cell->set_cell_contents(contents);
             std::unordered_map<std::string, Cell>::iterator it1 = cell_dictionary.find(name);
             Cell *new_cell = &it1->second;
-            std::cout << "The new cell contents after modification " << new_cell->get_cell_contents() << std::endl;
             
         }
         catch (CircularException& e)
         {
             // if we catch except, throw it again, so we know to return the error. 
-            std::cout << "Caught circular exception, throwing it again" << std::endl;
+            // std::cout << "Caught circular exception, throwing it again" << std::endl;
             throw e;
         }
-        // Get cell, remove current dependencies,add new ones, change contents
-        // Cell current_cell = it->second;
-
-        // for (std::string direct_depedent : current_cell.get_cell_direct_dependents())
-        // {
-        //     main_graph.remove_dependency(name, direct_depedent);
-        // }
-
-        // for (std::string dependent : dependents)
-        // {
-        //     main_graph.add_dependency(name, dependent);
-        // }
-
-        // current_cell.set_cell_contents(contents);
-        // current_cell.set_cell_direct_dependents(dependents);
     }
 }
 
@@ -201,15 +178,11 @@ std::vector<std::string> SpreadsheetModel::get_cells_to_recalculate(std::set<std
 
 void SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed)
 {
-    std::cout << "hitting visit function when start is " << start << " and name is " << name << std::endl;
     visited.insert(name);
-    std::cout << "getting the direct dependents of" << name << std::endl;
     for (std::string n : get_direct_dependents(name))
     {
-        std::cout << "got the direct dependents of " << name << std::endl;
         if (n == start)
         {
-            std::cout << "trying to throw circular exception" << std::endl;
             throw CircularException();
         }
         else if (visited.find(n) == visited.end())

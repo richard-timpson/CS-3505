@@ -102,7 +102,6 @@ void test4()
     std::vector<std::string> new_dependents;
     new_dependents.push_back("A1");
     new_dependents.push_back("A2");
-    std::cout << "trying to reset cell with new_dependents" << std::endl;   
     alpha.set_cell_contents("A7", "Fargo", new_dependents);
 
     std::vector<std::string>::iterator dependents_ = alpha.get_direct_dependents("A7").begin();
@@ -147,7 +146,7 @@ void test5()
     catch(const CircularException& e)
     {
         success = true;
-        std::cerr << e.what() << '\n';
+        // std::cerr << e.what() << '\n';
     }
     print_success_or_failure(success);
     std::cout << "Test 5 Finished " << std::endl << std::endl;
