@@ -1,13 +1,9 @@
-<<<<<<< HEAD
 /*
  * The dependency graph class is for dealing with seeing the cells on
  * the spreadsheet that relate to other cells. This class will keep,
  *  track of which cells are a dependent or depeende of other cells.
  *
  */
-=======
-//Hi
->>>>>>> SpreadsheetModel
 
 #ifndef DEPENDENCY_GRAPH_H
 #define DEPENDENCY_GRAPH_H
@@ -15,37 +11,33 @@
 #include <string>
 #include <unordered_set>
 #include <unordered_map>
+#include <vector>
 
-namespace Backend
+class DependencyGraph
 {
-  class dependency_graph
-  {
   public:
-    
-    dependency_graph();
-    ~dependency_graph();
+    DependencyGraph();
+    ~DependencyGraph();
 
     int get_size();
     int get_size_of_dependees(std::string input);
     bool has_dependents(std::string input);
     bool has_dependees(std::string input);
-    void get_dependents(std::string input);
-    void get_dependees(std::string input);
+    std::unordered_set<std::string>::const_iterator get_dependents(std::string input);
+    std::unordered_set<std::string>::const_iterator get_dependees(std::string input);
     void add_dependency(std::string first, std::string second);
     void remove_dependency(std::string first, std::string second);
-    // Replace dependents and dependees methods go here.
-    
-    
-    
-    
-  private:
-    std::unordered_map<std::string, std::unordered_set<std::string>> depends_on_graph;
-    std::unordered_map<std::string, std::unordered_set<std::string>> depended_on_by_graph;
-    int num_pairs;
-    
-    
-  };
-}
+    void replace_dependents(std::string first, std::vector<std::string> vector_dependents);
+    void replace_dependees(std::string first, std::vector<std::string> vector_dependees);
 
+
+    std::unordered_map<std::string, std::unordered_set<std::string>> dependees;
+
+    std::unordered_map<std::string, std::unordered_set<std::string>> dependents;
+
+    int num_pairs;
+
+  private:
+};
 
 #endif

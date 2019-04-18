@@ -50,40 +50,6 @@ int main (int argc, char** argv)
         io_context.run();
         while(true);
 
-        // char line[7]="hello\n";
-        // char read[7];
-        // char waste[10];
-        // while(std::cin.getline(waste, 10))
-        // {
-        //     std::cout << "trying to write message " << std::string(line) << std::endl;
-        //     boost::asio::async_write(socket, boost::asio::buffer(line, 7), 
-        //         [](boost::system::error_code ec, std::size_t bytes_transferred) {
-        //             std::cout << "async writing" << std::endl;
-        //             if (!ec)
-        //             {
-        //                 std::cout << "succesfully wrote message " << std::endl;
-        //             }
-        //             else
-        //             {
-        //                 std::cout << "error writing message" << std::endl;
-        //             }
-                    
-        //         });
-        //     std::cout << "trying to receive message " << std::endl;
-        //     boost::asio::async_read(socket, boost::asio::buffer(read, 7), 
-        //     [read](boost::system::error_code ec, std::size_t ){
-        //         std::cout << "received  Message " << read << std::endl;
-        //         if (!ec)
-        //         {
-        //             std::cout << read << std::endl;
-        //         }
-        //         else 
-        //         {
-        //             std::cout << ec.message() << std::endl;
-        //         }
-        //     });
-        //     io_context.run();
-        // }
     }
     catch (std::exception &e)
     {
