@@ -12,10 +12,11 @@
 class Cell
 {
   public:
-    Cell(std::string input);
+    Cell(std::string name);
     ~Cell();
-    void set_cell_value(std::string input);
-    std::string get_cell_value();
+    void set_cell_contents(std::string input);
+    std::string get_cell_contents();
+    std::string get_cell_name();
   private:
     std::string current_value;
 };

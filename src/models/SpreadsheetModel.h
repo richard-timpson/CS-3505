@@ -22,6 +22,7 @@ class SpreadsheetModel
     void open_json_ss_file();
     void write_json_ss_file();
     std::string get_name();
+    std::string full_send();
     void set_name(std::string name);
     bool edit_made;
   private:

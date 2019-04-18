@@ -1,5 +1,3 @@
-//Hi
-
 #include <string>
 #include <iostream>
 #include <unordered_map>
@@ -10,9 +8,6 @@
 #include "SpreadsheetModel.h"
 
 using json = nlohmann::json;
-
-// Create new ss_model object
-
 
 SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
 {
@@ -43,7 +38,6 @@ void SpreadsheetModel::open_json_ss_file()
 
 void SpreadsheetModel::write_json_ss_file()
 {
-
     int cell_index;
     std::ofstream write_file;
     json current_json;
@@ -54,13 +48,25 @@ void SpreadsheetModel::write_json_ss_file()
     while (it != this->cell_dictionary.end())
     {
         current_json["name"] = it->first;
-        current_json["contents"] = it->second.get_cell_value();
+        current_json["contents"] = it->second.get_cell_contents();
 
         write_file << current_json;
         it++;
     }
 
     write_file.close();
+}
+
+std::string SpreadsheetModel::full_send()
+{
+    json ss;
+    json cells;
+    for (std::pair<std::string, Cell> cell : this->cell_dictionary)
+    {
+        cells[cell.second.get_cell_name()] = cell.second.get_cell_contents();
+    }
+    ss["type"] = "full send";
+    ss["spreadsheet"] = cells;
 }
 
 std::string SpreadsheetModel::get_name()

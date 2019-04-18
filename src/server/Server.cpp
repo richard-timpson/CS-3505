@@ -84,6 +84,24 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
         });
 }
 
+void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
+{
+    std::string message = sm->full_send();
+    message += "\n\n";
+    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
+            [message, connection, this](boost::system::error_code ec, std::size_t){
+                if (!ec)
+                {
+                    std::cout << "writing message " << message << std::endl;
+                    accept_edit(connection);
+                }
+                else
+                {
+                    std::cout << "Error sending message " << ec.message() << std::endl;
+                }
+            });
+}
+
 void Server::send_type_1_error(std::shared_ptr<ClientConnection> connection)
 {
     std::string message = SpreadsheetController::create_type_1_error();
