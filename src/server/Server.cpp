@@ -93,7 +93,7 @@ void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection,
                 if (!ec)
                 {
                     std::cout << "writing message " << message << std::endl;
-                    accept_edit(connection);
+                    // accept_edit(connection);
                 }
                 else
                 {

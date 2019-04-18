@@ -1,11 +1,9 @@
-#include "../controllers/SpreadsheetController.h"
-#include "../server/Server.h"
 #include <string>
 #include <iostream>
 #include "../../libs/json.hpp"
-#include <boost/asio.hpp>
 #include <iostream>
 #include <fstream>
+#include "../models/SpreadsheetModel.cpp"
 
 
 void test1();
@@ -26,5 +24,6 @@ int main()
 
 void test1()
 {
-    SpreadsheetModel sm()
+    SpreadsheetModel sm("test", true);
+    // sm.
 }

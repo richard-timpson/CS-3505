@@ -30,10 +30,11 @@ void SpreadsheetModel::open_json_ss_file()
     std::ifstream input_file("../../data/" + this->name + ".json");
     json jsons = json::parse(input_file);
 
-    for (auto it = jsons.begin(); it != jsons.end(); it++)
-    {
-        // Set contents of cell and dictionary of cells
-    }
+    // for (auto it = jsons.begin(); it != jsons.end(); it++)
+    // {
+    //     set_cell_contents(it->first, it->second, it->third);
+    // }
+    input_file.close();
 }
 
 void SpreadsheetModel::write_json_ss_file()
@@ -49,12 +50,49 @@ void SpreadsheetModel::write_json_ss_file()
     {
         current_json["name"] = it->first;
         current_json["contents"] = it->second.get_cell_contents();
+        current_json["dependents"] = it->second.get_cell_direct_dependents();
 
         write_file << current_json;
         it++;
     }
 
     write_file.close();
+}
+
+void SpreadsheetModel::set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents)
+{
+    std::unordered_map<std::string, Cell>::const_iterator it = cell_dictionary.find(name);
+
+    // Cell doesn't exist
+    if (it == cell_dictionary.end())
+    {
+        Cell new_cell(name, contents, dependents);
+        cell_dictionary.insert({name, new_cell});
+        // Adding dependency
+        for (std::string dependent: dependents)
+        {
+            main_graph.add_dependency(name, dependent);
+        }
+    }
+    // Cell exists
+    else
+    {
+        // Get cell, remove current dependencies,add new ones, change contents
+        Cell current_cell = it->second;
+
+        for (std::string direct_depedent : current_cell.get_cell_direct_dependents())
+        {
+            main_graph.remove_dependency(name, direct_depedent);
+        }
+
+        for (std::string dependent : dependents)
+        {
+            main_graph.add_dependency(name, dependent);
+        }
+
+        current_cell.set_cell_contents(contents);
+        current_cell.set_cell_direct_dependents(dependents);
+    }
 }
 
 std::string SpreadsheetModel::full_send()

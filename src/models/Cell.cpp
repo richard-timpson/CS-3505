@@ -2,24 +2,47 @@
 #include "Cell.h"
 #include <string>
 
-
-Cell::Cell(std::string input)
+Cell::Cell(std::string name)
 {
-  this->current_value = input;
+    this->name = name;
+    this->current_contents = "";
 }
 
-Cell::~Cell()
+Cell::Cell(std::string name, std::string contents)
 {
-  this->current_value = "";
+    this->name = name;
+    this->current_contents = contents;
 }
 
-std::string Cell::get_cell_value()
+Cell::Cell(std::string name, std::string contents, std::vector<std::string> direct_dependents)
 {
-  return this->current_value;
+    this->name = name;
+    this->current_contents = contents;
+    this->direct_dependents = direct_dependents;
 }
 
-void Cell::set_cell_value(std::string input)
+
+std::string Cell::get_cell_contents()
 {
-  this->current_value = input;
+    return this->current_contents;
 }
 
+std::string Cell::get_cell_name()
+{
+    return this->name;
+}
+
+std::vector<std::string> Cell::get_cell_direct_dependents()
+{
+    return this->direct_dependents;
+}
+
+void Cell::set_cell_direct_dependents(std::vector<std::string> direct_dependents)
+{
+    this->direct_dependents = direct_dependents;
+}
+
+void Cell::set_cell_contents(std::string input)
+{
+    this->current_contents = input;
+}
