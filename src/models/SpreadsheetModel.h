@@ -27,7 +27,6 @@ class SpreadsheetModel
     void set_name(std::string name);
     void set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents);
     std::string get_cell_contents(std::string name);
-    std::vector<std::string> get_cell_direct_dependents(std::string name);
     std::vector<std::string> get_cells_to_recalculate(std::string name);
     std::vector<std::string> get_cells_to_recalculate(std::set<std::string> names);
     std::vector<std::string> get_direct_dependents(std::string name);
