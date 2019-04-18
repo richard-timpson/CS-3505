@@ -75,7 +75,7 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     {
         std::string type;
         bool is_int = check_if_int(contents);
-        if (is_int) 
+        if (is_int)
         {
             type = "int";
         }
@@ -86,7 +86,7 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
             {
                 type = "double";
             }
-            else 
+            else
             {
                 type = "string";
             }
@@ -97,24 +97,20 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     // Cell exists
     else
     {
-        try 
-        {
-            Cell *current_cell = &it->second;
-            current_cell->set_cell_direct_dependents(dependents);
-            // get cells to recalculate with throw circular exception if there is one
-            std::vector<std::string> all_dependents = get_cells_to_recalculate(name);
+        Cell *current_cell = &it->second;
+        current_cell->set_cell_direct_dependents(dependents);
 
-            // if there is no circular exception, we can set the cell contents and the dependents. 
+        // get cells to recalculate with throw circular exception if there is one
+        bool circular_dependency = circular_dependency_check(name);
+        if (!circular_dependency)
+        {
             current_cell->set_cell_contents(contents);
             std::unordered_map<std::string, Cell>::iterator it1 = cell_dictionary.find(name);
             Cell *new_cell = &it1->second;
-            
         }
-        catch (CircularException& e)
+        else
         {
-            // if we catch except, throw it again, so we know to return the error. 
-            // std::cout << "Caught circular exception, throwing it again" << std::endl;
-            throw e;
+            throw CircularException();
         }
     }
 }
@@ -154,67 +150,66 @@ std::string SpreadsheetModel::get_name()
     return name;
 }
 
-std::vector<std::string> SpreadsheetModel::get_cells_to_recalculate(std::string name)
+bool SpreadsheetModel::circular_dependency_check(std::string name)
 {
     std::set<std::string> names{name};
-    return get_cells_to_recalculate(names);
+    return circular_dependency_check(names);
 }
 
-std::vector<std::string> SpreadsheetModel::get_cells_to_recalculate(std::set<std::string> names)
+bool SpreadsheetModel::circular_dependency_check(std::set<std::string> names)
 {
     std::vector<std::string> changed;
     std::set<std::string> visited;
-    for (std::string name: names)
+    for (std::string name : names)
     {
         if (visited.find(name) == visited.end())
         {
-            visit(name, name, visited, changed);
+            return visit(name, name, visited, changed);
         }
     }
-    return changed;
+    return false;
 }
 
-
-
-void SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed)
+bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std::string> &visited, std::vector<std::string> &changed)
 {
     visited.insert(name);
     for (std::string n : get_direct_dependents(name))
     {
         if (n == start)
         {
-            throw CircularException();
+            return true;
         }
         else if (visited.find(n) == visited.end())
         {
-            visit(start, n, visited, changed);
+            return visit(start, n, visited, changed);
         }
     }
+    return false;
 }
 
-bool check_if_int(std::string & contents)
+bool check_if_int(std::string &contents)
 {
     int number;
-    try 
+    try
     {
         number = boost::lexical_cast<int>(contents);
         return true;
     }
-    catch(boost::bad_lexical_cast &e)
+    catch (boost::bad_lexical_cast &e)
     {
         return false;
     }
 }
 
-bool check_if_double(std::string & contents)
+bool check_if_double(std::string &contents)
 {
     double number;
-    try 
+    try
     {
         number = boost::lexical_cast<double>(contents);
         return true;
     }
-    catch(boost::bad_lexical_cast &e)
+    catch (boost::bad_lexical_cast &e)
     {
         return false;
     }

@@ -1,7 +1,3 @@
-//HI
-
-
-
 #include "../models/SpreadsheetModel.h"
 #include <string>
 #include <iostream>

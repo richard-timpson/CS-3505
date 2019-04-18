@@ -27,12 +27,12 @@ class SpreadsheetModel
     void set_name(std::string name);
     void set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents);
     std::string get_cell_contents(std::string name);
-    std::vector<std::string> get_cells_to_recalculate(std::string name);
-    std::vector<std::string> get_cells_to_recalculate(std::set<std::string> names);
+    bool circular_dependency_check(std::string name);
+    bool circular_dependency_check(std::set<std::string> names);
     std::vector<std::string> get_direct_dependents(std::string name);
     bool edit_made;
   private:
-    void visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed);
+    bool visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed);
     std::unordered_map<std::string, Cell> cell_dictionary;
     DependencyGraph main_graph;
     std::string name;
