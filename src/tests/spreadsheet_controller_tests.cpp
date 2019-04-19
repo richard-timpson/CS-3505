@@ -47,6 +47,7 @@ int main()
     testSpreadsheetSelection();
     test10();
     test11();
+    test12();
 }
 
 void test1()
@@ -305,6 +306,28 @@ void test11()
 
     std::cout << "Test 11 finished" << std::endl;
 
+}
+
+/**
+ * Test making normal edit
+ */
+void test12()
+{
+    std::cout << "Test 12: Test for correct string to be printed on normal edit" << std::endl;
+    std::vector<std::string> dependencies{"A1", "B3"};
+    json message;
+    json j_vec(dependencies);
+    message["type"] = "edit";
+    message["cell"] = "A2";
+    message["value"] = "=2*A1+1+B3";
+    message["dependencies"] = j_vec;
+
+    std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>("test", true);
+    bool valid = SpreadsheetController::handle_edit_message(message, sm);
+    
+    std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
+    std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
+    print_success_or_failure(valid);
 }
 
 

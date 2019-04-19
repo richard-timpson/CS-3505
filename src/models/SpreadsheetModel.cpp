@@ -105,10 +105,25 @@ std::string SpreadsheetModel::get_cell_type(std::string name)
     }
 }
 
+std::stack<CellEdit> SpreadsheetModel::get_cell_personal_history(std::string name)
+{
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    if (it != cell_dictionary.end())
+    {
+        return it->second.get_personal_history();
+    }
+}
+
 std::unordered_map<std::string, Cell> SpreadsheetModel::get_cell_dictionary()
 {
     return this->cell_dictionary;
 }
+
+std::stack<CellEdit> SpreadsheetModel::get_global_history()
+{
+    return this->global_history;
+}
+
 
 void SpreadsheetModel::open_json_ss_file()
 {
@@ -190,6 +205,26 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
     }
     return false;
 }
+
+void SpreadsheetModel::do_edit()
+{
+    // Change the cell's contents, then add the CellEdit struct
+    //  to the global history as well as the cell's personal history.
+
+}
+
+void SpreadsheetModel::do_undo()
+{
+    // Pop the latest change off the global history
+    // Peek the global stack and set the contents of that cell.
+}
+
+void SpreadsheetModel::do_revert(std::string name)
+{
+    // pop the latest change on the cell's personal history
+    // Peek the personal stack and make a do_edit command, BUT DO NOT ADD BACK TO PERSONAL HISTORY.
+}
+
 
 
 bool check_if_int(std::string &contents)

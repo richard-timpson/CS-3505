@@ -32,6 +32,9 @@ class SpreadsheetModel
     std::stack<CellEdit> get_global_history();
     void open_json_ss_file();
     void write_json_ss_file();
+    void do_edit();
+    void do_undo();
+    void do_revert(std::string name);
     bool circular_dependency_check(std::string name);
     bool circular_dependency_check(std::set<std::string> names);
   private:
