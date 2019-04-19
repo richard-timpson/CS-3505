@@ -10,6 +10,7 @@
 #include "./Cell.h"
 #include "./CircularException.h"
 #include "SpreadsheetModel.h"
+#include "CellEdit.h"
 
 using json = nlohmann::json;
 
