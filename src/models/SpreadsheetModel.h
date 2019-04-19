@@ -34,6 +34,7 @@ class SpreadsheetModel
     std::stack<CellEdit> get_cell_personal_history(std::string name);
     void push_cell_personal_history(std::string name, CellEdit input);
     void pop_cell_personal_history(std::string name);
+    CellEdit top_cell_personal_history(std::string name);
 
     void open_json_ss_file();
     void write_json_ss_file();

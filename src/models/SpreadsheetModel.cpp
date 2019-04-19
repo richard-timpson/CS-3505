@@ -133,6 +133,15 @@ void SpreadsheetModel::pop_cell_personal_history(std::string name)
     }
 }
 
+CellEdit SpreadsheetModel::top_cell_personal_history(std::string name)
+{
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    if (it != cell_dictionary.end())
+    {
+        return it->second.get_personal_history().top();
+    }
+}
+
 std::unordered_map<std::string, Cell> SpreadsheetModel::get_cell_dictionary()
 {
     return this->cell_dictionary;
@@ -191,8 +200,7 @@ void SpreadsheetModel::write_json_ss_file()
                 {"name", /*name*/},
                 {"contents", /*contents*/},
                 {"dependents"}
-            })
-            std::vector<CellEdit> cell_edit;
+            });
 
             fields["history"] = history;
 
