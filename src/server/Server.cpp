@@ -90,11 +90,11 @@ void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection,
     std::string message = SpreadsheetController::full_send(cell_dictionary);
     message += "\n\n";
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
-            [message, connection, this](boost::system::error_code ec, std::size_t){
+            [sm, message, connection, this](boost::system::error_code ec, std::size_t){
                 if (!ec)
                 {
                     std::cout << "writing message " << message << std::endl;
-                    // accept_edit(connection);
+                    accept_edit(connection, sm);
                 }
                 else
                 {
@@ -107,7 +107,7 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
 {
     std::cout << "trying to accept edit" << std::endl;
     boost::asio::async_read_until(connection->socket_, buff, "\n\n", 
-        [connection, this](boost::system::error_code ec, std::size_t size){
+        [connection, this, sm](boost::system::error_code ec, std::size_t size){
             std::cout << "async read handler called" << std::endl;
             if (!ec)
             {
@@ -118,7 +118,18 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
                 istrm >> message;
                 std::cout << "message is " << message << std::endl;
                 std::string error_message;
-                json json_message = json::parse(message);
+                try
+                {
+                    json json_message = json::parse(message);
+                    std::cout << "successfully parsed message" << std::endl;
+                    // send_edit();
+                    accept_edit(connection, sm);
+                }
+                catch (json::parse_error &e)
+                {
+                    std::cout << e.what() << std::endl;
+                    accept_edit(connection, sm);
+                }
                 // parse the message the correct way, edit the model, write back the edit, and then read again. 
             }
             else
@@ -139,6 +150,24 @@ void Server::send_type_1_error(std::shared_ptr<ClientConnection> connection)
                 {
                     std::cout << "writing message " << message << std::endl;
                     accept_spreadsheet_selection(connection);
+                }
+                else
+                {
+                    std::cout << "Error sending message " << ec.message() << std::endl;
+                }
+            });
+}
+
+void Server::send_type_2_error(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
+{
+    std::string message = SpreadsheetController::create_type_2_error();
+    message += "\n\n";
+    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
+            [message, connection, sm, this](boost::system::error_code ec, std::size_t){
+                if (!ec)
+                {
+                    std::cout << "writing message " << message << std::endl;
+                    accept_edit(connection, sm);
                 }
                 else
                 {

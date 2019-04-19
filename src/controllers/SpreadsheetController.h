@@ -18,7 +18,13 @@ class SpreadsheetController
     static bool validate_user(json message, std::string &error_message);    
     static bool validate_login_message(json & message);
     static bool check_if_spreadsheet_in_storage(json & message, std::string &spreadsheet);
+    static bool handle_edit_message(json & message);
     static std::string create_type_1_error();
+    static std::string create_type_2_error();
+  private:
+    static bool handle_edit();
+    static bool handle_undo();
+    static bool handle_revert();
 };
 
 

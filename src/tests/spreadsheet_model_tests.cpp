@@ -28,6 +28,9 @@ int main()
     test3();
     test4();
     test5();
+    test6();
+    test7();
+    test8();
 }
 
 /**
@@ -102,7 +105,7 @@ void test4()
     std::vector<std::string> dependents;
     dependents.push_back("A9");
     dependents.push_back("A8");
-    alpha.set_cell_contents("A7", "Reach", dependents);
+    alpha.set_cell_contents("A7", "A7 test", dependents);
     std::vector<std::string> a1_dependents;
     std::vector<std::string> a2_dependents;
     alpha.set_cell_contents("A1", "A1 test", a1_dependents );
@@ -112,9 +115,14 @@ void test4()
     new_dependents.push_back("A2");
     alpha.set_cell_contents("A7", "Fargo", new_dependents);
 
-    std::vector<std::string>::iterator dependents_ = alpha.get_cell_direct_dependents("A7").begin();
+    std::vector<std::string> vector_dep = alpha.get_cell_direct_dependents("A7");
+    std::vector<std::string>::iterator dependents_ = vector_dep.begin();
+
+    std::cout << alpha.get_cell_direct_dependents("A7").front()<< std::endl;
+    std::cout << *dependents_ << std::endl;
     bool success1 = *dependents_ == "A1";
     dependents_++;
+    std::cout << *dependents_ << std::endl;
     bool success2 = *dependents_ == "A2";
     bool success3 = alpha.get_cell_contents("A7") == "Fargo";
     if (success1 && success2 && success3) print_success_or_failure(true);
@@ -158,6 +166,57 @@ void test5()
     }
     print_success_or_failure(success);
     std::cout << "Test 5 Finished " << std::endl << std::endl;
+
+}
+
+
+
+
+/**
+ * Test if the type is saved correctly, INT
+ */
+void test6()
+{
+    SpreadsheetModel alpha("Alpha", true);
+    std::cout << "Test 6: type is saved correctly, INT" << std::endl;
+    std::vector<std::string> dependents;
+    alpha.set_cell_contents("C3", "5", dependents);
+    std::string type = alpha.get_cell_type("C3");
+    bool success = (type == "int");
+    print_success_or_failure(success);
+    std::cout << "Test 6 finished " << std::endl << std::endl;
+
+}
+
+/**
+ * Test if the type is saved correctly, Double
+ */
+void test7()
+{
+    SpreadsheetModel alpha("Alpha", true);
+    std::cout << "Test 7: type is saved correctly, DOUBLE" << std::endl;
+    std::vector<std::string> dependents;
+    alpha.set_cell_contents("C3", "4.39", dependents);
+    std::string type = alpha.get_cell_type("C3");
+    bool success = (type == "double");
+    print_success_or_failure(success);
+    std::cout << "Test 7 finished " << std::endl << std::endl;
+
+}
+
+/**
+ * Test if the type is saved correctly, String
+ */
+void test8()
+{
+    SpreadsheetModel alpha("Alpha", true);
+    std::cout << "Test 8: type is saved correctly, STRING" << std::endl;
+    std::vector<std::string> dependents;
+    alpha.set_cell_contents("C3", "=A1+5", dependents);
+    std::string type = alpha.get_cell_type("C3");
+    bool success = (type == "string");
+    print_success_or_failure(success);
+    std::cout << "Test 8 finished " << std::endl << std::endl;
 
 }
 

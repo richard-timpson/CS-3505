@@ -43,24 +43,34 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
 {
     json ss;
     json cells;
-    for (std::pair<std::string, Cell> cell : cell_dictionary)
+    if (cell_dictionary.begin() == cell_dictionary.end())
     {
-        std::string name = cell.second.get_name();
-        std::string contents = cell.second.get_contents();
-        std::string type = cell.second.get_type();
-        if (type == "int")
+        std::cout << "setting cells to empty object " << std::endl;
+        cells = json({});
+    }
+    else
+    {
+        for (std::pair<std::string, Cell> cell : cell_dictionary)
         {
-            cells[name] = stoi(contents);
-        }
-        else if (type == "double")
-        {
-            cells[name] = stod(contents);
-        }
-        else
-        {
-            cells[name] = contents;
+            std::cout << "entered loop in full send " << std::endl;
+            std::string name = cell.second.get_name();
+            std::string contents = cell.second.get_contents();
+            std::string type = cell.second.get_type();
+            if (type == "int")
+            {
+                cells[name] = stoi(contents);
+            }
+            else if (type == "double")
+            {
+                cells[name] = stod(contents);
+            }
+            else
+            {
+                cells[name] = contents;
+            }
         }
     }
+    
     ss["type"] = "full send";
     ss["spreadsheet"] = cells;
     return ss.dump();
@@ -133,6 +143,29 @@ bool SpreadsheetController::check_if_spreadsheet_in_storage(json & message, std:
     return false;
 }
 
+bool SpreadsheetController::handle_edit_message(json & message)
+{
+    std::string type = message.value("type", "-1");
+    if (type == "-1") return false;
+    if (type == "edit") return handle_edit();
+    if (type == "undo") return handle_undo();
+    if (type == "revert") return handle_revert();
+
+}
+
+bool SpreadsheetController::handle_edit()
+{
+    
+}
+
+std::string SpreadsheetController::create_type_1_error()
+{
+    json message = {
+        {"type", "error"},
+        {"code", 1},
+        {"source", " "}};
+    return message.dump();
+}
 
 std::string SpreadsheetController::create_type_1_error()
 {
