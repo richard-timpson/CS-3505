@@ -22,14 +22,18 @@ class Server
 
     // networking functions
     void accept_clients();
-    void send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> connection);
     void accept_spreadsheet_selection(std::shared_ptr<ClientConnection> connection);
+    void accept_edit(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
+    void send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> connection);
     void send_type_1_error(std::shared_ptr<ClientConnection> connection);
+    void send_type_2_error(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
+    void send_full_spreadsheet(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
 
     // member functions
     void add_client_to_list(std::shared_ptr<ClientConnection> connection);
     void add_spreadsheet_to_list(std::shared_ptr<SpreadsheetModel> ss);
-    bool check_if_spreadsheet_in_list(json message);
+    std::shared_ptr<SpreadsheetModel> choose_spreadsheet(json &json_message);
+    bool check_if_spreadsheet_in_list(json message, std::shared_ptr<SpreadsheetModel> sm);
 
 
     // getters/setters
