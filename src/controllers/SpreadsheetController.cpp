@@ -181,7 +181,7 @@ bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<Spreadsh
         }
         
         std::vector<std::string> dependents = message["dependencies"].get<std::vector<std::string>>();
-        sm->do_edit(cell, value, dependents, );
+        //sm->do_edit(cell, value, dependents, );
     }
     
 }
