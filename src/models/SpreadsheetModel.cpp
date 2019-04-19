@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <set>
+#include <deque>
 #include <boost/lexical_cast.hpp>
 
 #include "../../libs/json.hpp"
@@ -105,12 +106,30 @@ std::string SpreadsheetModel::get_cell_type(std::string name)
     }
 }
 
-std::stack<CellEdit>* SpreadsheetModel::get_cell_personal_history(std::string name)
+std::stack<CellEdit> SpreadsheetModel::get_cell_personal_history(std::string name)
 {
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return &it->second.get_personal_history();
+        return it->second.get_personal_history();
+    }
+}
+
+void SpreadsheetModel::push_cell_personal_history(std::string name, CellEdit edit)
+{
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    if (it != cell_dictionary.end())
+    {
+        it->second.get_personal_history().push(edit);
+    }
+}
+
+void SpreadsheetModel::pop_cell_personal_history(std::string name)
+{
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    if (it != cell_dictionary.end())
+    {
+        return it->second.get_personal_history().pop();
     }
 }
 
@@ -143,24 +162,55 @@ void SpreadsheetModel::open_json_ss_file()
 
 void SpreadsheetModel::write_json_ss_file()
 {
-    int cell_index;
-    std::ofstream write_file;
-    json current_json;
 
-    write_file.open("../../data/" + this->name + ".json", std::ios::out);
-    std::unordered_map<std::string, Cell>::iterator it = this->cell_dictionary.begin();
-
-    while (it != this->cell_dictionary.end())
+    json ss;
+    json cells;
+    json fields;
+    if (cell_dictionary.begin() == cell_dictionary.end())
     {
-        current_json["name"] = it->first;
-        current_json["contents"] = it->second.get_contents();
-        current_json["dependents"] = it->second.get_direct_dependents();
-
-        write_file << current_json;
-        it++;
+        std::cout << "setting cells to empty object " << std::endl;
+        cells = json({});
     }
+    else
+    {
+        for (std::pair<const std::string, Cell> cell : cell_dictionary)
+        {
+            std::cout << "entered loop in write_json " << std::endl;
+            std::string name = cell.second.get_name();
+            std::string contents = cell.second.get_contents();
+            std::string type = cell.second.get_type();
+            std::vector<std::string> dependents = cell.second.get_direct_dependents();
+            std::stack<CellEdit> cell_history = cell.second.get_personal_history();
 
+            fields["contents"] = contents;
+            fields["type"] = type;
+            fields["dependents"] = dependents;
+            json history;
+            // loop through all of the stack edits
+            history.push_back({
+                {"name", /*name*/},
+                {"contents", /*contents*/},
+                {"dependents"}
+            })
+            std::vector<CellEdit> cell_edit;
+
+            fields["history"] = history;
+
+            cells[name] = fields;
+
+
+
+
+        }
+    }
+    
+    ss["spreadsheet"] = cells;
+
+    std::ofstream write_file;
+    write_file.open("../../data/" + this->name + ".json", std::ios::out);
+    write_file << ss;
     write_file.close();
+
 }
 
 
