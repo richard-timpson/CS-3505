@@ -325,12 +325,20 @@ void SpreadsheetModel::do_undo()
 
 void SpreadsheetModel::do_revert(std::string name)
 {
+<<<<<<< HEAD
+    // pop the latest change on the cell's personal history
+    this->pop_cell_personal_history(name);
+    
+    // CellEdit edit = edits->top();
+    CellEdit edit = this->top_cell_personal_history(name);
+=======
     // get the edits from the spreadsheet model
     //std::stack<CellEdit> *edits = this->get_cell_personal_history(name);
 
     // pop the latest change on the cell's personal history
     //edits->pop();
     //CellEdit edit = edits->top();
+>>>>>>> SpreadsheetModel
     
     // Peek the personal stack and make a do_edit command, BUT DO NOT ADD BACK TO PERSONAL HISTORY.
     //do_edit(edit.name, edit.contents, edit.direct_dependents, edit.type);

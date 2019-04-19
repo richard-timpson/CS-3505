@@ -23,7 +23,7 @@ Cell::Cell(std::string name, std::string contents, std::vector<std::string> dire
     this->type = type;
 }
 
-
+//changed
 std::string Cell::get_contents()
 {
     return this->current_contents;

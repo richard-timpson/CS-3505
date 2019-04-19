@@ -101,7 +101,7 @@ void test4()
     std::cout << "Test 4: Existing Cell with two dependents" << std::endl;
     std::vector<std::string> a9_dependents;
     std::vector<std::string> a8_dependents;
-    alpha.set_cell_contents("A9", "A9 test", a9_dependents, "string");
+    alpha.set_cell_contents("A9", "A9 test", a9_dependents, "string" );
     alpha.set_cell_contents("A8", "A8 test", a8_dependents, "string" );
     std::vector<std::string> dependents;
     dependents.push_back("A9");
@@ -157,7 +157,7 @@ void test5()
     bool success;
     try
     {
-        alpha.set_cell_contents("A1", "A4", new_a1_dependents, "string" );
+        alpha.set_cell_contents("A1", "=A4+1", new_a1_dependents, "string");
         success = false;
     }
     catch(const CircularException& e)

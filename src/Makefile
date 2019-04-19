@@ -49,3 +49,6 @@ spreadsheet_model_tests: ./tests/spreadsheet_model_tests.cpp
 ######################
 clean:
 	rm -rf ../bin/objects/* ../bin/executables/* ../bin/tests/*
+
+clean_tests:
+	rm -rf ../bin/tests/*
