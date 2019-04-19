@@ -10,6 +10,8 @@
 using namespace boost::asio::ip;
 using json = nlohmann::json;
 
+
+void print_success_or_failure(bool success);
 void test1();
 void test2();
 void test3();
@@ -44,6 +46,8 @@ int main()
     test6();
     testSpreadsheetSelection();
     test10();
+    test11();
+    test12();
 }
 
 void test1()
@@ -102,6 +106,9 @@ void test5()
     Server server(io_context, endpoint);
     json message;
     message["name"] = "test";
+    message["username"] = "test";
+    message["password"] = "test";
+    message["type"] = "open";
     std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>("test", true);
     bool valid = server.check_if_spreadsheet_in_list(message, sm);
     if (valid)
@@ -171,7 +178,18 @@ void test7()
     std::remove("../../data/spreadsheets.txt");
     std::rename("../../data/spreadsheets_temp.txt", "../../data/spreadsheets.txt");
 
-    std::cout << "\tTest 7 finished" << std::endl;
+    bool success;
+    if (sm->get_name() != "test")
+    {
+        success = false;
+    }
+    else 
+    {
+        success = false;
+    }
+    print_success_or_failure(success);
+
+    std::cout << "Test 7 finished" << std::endl;
 }
 
 void test8()
@@ -274,5 +292,54 @@ void test10()
 
     std::cout << "Test 10 finished" << std::endl;
 
+}
 
+/**
+ * Test full send
+ */
+void test11()
+{
+    SpreadsheetModel alpha("SM", true);
+    std::cout << "Test 11: Test for correct full send string on new spreadsheet creation" << std::endl;
+    std::unordered_map<std::string, Cell> cell_dictionary = alpha.get_cell_dictionary();
+    std::cout << "\t" << SpreadsheetController::full_send(cell_dictionary) << std::endl;
+
+    std::cout << "Test 11 finished" << std::endl;
+
+}
+
+/**
+ * Test making normal edit
+ */
+void test12()
+{
+    std::cout << "Test 12: Test for correct string to be printed on normal edit" << std::endl;
+    std::vector<std::string> dependencies{"A1", "B3"};
+    json message;
+    json j_vec(dependencies);
+    message["type"] = "edit";
+    message["cell"] = "A2";
+    message["value"] = "=2*A1+1+B3";
+    message["dependencies"] = j_vec;
+
+    std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>("test", true);
+    bool valid = SpreadsheetController::handle_edit_message(message, sm);
+    
+    std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
+    std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
+    print_success_or_failure(valid);
+}
+
+
+
+void print_success_or_failure(bool success)
+{
+    if (success)
+    {
+        std::cout << "\t Test Succeeded!" << std::endl;
+    }
+    else
+    {
+        std::cout << "\t Test Failed!" << std::endl;
+    }
 }
