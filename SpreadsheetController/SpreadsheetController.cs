@@ -21,15 +21,21 @@ namespace CS3505
         private Socket theServer;
         private SocketState theServerState;
 
-        //public delegate void SpreadsheetUpdatedEventHandler(List<string> updatedCells);
+       
         public delegate void SpreadsheetUpdatedEventHandler(Dictionary<string, IEnumerable<string>> updatedDependencies);
         public event SpreadsheetUpdatedEventHandler SpreadsheetUpdated;
 
         public delegate void SpreadsheetErrorEventHandler(int code, string source);
         public event SpreadsheetErrorEventHandler SpreadsheetError;
-
         public delegate void SpreadsheetsReceivedHandler();
         public event SpreadsheetsReceivedHandler SpreadsheetsReceived;
+
+        /// <summary>
+        /// Usernames cannot have whitespace, this lets the client know
+        /// that the username contains a whitespace
+        /// </summary>
+        public delegate void InvalidUsernameHandler();
+        public event InvalidUsernameHandler InvalidUsername;
 
         /// <summary>
         /// LogIn Username
@@ -45,6 +51,11 @@ namespace CS3505
         /// JSON terminator string
         /// </summary>
         private const string ENDOFMESSAGE = "\n\n";
+
+        /// <summary>
+        /// Tracks the status of the client's connection
+        /// </summary>
+        private bool connected = false;
 
         /// <summary>
         /// The representation of a spreadsheet that will be updated
@@ -111,7 +122,6 @@ namespace CS3505
                 }
                 // if the last two chars are not new lines then there are
                 // no more full messages be evaluated
-                //FIXME CHANGED FOR TESTING Change to OR
                 if (p.Length < 3)
                 {
                     continue;
@@ -136,8 +146,17 @@ namespace CS3505
                 // ignore if it is the wrong kind of message
                 if (receive.type != "list")
                 {
-                    ss.sb.Remove(0, p.Length);
-                    Networking.GetData(ss);
+                    if(receive.type == "error")
+                    {
+                        ProcessError(p);
+
+                    }
+                    else
+                    {
+                        ss.sb.Remove(0, p.Length);
+                        Networking.GetData(ss);
+                    }
+                    
                     return;
                 }
 
@@ -155,6 +174,9 @@ namespace CS3505
                 // Notify the client that new spreadsheets are available
                 SpreadsheetsReceived();
                 theServerState = ss;
+
+                this.connected = true;
+
                 //Networking.GetData(ss);
                 ss.sb.Remove(0, p.Length);
             }
@@ -168,9 +190,16 @@ namespace CS3505
         /// <param name="sheet"></param>
         public void ChooseSpreadsheet(string sheetName, string username, string password)
         {
-
-
             Username = username;
+
+            //Usernames cannot have whitespaces. If the given username has a whitespace,
+            //Alert the client and do not proceed with the request.
+            if (Username.Contains(" "))
+            {
+                InvalidUsername();
+                return;
+            }
+
             Password = password;
             // create the JSon object to be sent
             var open = new
@@ -180,6 +209,8 @@ namespace CS3505
                 username = Username,
                 password = Password
             };
+
+            
 
             // send the request to the server
             string message = JsonConvert.SerializeObject(open) + ENDOFMESSAGE;
@@ -305,7 +336,6 @@ namespace CS3505
                     {
                         ProcessFullSend(p);
                     }
-                    // FIXME?
                     // if unexpected message comes ignore it for now?? ...
                     ss.sb.Remove(0, p.Length);
 
@@ -334,8 +364,25 @@ namespace CS3505
 
             if (error.code == 1)
             {
-                // notify the client
-                SpreadsheetError(error.code, "");
+                if (connected)
+                {
+
+
+                    // notify the client
+                    SpreadsheetError(error.code, "Invalid Authorization Please Verify Your Password");
+
+                    //Set the CallMe back to receivespreadsheet list
+                    theServerState.CallMe = ReceiveSpreadsheetsList;
+                }
+                else
+                {
+                    // notify the client
+                    SpreadsheetError(error.code, "Connection Failed Verify IPAddress and Try Again");
+
+                    // disconnect
+                    theServerState.theSocket.Close();
+
+                }
             }
             else // code 2
             {
@@ -359,7 +406,14 @@ namespace CS3505
             };
 
             fullsend = JsonConvert.DeserializeAnonymousType(message, fullsend);
+
             Dictionary<string, string> edits = fullsend.spreadsheet;
+
+            // ignore invalid messages
+            if(fullsend.spreadsheet == null)
+            {
+                return;
+            }
 
             Dictionary<string, IEnumerable<string>> cellDependencies = new Dictionary<string, IEnumerable<string>>();
            // lock (sheet)
@@ -370,14 +424,10 @@ namespace CS3505
                    cellDependencies[cell] = this.sheet.SetContentsOfCell(cell, edits[cell]);
                 }
 
-
-
             }
             // let the subscribers (client) know that the spreadsheet has been updated
-            // SpreadsheetUpdated(edits.Keys.ToList());
             SpreadsheetUpdated(cellDependencies);
 
         }
     }
 }
-

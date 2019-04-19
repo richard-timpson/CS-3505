@@ -11,7 +11,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
-using NewSpreadsheetDialog;
 
 namespace ClientGUI
 {
@@ -24,6 +23,15 @@ namespace ClientGUI
         /// </summary>
         private SpreadsheetController ssController;
 
+        public SpreadsheetView SSView
+        {
+            get
+            {
+                return ssView;
+            }
+
+        }
+       
         public ClientLogIn()
         {
             InitializeComponent();
@@ -35,6 +43,8 @@ namespace ClientGUI
             //Subscribe To Spreadsheets Received by updating ListOfSpreadsheets
             ssController.SpreadsheetsReceived += UpdateListOfSpreadsheets;
             ssController.SpreadsheetUpdated += UpdateSpreadsheet;
+            ssController.InvalidUsername += UsernameInvalid;
+            ssController.SpreadsheetError += ProcessError;
             //------------------------------------------------------------------------------
 
             //----------ListOfSpreadsheets Initialization-------------------------------
@@ -49,7 +59,10 @@ namespace ClientGUI
             NewSpreadsheetButton.Enabled = false;
             //--------------------------------------------------------------------------
 
-            ssView = null;
+            //ssView = null;
+
+            ssView = new SpreadsheetView(ssController);
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -75,6 +88,13 @@ namespace ClientGUI
         /// <param name="e"></param>
         private void EditSpreadsheetButton_Click(object sender, EventArgs e)
         {
+            //If a spreadsheet isn't selected, don't do anything
+            if (ListOfSpreadsheets.SelectedItem == null)
+            {
+                return;
+            }
+
+            //Otherwise, send the message to open the spreadsheet
             System.Diagnostics.Debug.WriteLine(ListOfSpreadsheets.SelectedItem.ToString());
             ssController.ChooseSpreadsheet(ListOfSpreadsheets.SelectedItem.ToString(), UsernameTextBox.Text, PasswordTextBox.Text);
         }
@@ -126,6 +146,9 @@ namespace ClientGUI
         }
 
 
+        /// <summary>
+        /// Draws the list of available spreadsheets
+        /// </summary>
         private void PopulateListOfSpreadsheets()
         {
             ListOfSpreadsheets.Enabled = true;
@@ -155,31 +178,73 @@ namespace ClientGUI
         /// </summary>
         private void UpdateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependencies)
         {
-            //Is the spreadsheet already open?
-            if (ssView == null)
-            {
-                //Open a new SpreadsheetGUI if it isn't
-                ssView = new SpreadsheetView(ssController);
-                MethodInvoker m = new MethodInvoker(() => SpreadsheetAplicationContext.getAppContext().RunForm(ssView));//new SpreadsheetView(ssController)));
-                this.Invoke(m);
-                System.Diagnostics.Debug.WriteLine("Opened new form");
+            // Launch the SpreadsheetView
+            MethodInvoker m = new MethodInvoker(() => Program.runView(cellDependencies));
+            this.Invoke(m);
 
-                ssView.PopulateSpreadsheet(cellDependencies);
-                
+            // Close the Client GUI
+            MethodInvoker m1 = new MethodInvoker(() => this.Close());
+            this.Invoke(m1);
+            
+        }
+
+
+        private void ProcessError(int code, string source)
+        {
+            if(code == 1)
+            {
+                MessageBox.Show(source, "Connection Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        
-        //private async Task<DialogResult> ShowDialogAsync(this Form @this)
-        //{
-        //    await Task.Yield();
-        //    if (@this.IsDisposed)
-        //        return DialogResult.OK;
-        //    return @this.ShowDialog();
-        //}
 
+
+        /// <summary>
+        /// When the New Spreadsheet button is clicked, verify that the name
+        /// doesn't exist, then create a new spreadsheet with the given name
+        /// </summary>  
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void NewSpreadsheetButton_Click(object sender, EventArgs e)
         {
-            string s = Interaction.InputBox("Please enter the password:", "Password", "", -1, -1);
+            //prompt user to type in a new spreadsheet name
+            string newSheetName = Interaction.InputBox("Enter name of new spreadsheet:", "New Spreadsheet", "", -1, -1);
+
+            //If the string is not null or whitespace, two things could happen.
+            //Either the Spreadsheet already exists, or it doesn't. The loop 
+            //Allows users multiple opportunities to enter a valid spreadsheet name.
+            while (!String.IsNullOrWhiteSpace(newSheetName))
+            {
+                //If the spreadsheet already exists, let the user know and allow them
+                //another chance to write out a different spreadsheet name.
+                if (ListOfSpreadsheets.Items.Contains(newSheetName))
+                {
+                    MessageBox.Show("The spreadsheet already exists.\n\nPlease enter a different name.",
+                                    "Spreadsheet Already Exists",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Stop);
+                    newSheetName = Interaction.InputBox("Enter name of new spreadsheet:", "New Spreadsheet", "", -1, -1);
+                }
+                else //If the spreadsheet doesn't already exist, send a message to make a spreadsheet
+                {
+                    ssController.ChooseSpreadsheet(newSheetName, UsernameTextBox.Text, PasswordTextBox.Text);
+                    break;
+                }
+            }
+
+            //If the string is null or whitespace, the code will end up here, just do nothing
+        }
+
+        /// <summary>
+        /// Happens when the user attempts to enter 
+        /// a name that the Spreadsheet Controller
+        /// doesn't like.
+        /// </summary>
+        private void UsernameInvalid()
+        {
+            MessageBox.Show("The specified username is invalid.\n\nUsernames cannot have whitespaces.", 
+                            "Invalid Username", 
+                            MessageBoxButtons.OK, 
+                            MessageBoxIcon.Stop);
         }
 
 

@@ -38,6 +38,8 @@ namespace SpreadsheetGUI
         /// </summary>
         private SoundPlayer music;
 
+        private static bool closing = false;
+
         /// <summary>
         /// Controller for sending and receiving edits from a server
         /// </summary>
@@ -50,23 +52,52 @@ namespace SpreadsheetGUI
             FormClosing += saveCheck;
             SetCellContentsText.KeyUp += KeyReleased;
             SetCellContentsText.PreviewKeyDown += KeyPressed;
+
+            cellEditBox.TextChanged += UpdateSetCellContentsText;
+            SetCellContentsText.TextChanged += UpdateCellEditBox;
+
             // SetCellContentsText.KeyDown += KeyReleased;
             music = new SoundPlayer(Directory.GetCurrentDirectory() + "\\WiiMusic.wav");
 
             this.ssController = ssController;
 
             ssController.SpreadsheetUpdated += SpreadsheetUpdate;
+            ssController.SpreadsheetError += ProcessError;
             formSheet = ssController.Sheet;
             //formSheet = new Spreadsheet(x => true, x => x.ToUpper(), "ps6");
 
             this.AcceptButton = SetCellContentsButton;
-            
+
             // the initial selection should be the first cell
             spreadsheetPanel1.SetSelection(0, 0);
             SetCellContentsText.Focus();
         }
 
-       
+        /// <summary>
+        /// When the SetCellContents text box updates, update
+        /// the cellEditBox text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateCellEditBox(object sender, EventArgs e)
+        {
+            cellEditBox.Text = SetCellContentsText.Text;
+        }
+
+        /// <summary>
+        /// When the cellEditBox text box updates, update
+        /// the SetCellContents text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateSetCellContentsText(object sender, EventArgs e)
+        {
+            SetCellContentsText.Text = cellEditBox.Text;
+        }
+
+
+
+
 
 
         #region(oldocde)
@@ -200,18 +231,15 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void saveCheck(Object sender, FormClosingEventArgs e)
         {
-            if (!saved)
+
+            //{
+            if (!closing)
             {
-                DialogResult saveResult = MessageBox.Show("Your data has not been saved. Would you like to save before continuing?", "Unsaved Data", MessageBoxButtons.YesNoCancel);
-                if (saveResult == DialogResult.Yes)
-                {
-                    save();
-                }
-                else if (saveResult == DialogResult.Cancel)
-                {
-                    e.Cancel = true;
-                }
+                closing = true;
+                MethodInvoker m = new MethodInvoker(() => this.Close());
+                this.Invoke(m);
             }
+      
         }
         /// <summary>
         /// A private helper method that, upon loading an existing sheet if the current sheet
@@ -246,6 +274,9 @@ namespace SpreadsheetGUI
         /// <param name="ss"></param>
         private void OnSelectionChanged(SpreadsheetPanel ss)
         {
+            //TODO SET TEXT BOX FOR EDITING THE CELL DIRECTLY
+
+
             // set the cursor to the set cell contents text box when a new cell is selected
             SetCellContentsText.Focus();
             displayCellName(ss);
@@ -313,15 +344,23 @@ namespace SpreadsheetGUI
 
             string cellName = (columnLetter.ToString() + row.ToString());
 
+            cellEditBox.Location = new Point(col * 80 + 29, row * 20 + 90);
 
             if (formSheet.GetCellContents(cellName) is SpreadsheetUtilities.Formula)
             {
                 SetCellContentsText.Text = "=" + formSheet.GetCellContents(cellName).ToString();
+                this.cellEditBox.Visible = true;
+                cellEditBox.Text = "=" + formSheet.GetCellContents(cellName).ToString();
+                cellEditBox.Focus();
             }
             else
             {
                 //********** Set the Contents of the text box to the contents of the selected cell ****
                 SetCellContentsText.Text = formSheet.GetCellContents(cellName).ToString();
+
+                this.cellEditBox.Visible = true;
+                cellEditBox.Text = formSheet.GetCellContents(cellName).ToString();
+                cellEditBox.Focus();
             }
 
         }
@@ -346,6 +385,21 @@ namespace SpreadsheetGUI
 
         }
         #endregion
+
+        /// <summary>
+        /// Event handler for Processing spreadsheet errors
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="source"></param>
+        private void ProcessError(int code, string source)
+        {
+            // only code 2 is processed by the spreadsheet view
+            if (code == 2)
+            {
+                MessageBox.Show("Circular Dependency Created in Cell: " + source + "\n\n The Requested Edit was not Applied to the Cell", "Circular Dependency", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         /// <summary>
         /// Helper method that uses the Spreadsheet controller to send an edit Request to the server
         /// </summary>
@@ -356,10 +410,13 @@ namespace SpreadsheetGUI
 
             spreadsheetPanel1.GetSelection(out col, out row);
 
+            cellEditBox.Visible = false;
+
             // get the appropriate column letter and cell name
             char columnLetter = getColumnLetter(col);
             string cellName = columnLetter.ToString() + (row + 1).ToString();
 
+            SetCellContentsText.Text = cellEditBox.Text;
             ssController.ClientEdit(cellName, SetCellContentsText.Text);
 
         }
@@ -381,50 +438,17 @@ namespace SpreadsheetGUI
         /// <param name="updatedCells"></param>
         private void SpreadsheetUpdate(Dictionary<string, IEnumerable<string>> cellDependies)
         {
-            #region(maybe)
-            //lock (this.formSheet)
-            //{
-            //    foreach (string cell in updatedCells)
-            //    {
-            //       object edit = ssController.Sheet.GetCellContents(cell);
 
-            //        if (edit is string)
-            //        {
-            //            //FIXME??
-            //            //MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, edit.ToString()));
-            //            //this.Invoke(m);
-            //            setSelectedCell(cell, edit.ToString());
-            //        }
-            //        else if (edit is double)
-            //        {
-            //            //FIXME??
-            //            //MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, edit.ToString()));
-            //            //this.Invoke(m);
-            //            setSelectedCell(cell, edit.ToString());
-            //        }
-            //        else // else it is a formula
-            //        {
-
-            //            //FIXME??
-            //            //MethodInvoker m = new MethodInvoker(() => this.setSelectedCell(cell, "=" + edit.ToString()));
-            //            //this.Invoke(m);
-            //             setSelectedCell(cell, "=" + edit.ToString());
-
-            //        }
-
-            //    }
-            //}
-            #endregion
             //update the underlying spreadsheet and all of the values that rely on the updated cells
             foreach (string dependent in cellDependies.Keys)
             {
-                foreach(string cell in cellDependies[dependent])
+                foreach (string cell in cellDependies[dependent])
                 {
                     // get the location of the dependent cell
-                    int col = (int)dependent[0] - 65;
-                    int row = int.Parse(dependent.Substring(1)) - 1;
+                    int col = (int)cell[0] - 65;
+                    int row = int.Parse(cell.Substring(1)) - 1;
                     //set the new value to the dependent cells                
-                    spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(dependent).ToString());
+                    spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(cell).ToString());
                 }
             }
 
@@ -448,8 +472,8 @@ namespace SpreadsheetGUI
             IEnumerable<string> dependentList;
             try
             {
-               dependentList = formSheet.SetContentsOfCell(cellName, SetCellContentsText.Text);
-               //dependentList = formSheet.get
+                dependentList = formSheet.SetContentsOfCell(cellName, SetCellContentsText.Text);
+                //dependentList = formSheet.get
 
 
                 //update the underlying spreadsheet and all of the values that rely on the updated cell
@@ -471,7 +495,7 @@ namespace SpreadsheetGUI
             }
             catch (CircularException e)
             {
-               
+
                 MessageBox.Show("Cells Cannot Be Set So That a Circular Dependency is Introduced to the SpreadSheet /n" + e.Message, "Input Error");
             }
 
@@ -530,11 +554,11 @@ namespace SpreadsheetGUI
                     if (saveFile.FilterIndex == 2)
                     {
                         saveFile.DefaultExt = "sprd";
-                           
-                           }
+
+                    }
 
 
-                  
+
 
                     return saveFile.FileName;
                 }
@@ -911,7 +935,7 @@ namespace SpreadsheetGUI
             {
                 music.Play();
             }
-            catch( Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show("Invalid Music file path, please be sure a wav file has been selected", "Music error");
             }
@@ -927,18 +951,19 @@ namespace SpreadsheetGUI
                 {
                     musicFile.InitialDirectory = "c:\\";
                     musicFile.Filter = "wav files (*.wav)|*.wav";
-                    
+
 
                     musicFile.ShowDialog();
                     musicFile.RestoreDirectory = true;
                     string fileName = musicFile.FileName;
 
                     music.SoundLocation = fileName;
-                }catch(System.ArgumentException e)
+                }
+                catch (System.ArgumentException e)
                 {
 
                 }
-              
+
                 catch (Exception e)
                 {
                     MessageBox.Show("An error occured while selecting the file");
@@ -989,6 +1014,13 @@ namespace SpreadsheetGUI
             string cellName = columnLetter.ToString() + (row + 1).ToString();
 
             ssController.ClientRevert(cellName);
+        }
+
+        private void Menu_Click(object sender, EventArgs e)
+        {
+            //{
+            //    MethodInvoker m = new MethodInvoker(() => this.menu);
+            //    this.Invoke(m);
         }
     }
 
