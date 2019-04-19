@@ -153,12 +153,11 @@ bool SpreadsheetController::check_if_spreadsheet_in_storage(json & message, std:
 
 bool SpreadsheetController::handle_edit_message(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
-    std::string type = message.value("type", "-1");
-    if (type == "-1") return false;
+    if (!message.contains("type")) return false;
+    std::string type = message.at("type");
     if (type == "edit") return handle_edit(message, sm);
-    if (type == "undo") return handle_undo(message, sm);
-    if (type == "revert") return handle_revert(message, sm);
-
+    else if (type == "undo") return handle_undo(message, sm);
+    else if (type == "revert") return handle_revert(message, sm);
 }
 
 bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<SpreadsheetModel> sm)
@@ -166,11 +165,12 @@ bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<Spreadsh
     // std::cout << message.value("cell", "-1")  << message.value("value", "-1") << std::endl;
     if (!message.contains("cell") || !message.contains("value") || !message.contains("dependencies"))
     {
-        std::cout << "return false" << std::endl;
+        // std::cout << "edit message is invalid" << std::endl;
         return false;
     }
     else
     {
+        // std::cout << "edit message is valid" << std::endl;
         std::string cell = message.value("cell", "-1");
         json value_ = message["value"];
         std::string value;
@@ -190,6 +190,7 @@ bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<Spreadsh
         
         std::vector<std::string> dependents = message["dependencies"].get<std::vector<std::string>>();
         sm->do_edit(cell, value, dependents, type);
+        return true;
     }
     
 }
