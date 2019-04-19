@@ -194,25 +194,44 @@ void SpreadsheetModel::write_json_ss_file()
             fields["contents"] = contents;
             fields["type"] = type;
             fields["dependents"] = dependents;
-            json history;
+            
+            json j_cell_history;
             // loop through all of the stack edits
-            history.push_back({
-                {"name", /*name*/},
-                {"contents", /*contents*/},
-                {"dependents"}
-            });
+            while (cell_history.empty() != true)
+            {
+                j_cell_history.push_back({
+                {"name", cell_history.top().name},
+                {"contents", cell_history.top().contents},
+                {"dependents", cell_history.top().direct_dependents}
+                });
+                cell_history.pop();
 
-            fields["history"] = history;
+            }
+
+            fields["history"] = j_cell_history;
 
             cells[name] = fields;
-
-
-
-
         }
     }
     
     ss["spreadsheet"] = cells;
+
+
+    std::stack<CellEdit> global_history = this->get_global_history();
+    json j_global_history;
+    // loop through all of the stack edits
+    while (global_history.empty() != true)
+    {
+        j_global_history.push_back({
+        {"name", global_history.top().name},
+        {"contents", global_history.top().contents},
+        {"dependents", global_history.top().direct_dependents}
+        });
+        global_history.pop();
+
+    }
+
+    ss["global_history"] = j_global_history;
 
     std::ofstream write_file;
     write_file.open("../../data/" + this->name + ".json", std::ios::out);
@@ -306,14 +325,23 @@ void SpreadsheetModel::do_undo()
 
 void SpreadsheetModel::do_revert(std::string name)
 {
+<<<<<<< HEAD
     // pop the latest change on the cell's personal history
     this->pop_cell_personal_history(name);
     
     // CellEdit edit = edits->top();
     CellEdit edit = this->top_cell_personal_history(name);
+=======
+    // get the edits from the spreadsheet model
+    //std::stack<CellEdit> *edits = this->get_cell_personal_history(name);
+
+    // pop the latest change on the cell's personal history
+    //edits->pop();
+    //CellEdit edit = edits->top();
+>>>>>>> SpreadsheetModel
     
     // Peek the personal stack and make a do_edit command, BUT DO NOT ADD BACK TO PERSONAL HISTORY.
-    do_edit(edit.name, edit.contents, edit.direct_dependents, edit.type);
+    //do_edit(edit.name, edit.contents, edit.direct_dependents, edit.type);
 }
 
 

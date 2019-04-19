@@ -31,6 +31,7 @@ int main()
     test6();
     test7();
     test8();
+    test9();
 }
 
 /**
@@ -180,7 +181,7 @@ void test6()
     SpreadsheetModel alpha("Alpha", true);
     std::cout << "Test 6: type is saved correctly, INT" << std::endl;
     std::vector<std::string> dependents;
-    alpha.set_cell_contents("C3", "5", dependents, "string");
+    alpha.set_cell_contents("C3", "5", dependents, "int");
     std::string type = alpha.get_cell_type("C3");
     bool success = (type == "int");
     print_success_or_failure(success);
@@ -196,7 +197,7 @@ void test7()
     SpreadsheetModel alpha("Alpha", true);
     std::cout << "Test 7: type is saved correctly, DOUBLE" << std::endl;
     std::vector<std::string> dependents;
-    alpha.set_cell_contents("C3", "4.39", dependents, "string");
+    alpha.set_cell_contents("C3", "4.39", dependents, "double");
     std::string type = alpha.get_cell_type("C3");
     bool success = (type == "double");
     print_success_or_failure(success);
@@ -220,6 +221,23 @@ void test8()
 
 }
 
+/**
+ *  Test if the spreadsheet is written correctly.
+ */
+void test9()
+{
+    SpreadsheetModel alpha("Alpha", true);
+    std::cout << "Test 9: spreadsheet is saved correctly" << std::endl;
+    std::vector<std::string> dependents;
+    alpha.do_edit("C3", "=A1+1");
+    alpha.set_cell_contents("C3", "=A1+2", dependents, "string");
+    alpha.set_cell_contents("C3", "=A1+3", dependents, "string");
+
+    alpha.write_json_ss_file();
+
+    std::cout << "Test 9 finished " << std::endl << std::endl;
+
+}
 
 void print_success_or_failure(bool success)
 {
