@@ -25,6 +25,7 @@ class SpreadsheetController
     static bool handle_edit(json & message, std::shared_ptr<SpreadsheetModel> sm);
     static bool handle_undo(json & message, std::shared_ptr<SpreadsheetModel> sm);
     static bool handle_revert(json & message, std::shared_ptr<SpreadsheetModel> sm);
+    static std::string get_type(json & message);
 };
 
 

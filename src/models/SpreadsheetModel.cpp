@@ -29,31 +29,31 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
     }
 }
 
-void SpreadsheetModel::set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents)
+void SpreadsheetModel::set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents, std::string type)
 {
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
 
     // Cell doesn't exist
     if (it == cell_dictionary.end())
     {
-        std::string type;
-        bool is_int = check_if_int(contents);
-        if (is_int)
-        {
-            type = "int";
-        }
-        else
-        {
-            bool is_double = check_if_double(contents);
-            if (is_double)
-            {
-                type = "double";
-            }
-            else
-            {
-                type = "string";
-            }
-        }
+        // std::string type;
+        // bool is_int = check_if_int(contents);
+        // if (is_int)
+        // {
+        //     type = "int";
+        // }
+        // else
+        // {
+        //     bool is_double = check_if_double(contents);
+        //     if (is_double)
+        //     {
+        //         type = "double";
+        //     }
+        //     else
+        //     {
+        //         type = "string";
+        //     }
+        // }
         Cell new_cell(name, contents, dependents, type);
         cell_dictionary.insert({name, new_cell});
     }
@@ -105,12 +105,12 @@ std::string SpreadsheetModel::get_cell_type(std::string name)
     }
 }
 
-std::stack<CellEdit> SpreadsheetModel::get_cell_personal_history(std::string name)
+std::stack<CellEdit>* SpreadsheetModel::get_cell_personal_history(std::string name)
 {
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.get_personal_history();
+        return &it->second.get_personal_history();
     }
 }
 
@@ -206,8 +206,23 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
     return false;
 }
 
-void SpreadsheetModel::do_edit()
+void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std::vector<std::string> & dependents, std::string type)
 {
+    try
+    {
+        this->set_cell_contents(cell_name, contents, dependents, type);
+    }
+    catch(const CircularException& e)
+    {
+        std::cerr << e.what() << '\n';
+        throw e;
+    }
+    CellEdit edit;
+    edit.name = cell_name;
+    edit.contents = contents;
+    edit.direct_dependents = dependents;
+    edit.type = type;
+    this->global_history.push(edit);
     // Change the cell's contents, then add the CellEdit struct
     //  to the global history as well as the cell's personal history.
 
@@ -215,14 +230,33 @@ void SpreadsheetModel::do_edit()
 
 void SpreadsheetModel::do_undo()
 {
+    this->global_history.pop();
+    CellEdit edit = this->global_history.top();
+    try
+    {
+        this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        throw e;
+    }
+    
     // Pop the latest change off the global history
     // Peek the global stack and set the contents of that cell.
 }
 
 void SpreadsheetModel::do_revert(std::string name)
 {
+    // get the edits from the spreadsheet model
+    std::stack<CellEdit> *edits = this->get_cell_personal_history(name);
+
     // pop the latest change on the cell's personal history
+    edits->pop();
+    CellEdit edit = edits->top();
+    
     // Peek the personal stack and make a do_edit command, BUT DO NOT ADD BACK TO PERSONAL HISTORY.
+    do_edit(edit.name, edit.contents, edit.direct_dependents, edit.type);
 }
 
 

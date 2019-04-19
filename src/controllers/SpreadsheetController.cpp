@@ -9,7 +9,7 @@
 using json = nlohmann::json;
 
 std::vector<std::string> split(std::string s, std::string delimiter);
-
+// std::string check_type
 std::string SpreadsheetController::get_list_of_spreadsheets()
 {
     std::ifstream file("../../data/spreadsheets.txt");
@@ -116,7 +116,7 @@ bool SpreadsheetController::validate_user(json message, std::string &error_messa
 
 bool SpreadsheetController::validate_login_message(json & message)
 {
-    if (message.value("username", "-1") == "-1" || message.value("password", "-1") == "-1" || message.value("type", "-1") == "-1" || message.value("name", "-1") == "-1")
+    if (!message.contains("username") || !message.contains("password") || !message.contains("type") || !message.contains("name"))
     {
         return false;
     }
@@ -155,8 +155,8 @@ bool SpreadsheetController::handle_edit_message(json & message, std::shared_ptr<
 
 bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
-    std::cout << message.value("cell", "-1")  << message.value("value", "-1") << std::endl;
-    if (message.value("cell", "-1") == "-1" || message.value("value", "-1") == "-1" || message.value("dependencies", "-1") == "-1")
+    // std::cout << message.value("cell", "-1")  << message.value("value", "-1") << std::endl;
+    if (!message.contains("cell") || !message.contains("value") || !message.contains("dependencies"))
     {
         std::cout << "return false" << std::endl;
         return false;
@@ -164,9 +164,24 @@ bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<Spreadsh
     else
     {
         std::string cell = message.value("cell", "-1");
-        std::string value = message.value("value", "-1");
+        json value_ = message["value"];
+        std::string value;
+        std::string type = get_type(value_);
+        if (type == "string")
+        {
+            value = value_.get<std::string>();
+        }
+        else if (type == "int")
+        {
+            value = std::to_string(value_.get<int>());
+        }
+        else if (type == "double")
+        {
+            value = std::to_string(value_.get<double>());
+        }
+        
         std::vector<std::string> dependents = message["dependencies"].get<std::vector<std::string>>();
-        sm->do_edit();
+        sm->do_edit(cell, value, dependents, );
     }
     
 }
@@ -198,6 +213,22 @@ std::string SpreadsheetController::create_type_2_error()
         {"code", 1},
         {"source", " "}};
     return message.dump();
+}
+
+std::string SpreadsheetController::get_type(json &message)
+{
+    if (message.type() == json::value_t::string)
+    {
+        return "string";
+    }
+    else if (message.type() == json::value_t::number_integer)
+    {
+        return "int";
+    }
+    else if (message.type() == json::value_t::number_float)
+    {
+        return "double";
+    }
 }
 
 std::vector<std::string> split(std::string s, std::string delimiter)

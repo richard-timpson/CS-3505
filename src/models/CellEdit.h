@@ -1,8 +1,5 @@
-#ifndef CELLEDIT
-#define CELLEDIT
-
-#include <string>
-#include <vector>
+#ifndef CELLEDIT_H
+#define CELLEDIT_H
 
 
 struct CellEdit
