@@ -47,6 +47,10 @@
             this.cancelButton = new System.Windows.Forms.Button();
             this.deleteUserButton = new System.Windows.Forms.Button();
             this.deleteSpreadsheetButton = new System.Windows.Forms.Button();
+            this.activeSpreadsheetsAndUsers = new System.Windows.Forms.ListView();
+            this.usersLabel = new System.Windows.Forms.Label();
+            this.spreadsheetsLabel = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // offButton
@@ -71,18 +75,18 @@
             // 
             // userListView
             // 
-            this.userListView.Location = new System.Drawing.Point(156, 17);
+            this.userListView.Location = new System.Drawing.Point(156, 31);
             this.userListView.Name = "userListView";
-            this.userListView.Size = new System.Drawing.Size(200, 400);
+            this.userListView.Size = new System.Drawing.Size(200, 386);
             this.userListView.TabIndex = 2;
             this.userListView.UseCompatibleStateImageBehavior = false;
             this.userListView.SelectedIndexChanged += new System.EventHandler(this.userListView_SelectedIndexChanged);
             // 
             // spreadsheetListView
             // 
-            this.spreadsheetListView.Location = new System.Drawing.Point(362, 17);
+            this.spreadsheetListView.Location = new System.Drawing.Point(362, 31);
             this.spreadsheetListView.Name = "spreadsheetListView";
-            this.spreadsheetListView.Size = new System.Drawing.Size(174, 400);
+            this.spreadsheetListView.Size = new System.Drawing.Size(174, 386);
             this.spreadsheetListView.TabIndex = 3;
             this.spreadsheetListView.UseCompatibleStateImageBehavior = false;
             this.spreadsheetListView.SelectedIndexChanged += new System.EventHandler(this.spreadsheetListView_SelectedIndexChanged);
@@ -112,7 +116,7 @@
             // confirmAddUserButton
             // 
             this.confirmAddUserButton.Enabled = false;
-            this.confirmAddUserButton.Location = new System.Drawing.Point(649, 88);
+            this.confirmAddUserButton.Location = new System.Drawing.Point(1049, 74);
             this.confirmAddUserButton.Name = "confirmAddUserButton";
             this.confirmAddUserButton.Size = new System.Drawing.Size(133, 23);
             this.confirmAddUserButton.TabIndex = 6;
@@ -124,7 +128,7 @@
             // newUserTextBox
             // 
             this.newUserTextBox.Enabled = false;
-            this.newUserTextBox.Location = new System.Drawing.Point(649, 36);
+            this.newUserTextBox.Location = new System.Drawing.Point(1049, 22);
             this.newUserTextBox.Name = "newUserTextBox";
             this.newUserTextBox.Size = new System.Drawing.Size(138, 20);
             this.newUserTextBox.TabIndex = 7;
@@ -133,7 +137,7 @@
             // newPasswordTextBox
             // 
             this.newPasswordTextBox.Enabled = false;
-            this.newPasswordTextBox.Location = new System.Drawing.Point(649, 62);
+            this.newPasswordTextBox.Location = new System.Drawing.Point(1049, 48);
             this.newPasswordTextBox.Name = "newPasswordTextBox";
             this.newPasswordTextBox.Size = new System.Drawing.Size(138, 20);
             this.newPasswordTextBox.TabIndex = 8;
@@ -143,7 +147,7 @@
             // 
             this.newUserLabel.AutoSize = true;
             this.newUserLabel.Enabled = false;
-            this.newUserLabel.Location = new System.Drawing.Point(558, 43);
+            this.newUserLabel.Location = new System.Drawing.Point(958, 29);
             this.newUserLabel.Name = "newUserLabel";
             this.newUserLabel.Size = new System.Drawing.Size(85, 13);
             this.newUserLabel.TabIndex = 9;
@@ -154,7 +158,7 @@
             // 
             this.newPasswordLabel.AutoSize = true;
             this.newPasswordLabel.Enabled = false;
-            this.newPasswordLabel.Location = new System.Drawing.Point(565, 65);
+            this.newPasswordLabel.Location = new System.Drawing.Point(965, 51);
             this.newPasswordLabel.Name = "newPasswordLabel";
             this.newPasswordLabel.Size = new System.Drawing.Size(78, 13);
             this.newPasswordLabel.TabIndex = 10;
@@ -164,7 +168,7 @@
             // confirmNewSpreadsheetButton
             // 
             this.confirmNewSpreadsheetButton.Enabled = false;
-            this.confirmNewSpreadsheetButton.Location = new System.Drawing.Point(568, 176);
+            this.confirmNewSpreadsheetButton.Location = new System.Drawing.Point(968, 162);
             this.confirmNewSpreadsheetButton.Name = "confirmNewSpreadsheetButton";
             this.confirmNewSpreadsheetButton.Size = new System.Drawing.Size(189, 23);
             this.confirmNewSpreadsheetButton.TabIndex = 11;
@@ -176,7 +180,7 @@
             // newSpreadhseetTextBox
             // 
             this.newSpreadhseetTextBox.Enabled = false;
-            this.newSpreadhseetTextBox.Location = new System.Drawing.Point(671, 146);
+            this.newSpreadhseetTextBox.Location = new System.Drawing.Point(1071, 132);
             this.newSpreadhseetTextBox.Name = "newSpreadhseetTextBox";
             this.newSpreadhseetTextBox.Size = new System.Drawing.Size(111, 20);
             this.newSpreadhseetTextBox.TabIndex = 12;
@@ -186,7 +190,7 @@
             // 
             this.newSpreadsheetNameLabel.AutoSize = true;
             this.newSpreadsheetNameLabel.Enabled = false;
-            this.newSpreadsheetNameLabel.Location = new System.Drawing.Point(542, 149);
+            this.newSpreadsheetNameLabel.Location = new System.Drawing.Point(942, 135);
             this.newSpreadsheetNameLabel.Name = "newSpreadsheetNameLabel";
             this.newSpreadsheetNameLabel.Size = new System.Drawing.Size(123, 13);
             this.newSpreadsheetNameLabel.TabIndex = 13;
@@ -195,16 +199,16 @@
             // 
             // logTextBox
             // 
-            this.logTextBox.Location = new System.Drawing.Point(545, 271);
+            this.logTextBox.Location = new System.Drawing.Point(945, 252);
             this.logTextBox.Name = "logTextBox";
-            this.logTextBox.Size = new System.Drawing.Size(237, 146);
+            this.logTextBox.Size = new System.Drawing.Size(237, 164);
             this.logTextBox.TabIndex = 14;
             this.logTextBox.Text = "";
             // 
             // logLabel
             // 
             this.logLabel.AutoSize = true;
-            this.logLabel.Location = new System.Drawing.Point(627, 250);
+            this.logLabel.Location = new System.Drawing.Point(1027, 236);
             this.logLabel.Name = "logLabel";
             this.logLabel.Size = new System.Drawing.Size(71, 13);
             this.logLabel.TabIndex = 15;
@@ -213,7 +217,7 @@
             // cancelButton
             // 
             this.cancelButton.Enabled = false;
-            this.cancelButton.Location = new System.Drawing.Point(623, 224);
+            this.cancelButton.Location = new System.Drawing.Point(1023, 210);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 16;
@@ -248,11 +252,50 @@
             this.deleteSpreadsheetButton.Visible = false;
             this.deleteSpreadsheetButton.Click += new System.EventHandler(this.deleteSpreadsheetButton_Click);
             // 
+            // activeSpreadsheetsAndUsers
+            // 
+            this.activeSpreadsheetsAndUsers.Location = new System.Drawing.Point(542, 30);
+            this.activeSpreadsheetsAndUsers.Name = "activeSpreadsheetsAndUsers";
+            this.activeSpreadsheetsAndUsers.Size = new System.Drawing.Size(377, 387);
+            this.activeSpreadsheetsAndUsers.TabIndex = 19;
+            this.activeSpreadsheetsAndUsers.UseCompatibleStateImageBehavior = false;
+            // 
+            // usersLabel
+            // 
+            this.usersLabel.AutoSize = true;
+            this.usersLabel.Location = new System.Drawing.Point(234, 9);
+            this.usersLabel.Name = "usersLabel";
+            this.usersLabel.Size = new System.Drawing.Size(34, 13);
+            this.usersLabel.TabIndex = 20;
+            this.usersLabel.Text = "Users";
+            // 
+            // spreadsheetsLabel
+            // 
+            this.spreadsheetsLabel.AutoSize = true;
+            this.spreadsheetsLabel.Location = new System.Drawing.Point(411, 9);
+            this.spreadsheetsLabel.Name = "spreadsheetsLabel";
+            this.spreadsheetsLabel.Size = new System.Drawing.Size(72, 13);
+            this.spreadsheetsLabel.TabIndex = 21;
+            this.spreadsheetsLabel.Text = "Spreadsheets";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(654, 9);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(156, 13);
+            this.label3.TabIndex = 22;
+            this.label3.Text = "Active Spreadsheets and Users";
+            // 
             // ServerControllerView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(790, 446);
+            this.ClientSize = new System.Drawing.Size(1190, 446);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.spreadsheetsLabel);
+            this.Controls.Add(this.usersLabel);
+            this.Controls.Add(this.activeSpreadsheetsAndUsers);
             this.Controls.Add(this.deleteSpreadsheetButton);
             this.Controls.Add(this.deleteUserButton);
             this.Controls.Add(this.cancelButton);
@@ -302,6 +345,10 @@
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button deleteUserButton;
         private System.Windows.Forms.Button deleteSpreadsheetButton;
+        private System.Windows.Forms.ListView activeSpreadsheetsAndUsers;
+        private System.Windows.Forms.Label usersLabel;
+        private System.Windows.Forms.Label spreadsheetsLabel;
+        private System.Windows.Forms.Label label3;
     }
 }
 
