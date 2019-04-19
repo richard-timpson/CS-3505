@@ -105,12 +105,12 @@ std::string SpreadsheetModel::get_cell_type(std::string name)
     }
 }
 
-std::stack<CellEdit>* SpreadsheetModel::get_cell_personal_history(std::string name)
+std::stack<CellEdit> SpreadsheetModel::get_cell_personal_history(std::string name)
 {
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return &it->second.get_personal_history();
+        std::stack<CellEdit> stack = it->second.get_personal_history();
     }
 }
 

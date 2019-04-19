@@ -28,7 +28,7 @@ class SpreadsheetModel
     std::string get_cell_type(std::string name);
     std::vector<std::string> get_cell_direct_dependents(std::string name);
     std::unordered_map<std::string, Cell> get_cell_dictionary();
-    std::stack<CellEdit>* get_cell_personal_history(std::string name);
+    std::stack<CellEdit> get_cell_personal_history(std::string name);
     std::stack<CellEdit> get_global_history();
     void open_json_ss_file();
     void write_json_ss_file();
