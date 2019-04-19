@@ -143,19 +143,43 @@ bool SpreadsheetController::check_if_spreadsheet_in_storage(json & message, std:
     return false;
 }
 
-bool SpreadsheetController::handle_edit_message(json & message)
+bool SpreadsheetController::handle_edit_message(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
     std::string type = message.value("type", "-1");
     if (type == "-1") return false;
-    if (type == "edit") return handle_edit();
-    if (type == "undo") return handle_undo();
-    if (type == "revert") return handle_revert();
+    if (type == "edit") return handle_edit(message, sm);
+    if (type == "undo") return handle_undo(message, sm);
+    if (type == "revert") return handle_revert(message, sm);
 
 }
 
-bool SpreadsheetController::handle_edit()
+bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
+    std::cout << message.value("cell", "-1")  << message.value("value", "-1") << std::endl;
+    if (message.value("cell", "-1") == "-1" || message.value("value", "-1") == "-1" || message.value("dependencies", "-1") == "-1")
+    {
+        std::cout << "return false" << std::endl;
+        return false;
+    }
+    else
+    {
+        std::string cell = message.value("cell", "-1");
+        std::string value = message.value("value", "-1");
+        std::vector<std::string> dependents = message["dependencies"].get<std::vector<std::string>>();
+        sm->do_edit();
+    }
     
+}
+
+bool SpreadsheetController::handle_undo(json & message, std::shared_ptr<SpreadsheetModel> sm)
+{
+    sm->do_undo();
+}
+
+bool SpreadsheetController::handle_revert(json & message, std::shared_ptr<SpreadsheetModel> sm)
+{
+    std::string cell = message.value("cell", "-1");
+    sm->do_revert(cell);
 }
 
 std::string SpreadsheetController::create_type_1_error()
@@ -167,7 +191,7 @@ std::string SpreadsheetController::create_type_1_error()
     return message.dump();
 }
 
-std::string SpreadsheetController::create_type_1_error()
+std::string SpreadsheetController::create_type_2_error()
 {
     json message = {
         {"type", "error"},

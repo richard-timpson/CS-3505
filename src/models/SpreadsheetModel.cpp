@@ -190,6 +190,22 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
     return false;
 }
 
+void SpreadsheetModel::do_edit()
+{
+
+}
+
+void SpreadsheetModel::do_undo()
+{
+
+}
+
+void SpreadsheetModel::do_revert(std::string name)
+{
+
+}
+
+
 
 bool check_if_int(std::string &contents)
 {
