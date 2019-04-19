@@ -86,17 +86,25 @@ bool SpreadsheetController::validate_user(json message, std::string &error_messa
     }
     std::ifstream file("../../data/users.txt");
     std::string line;
-    bool valid_user;
+    bool valid_user; // is this value ever used?
+    // search for the user
     while (std::getline(file, line))
     {
+        // read a line of the file
         std::vector<std::string> current_line = split(line, " ");
         std::vector<std::string>::iterator it = current_line.begin();
         std::string username = *it;
         it++;
         std::string password = *it;
+        // compare the username and the password?
         if (message.value("username", " ") != username && message.value("password", " ") != password)
         {
-            valid_user = false;
+            
+        }
+        else if(message.value("username", " ") == username && message.value("password", " ") != password)
+        {
+            //send as an invalid function
+            return false;
         }
         else
         {
@@ -106,7 +114,7 @@ bool SpreadsheetController::validate_user(json message, std::string &error_messa
         }
     }
     file.close();
-
+    // if Username is not found create a new user
     std::ofstream write_file;
     write_file.open("../../data/users.txt", std::ios::app);
     write_file << message.value("username", " ") << " " << message.value("password", " ") << std::endl;
