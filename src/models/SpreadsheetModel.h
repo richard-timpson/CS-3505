@@ -30,7 +30,7 @@ class SpreadsheetModel
     std::string get_cell_contents(std::string name);
     std::string get_cell_type(std::string name);
     std::vector<std::string> get_cell_direct_dependents(std::string name);
-    std::unordered_map<std::string, Cell> get_cell_dictionary();
+    std::unordered_map<std::string, Cell*> get_cell_dictionary();
     std::stack<CellEdit> get_cell_personal_history(std::string name);
     void push_cell_personal_history(std::string name, CellEdit input);
     void pop_cell_personal_history(std::string name);
@@ -49,7 +49,7 @@ class SpreadsheetModel
   private:
     bool visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed);
     bool edit_made;
-    std::unordered_map<std::string, Cell> cell_dictionary;
+    std::unordered_map<std::string, Cell*> cell_dictionary;
     std::stack<CellEdit> global_history;
     std::string name;
 };

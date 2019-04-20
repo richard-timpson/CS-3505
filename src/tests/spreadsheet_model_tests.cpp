@@ -43,7 +43,9 @@ void test1()
     std::cout << "Test 1: New Cell with no dependents" << std::endl;
     std::vector<std::string> dependents;
     alpha.set_cell_contents("C3", "Reach", dependents, "string");
+    std::cout << "Test 1: Past set" << std::endl;
     std::string contents = alpha.get_cell_contents("C3");
+    std::cout << "Test 1: Past get" << std::endl;
     bool success = (contents == "Reach");
     print_success_or_failure(success);
     std::cout << "Test 1 finished " << std::endl << std::endl;
@@ -62,7 +64,8 @@ void test2()
     dependents.push_back("A2");
     alpha.set_cell_contents("B6", "Reach", dependents, "string");
 
-    std::vector<std::string>::iterator dependents_ = alpha.get_cell_direct_dependents("B6").begin();
+    std::vector<std::string> vector_dep =alpha.get_cell_direct_dependents("B6");
+    std::vector<std::string>::iterator dependents_ = vector_dep.begin();
     bool success1 = *dependents_ == "A1";
     dependents_++;
     bool success2 = *dependents_ == "A2";
@@ -229,9 +232,9 @@ void test9()
     SpreadsheetModel alpha("Alpha", true);
     std::cout << "Test 9: spreadsheet is saved correctly" << std::endl;
     std::vector<std::string> dependents;
-    alpha.do_edit("C3", "=A1+1");
-    alpha.set_cell_contents("C3", "=A1+2", dependents, "string");
-    alpha.set_cell_contents("C3", "=A1+3", dependents, "string");
+    alpha.do_edit("C3", "=A1+1", dependents, "string");
+    alpha.do_edit("C3", "=A1+2", dependents, "string");
+    alpha.do_edit("C3", "=A1+3", dependents, "string");
 
     alpha.write_json_ss_file();
 
