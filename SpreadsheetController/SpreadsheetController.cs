@@ -25,6 +25,7 @@ namespace CS3505
         public delegate void SpreadsheetUpdatedEventHandler(Dictionary<string, IEnumerable<string>> updatedDependencies);
         public event SpreadsheetUpdatedEventHandler SpreadsheetUpdated;
 
+
         public delegate void SpreadsheetErrorEventHandler(int code, string source);
         public event SpreadsheetErrorEventHandler SpreadsheetError;
         public delegate void SpreadsheetsReceivedHandler();
@@ -312,6 +313,7 @@ namespace CS3505
 
                     if (p.Length < 3)
                     {
+                        ss.sb.Remove(0, p.Length);
                         continue;
                     }
                     if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')

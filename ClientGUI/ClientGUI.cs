@@ -179,12 +179,20 @@ namespace ClientGUI
         private void UpdateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependencies)
         {
             // Launch the SpreadsheetView
-            MethodInvoker m = new MethodInvoker(() => Program.runView(cellDependencies));
-            this.Invoke(m);
+            try
+            {
+                MethodInvoker m = new MethodInvoker(() => Program.runView(cellDependencies));
+                this.Invoke(m);
 
-            // Close the Client GUI
-            MethodInvoker m1 = new MethodInvoker(() => this.Close());
-            this.Invoke(m1);
+                // Close the Client GUI
+                MethodInvoker m1 = new MethodInvoker(() => this.Close());
+                this.Invoke(m1);
+            }
+            catch (Exception)
+            {
+
+                
+            }
             
         }
 
