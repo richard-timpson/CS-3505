@@ -14,7 +14,7 @@ class ClientConnection : public std::enable_shared_from_this<ClientConnection>
     void do_write();
     void add_to_server();
     tcp::socket socket_;
-    char buff[256];
+    boost::asio::streambuf buff;
   private:
     Server *server_;
 };

@@ -32,6 +32,7 @@ int main()
     test7();
     test8();
     test9();
+    test10();
 }
 
 /**
@@ -232,13 +233,36 @@ void test9()
     SpreadsheetModel alpha("Alpha", true);
     std::cout << "Test 9: spreadsheet is saved correctly" << std::endl;
     std::vector<std::string> dependents;
-    alpha.do_edit("C3", "=A1+1", dependents, "string");
-    alpha.do_edit("C3", "=A1+2", dependents, "string");
-    alpha.do_edit("C3", "=A1+3", dependents, "string");
+    std::vector<std::string> dependents1{"A1"};
+    alpha.do_edit("C3", "=A1+1", dependents1, "string" );
+    alpha.set_cell_contents("C3", "=A1+2", dependents, "string");
+    alpha.set_cell_contents("C3", "=A1+3", dependents, "string");
 
     alpha.write_json_ss_file();
 
     std::cout << "Test 9 finished " << std::endl << std::endl;
+
+}
+
+/**
+ * Test if personal history is working
+ */
+void test10()
+{
+    std::cout << "Test 10: personal history " << std::endl << std::endl;
+    SpreadsheetModel alpha("Alpha", true);
+    std::vector<std::string>dependents;
+    alpha.do_edit("A1", "5", dependents, "int");
+    alpha.do_edit("A1", "10", dependents, "int");
+    alpha.do_edit("A1", "20", dependents, "int");
+    CellEdit edit = alpha.top_cell_personal_history("A1");
+    bool success = edit.contents == "20";
+    print_success_or_failure(success);
+    alpha.pop_cell_personal_history("A1");
+    edit = alpha.top_cell_personal_history("A1");
+    success = edit.contents == "10";
+    print_success_or_failure(success);
+    std::cout << "Test 10 finished " << std::endl << std::endl;
 
 }
 

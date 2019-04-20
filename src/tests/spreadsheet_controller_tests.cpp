@@ -50,6 +50,7 @@ int main()
     test12();
     test13();
     test14();
+    test15();
 
 }
 
@@ -395,7 +396,7 @@ void test14()
 
 
 /**
- * Test global stack working
+ * Test global stack working for one edit on cell
  */
 void test15()
 {
@@ -421,6 +422,12 @@ void test15()
     message1["cell"] = "A3";
     message1["value"] = "=A2+1";
     message1["dependencies"] = j_vec1;
+    valid = SpreadsheetController::handle_edit_message(message1, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+        return;
+    }
 
     json message2;
     std::vector<std::string> dependencies2{"A3"};
@@ -429,14 +436,37 @@ void test15()
     message2["cell"] = "A4";
     message2["value"] = "=A3+1";
     message2["dependencies"] = j_vec2;
+    valid = SpreadsheetController::handle_edit_message(message2, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+        return;
+    }
 
     json message3;
     std::vector<std::string> dependencies3{"A2"};
     json j_vec3(dependencies3);
     message3["type"] = "undo";
-    
+    valid = SpreadsheetController::handle_edit_message(message3, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+        return;
+    }
     std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
     std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
+
+    std::cout << "calling handle edit" << std::endl;
+    valid = SpreadsheetController::handle_edit_message(message3, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+        return;
+    }
+    std::cout << "called handle edit" << std::endl;
+    std::unordered_map<std::string, Cell> cells1 = sm->get_cell_dictionary();
+    std::cout << "calling full send" << std::endl;
+    std::cout << "\t" << SpreadsheetController::full_send(cells1) << std::endl;
     print_success_or_failure(valid);
     std::cout << "Test 15 finished " << std::endl <<std::endl;   
 }

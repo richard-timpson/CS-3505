@@ -20,7 +20,7 @@ class SpreadsheetController
     static bool check_if_spreadsheet_in_storage(json & message, std::string &spreadsheet);
     static bool handle_edit_message(json & message, std::shared_ptr<SpreadsheetModel> sm);
     static std::string create_type_1_error();
-    static std::string create_type_2_error();
+    static std::string create_type_2_error(std::string name);
   private:
     static bool handle_edit(json & message, std::shared_ptr<SpreadsheetModel> sm);
     static bool handle_undo(json & message, std::shared_ptr<SpreadsheetModel> sm);
