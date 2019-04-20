@@ -52,6 +52,7 @@ void Server::send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> c
                     std::cout << "Error sending message " << ec.message() << std::endl;
                     connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                     connection->socket_.close();
+                    this->remove_client_from_list(connection);
                 }
             });
 }
@@ -90,6 +91,8 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                 std::cout << "Error reading spreadsheet selection " << std::endl;
                 connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                 connection->socket_.close();
+                this->remove_client_from_list(connection);
+
             }
             
         });
@@ -112,6 +115,7 @@ void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection,
                     std::cout << "Error sending message " << ec.message() << std::endl;
                     connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                     connection->socket_.close();
+                    this->remove_client_from_list(connection);
                 }
             });
 }
@@ -157,6 +161,7 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
                 std::cout << "Error reading spreadsheet edit: " << ec.message() << std::endl;
                 connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                 connection->socket_.close();
+                this->remove_client_from_list(connection);
             }
             
         });
@@ -183,6 +188,7 @@ void Server::send_full_spreadsheet_to_clients(std::shared_ptr<SpreadsheetModel> 
                             std::cout << "Error sending message " << ec.message() << std::endl;
                             connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                             connection->socket_.close();
+                            this->remove_client_from_list(connection);
                         }
                     });
         }
@@ -205,6 +211,7 @@ void Server::send_type_1_error(std::shared_ptr<ClientConnection> connection)
                     std::cout << "Error sending message " << ec.message() << std::endl;
                     connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                     connection->socket_.close();
+                    this->remove_client_from_list(connection);
                 }
             });
 }
@@ -225,6 +232,7 @@ void Server::send_type_2_error(std::shared_ptr<ClientConnection> connection, std
                     std::cout << "Error sending message " << ec.message() << std::endl;
                     connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                     connection->socket_.close();
+                    this->remove_client_from_list(connection);
                 }
             });
 }
@@ -248,6 +256,11 @@ bool Server::check_if_spreadsheet_in_list(json message, std::shared_ptr<Spreadsh
 void Server::add_client_to_list(std::shared_ptr<ClientConnection> connection)
 {
     connections.insert(connection);
+}
+
+void Server::remove_client_from_list(std::shared_ptr<ClientConnection> connection)
+{
+    connections.erase(connection);
 }
 
 void Server::add_spreadsheet_to_list(std::shared_ptr<SpreadsheetModel> ss)

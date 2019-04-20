@@ -48,6 +48,12 @@ class SpreadsheetModel
     void push_cell_personal_history(std::string name, CellEdit input);
     bool check_cell_personal_history_empty(std::string name);
 
+    std::stack<CellEdit> get_cell_undo_history(std::string name);
+    CellEdit top_cell_undo_history(std::string name);
+    void pop_cell_undo_history(std::string name);
+    void push_cell_undo_history(std::string name, CellEdit input);
+    bool check_cell_undo_history_empty(std::string name);
+
   private:
     bool visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed);
     bool edit_made;

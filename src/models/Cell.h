@@ -27,6 +27,7 @@ class Cell
     std::stack<CellEdit> get_personal_history();
     std::vector<std::string> get_direct_dependents();
     std::stack<CellEdit> personal_history;
+    std::stack<CellEdit> undo_history;
   private:
     std::string current_contents;
     std::string type;
