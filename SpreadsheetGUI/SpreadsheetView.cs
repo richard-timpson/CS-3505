@@ -446,17 +446,19 @@ namespace SpreadsheetGUI
         /// <param name="updatedCells"></param>
         private void SpreadsheetUpdate(Dictionary<string, IEnumerable<string>> cellDependies)
         {
-
-            //update the underlying spreadsheet and all of the values that rely on the updated cells
-            foreach (string dependent in cellDependies.Keys)
+            lock (this.ssController.Sheet)
             {
-                foreach (string cell in cellDependies[dependent])
+                //update the underlying spreadsheet and all of the values that rely on the updated cells
+                foreach (string dependent in cellDependies.Keys)
                 {
-                    // get the location of the dependent cell
-                    int col = (int)cell[0] - 65;
-                    int row = int.Parse(cell.Substring(1)) - 1;
-                    //set the new value to the dependent cells                
-                    spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(cell).ToString());
+                    foreach (string cell in cellDependies[dependent])
+                    {
+                        // get the location of the dependent cell
+                        int col = (int)cell[0] - 65;
+                        int row = int.Parse(cell.Substring(1)) - 1;
+                        //set the new value to the dependent cells                
+                        spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(cell).ToString());
+                    }
                 }
             }
 
