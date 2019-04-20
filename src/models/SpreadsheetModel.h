@@ -24,7 +24,7 @@ class SpreadsheetModel
 
     void set_name(std::string name);
     std::string get_name();
-    std::stack<CellEdit> get_global_history();
+    std::stack<std::string> get_global_history();
 
     void set_cell_contents(std::string name, std::string contents, std::vector<std::string> &dependents, std::string type);
     std::string get_cell_contents(std::string name);
@@ -58,7 +58,7 @@ class SpreadsheetModel
     bool visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed);
     bool edit_made;
     std::unordered_map<std::string, Cell> cell_dictionary;
-    std::stack<CellEdit> global_history;
+    std::stack<std::string> global_history;
     std::string name;
 };
 

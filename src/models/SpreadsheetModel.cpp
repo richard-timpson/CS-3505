@@ -45,11 +45,12 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     // Cell exists
     else
     {
-        std::cout << "editing existing cell " << it->second.get_name() << std::endl;
         Cell current_cell = it->second;
-        std::cout << "HERE";
+        std::cout << "editing existing cell " << std::endl;
+        std::cout << "here" << std::endl;
         it->second.direct_dependents = dependents;
-        // current_cell->set_direct_dependents(dependents);
+        it++;
+        current_cell.set_direct_dependents(dependents);
 
         // get cells to recalculate with throw circular exception if there is one
         bool circular_dependency = circular_dependency_check(name);
@@ -200,7 +201,7 @@ std::unordered_map<std::string, Cell> SpreadsheetModel::get_cell_dictionary()
     return this->cell_dictionary;
 }
 
-std::stack<CellEdit> SpreadsheetModel::get_global_history()
+std::stack<std::string> SpreadsheetModel::get_global_history()
 {
     return this->global_history;
 }
@@ -219,14 +220,14 @@ void SpreadsheetModel::open_json_ss_file()
 
     std::stack<CellEdit> global_history;
 
-    for (auto& el : j_global_history.items())
-    {
+    // for (auto& el : j_global_history.items())
+    // {
         
-        std::cout << el.value() << "                      " << el.value() << std::endl;
-        CellEdit current_edit;
-        current_edit.name = el.value;
-        std::cout << current_edit.name << std::endl;
-    }
+    //     std::cout << el.value() << "                      " << el.value() << std::endl;
+    //     CellEdit current_edit;
+    //     current_edit.name = el.value;
+    //     std::cout << current_edit.name << std::endl;
+    // }
 
     //this->global_history = global_history;
 /*
@@ -293,15 +294,13 @@ void SpreadsheetModel::write_json_ss_file()
 
     ss["spreadsheet"] = cells;
 
-    std::stack<CellEdit> global_history = this->get_global_history();
+    std::stack<std::string> global_history = this->get_global_history();
     json j_global_history;
     // loop through all of the stack edits
     
     while (global_history.empty() != true)
     {
-        j_global_history.push_back({{"name", global_history.top().name},
-                                    {"contents", global_history.top().contents},
-                                    {"dependents", global_history.top().direct_dependents}});
+        j_global_history.push_back(global_history.top());
         global_history.pop();
     }
 
@@ -341,7 +340,8 @@ bool SpreadsheetModel::circular_dependency_check(std::set<std::string> names)
 bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std::string> &visited, std::vector<std::string> &changed)
 {
     visited.insert(name);
-    for (std::string n : get_cell_direct_dependents(name))
+    std::vector<std::string> dependents = get_cell_direct_dependents(name);
+    for (std::string n : dependents)
     {
         if (n == start)
         {
@@ -371,7 +371,7 @@ void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std:
     edit.contents = contents;
     edit.direct_dependents = dependents;
     edit.type = type;
-    this->global_history.push(edit);
+    this->global_history.push(edit.name);
     this->push_cell_personal_history(cell_name, edit);
     this->push_cell_undo_history(cell_name, edit);
 }
@@ -382,29 +382,29 @@ void SpreadsheetModel::do_undo()
     if (!this->global_history.empty())
     {
         // get the last edit from the global history
-        CellEdit edit = this->global_history.top();
+        std::string name = this->global_history.top();
         this->global_history.pop();
 
         // find the name from the edit, and pop off the cells undo_history
-        this->pop_cell_undo_history(edit.name);
-        CellEdit edit1;
+        this->pop_cell_undo_history(name);
+        CellEdit edit;
         
-        if (this->check_cell_undo_history_empty(edit.name))
+        if (this->check_cell_undo_history_empty(name))
         {
-            edit1.name = edit.name;
-            edit1.contents = "";
+            edit.name = name;
+            edit.contents = "";
             std::vector<std::string> dep;
             edit.direct_dependents = dep;
             edit.type = "string";
         }
         else
         {
-            edit1 = this->top_cell_undo_history(edit.name);
+            edit = this->top_cell_undo_history(edit.name);
         }
         try
         {
-            this->set_cell_contents(edit1.name, edit1.contents, edit1.direct_dependents, edit1.type);
-            this->push_cell_personal_history(edit1.name, edit1);
+            this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
+            this->push_cell_personal_history(edit.name, edit);
         }
         catch(const CircularException& e)
         {
@@ -437,7 +437,7 @@ void SpreadsheetModel::do_revert(std::string name)
         try
         {
             this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
-            this->global_history.push(edit);
+            this->global_history.push(edit.name);
             this->push_cell_undo_history(edit.name, edit);
         }
         catch (const CircularException &e)
