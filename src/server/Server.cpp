@@ -118,9 +118,23 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
 
 }
 
-void admin_parser_operations(std::shared_ptr<ClientConnection> connection)
+void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connection)
    {
-       
+       boost::asio::async_read_until(connection->socket_, connection->buff, "\n\n", 
+        [connection, this](boost::system::error_code ec, std::size_t size){
+            std::cout << "async read handler called" << std::endl;
+                // get the message from the client
+  //              buff.commit(size);
+                std::istream istrm(&connection->buff);
+                std::string message;
+                istrm >> message;
+                connection->buff.consume(size);
+                std::cout << "message is " << message << std::endl;
+                std::string error_message;
+                json json_message = json::parse(message);
+             
+            
+        });
    }
 
 
