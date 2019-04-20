@@ -54,9 +54,11 @@ namespace SpreadsheetGUI
             music = new SoundPlayer(Directory.GetCurrentDirectory() + "\\WiiMusic.wav");
 
             this.ssController = ssController;
-
             ssController.SpreadsheetUpdated += SpreadsheetUpdate;
             formSheet = ssController.Sheet;
+           
+            
+            
             //formSheet = new Spreadsheet(x => true, x => x.ToUpper(), "ps6");
 
             this.AcceptButton = SetCellContentsButton;
