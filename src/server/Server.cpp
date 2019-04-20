@@ -118,6 +118,27 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
 
 }
 
+    void Server::admin_add_user()
+    {
+
+    }
+    void Server::admin_delete_user()
+    {
+
+    }
+    void Server::admin_add_spreadsheet()
+    {
+
+    }
+    void Server::admin_delete_spreadsheet()
+    {
+
+    }
+    void Server::admin_off()
+    {
+
+    }
+
 void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connection)
    {
        boost::asio::async_read_until(connection->socket_, connection->buff, "\n\n", 
@@ -132,6 +153,34 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
                 std::cout << "message is " << message << std::endl;
                 std::string error_message;
                 json json_message = json::parse(message);
+
+                if (json_message.value("Operation", "AU") != "Admin")
+                    {
+
+                    }
+                else if (json_message.value("Operation", "DU") != "Admin")
+                    {
+
+                    }
+                else if (json_message.value("Operation", "AS") != "Admin")
+                    {
+
+                    }
+                else if (json_message.value("Operation", "DS") != "Admin")
+                    {
+
+                    }
+                else if (json_message.value("Operation", "Off") != "Admin")
+                    {
+
+                    }
+                else
+                    {
+                        //operation doesn't exist
+                    }
+    
+
+                
              
             
         });
