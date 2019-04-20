@@ -39,6 +39,35 @@ std::string SpreadsheetController::get_list_of_spreadsheets()
     }
 }
 
+std::string SpreadsheetController::get_list_of_users()
+{
+    std::ifstream file("../../data/users.txt");
+    std::string line;
+    std::vector<std::string> user_names;
+    int count = 0;
+    while (std::getline(file, line))
+    {
+        user_names.push_back(line);
+        count++;
+    }
+    json users;
+    users["type"] = "list";
+    users["users"] = {};
+    if (count != 0)
+    {
+        std::cout << "count is 0" << std::endl;
+        for (std::vector<std::string>::iterator it = spreadsheet_names.begin(); it != spreadsheet_names.end(); it++)
+        {
+            users["users"].push_back(*it);
+        }
+        return users.dump();
+    }
+    else
+    {
+        return "[]";
+    }
+}
+
 std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cell> & cell_dictionary)
 {
     json ss;
@@ -119,6 +148,18 @@ bool SpreadsheetController::validate_user(json message, std::string &error_messa
     write_file.open("../../data/users.txt", std::ios::app);
     write_file << message.value("username", " ") << " " << message.value("password", " ") << std::endl;
     write_file.close();
+    return true;
+}
+
+bool SpreadsheetController::validate_admin(json message, std::string &error_message)
+{
+    if (!validate_login_message(message)) return false;
+    if (message.value("type", " ") != "Admin")
+    {
+        error_message = "not an Admin user";
+        return false;
+    }
+    
     return true;
 }
 

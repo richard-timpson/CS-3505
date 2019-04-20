@@ -14,7 +14,9 @@ class SpreadsheetController
   public:
     // get a json string that is an array of strings with the spreadsheet names. 
     static std::string get_list_of_spreadsheets();
+    static std::string SpreadsheetController::get_list_of_users()
     static std::string full_send(std::unordered_map<std::string, Cell> & cell_dictionary);
+    static bool validate_admin(json message, std::string &error_message);  
     static bool validate_user(json message, std::string &error_message);    
     static bool validate_login_message(json & message);
     static bool check_if_spreadsheet_in_storage(json & message, std::string &spreadsheet);

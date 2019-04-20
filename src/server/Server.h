@@ -22,6 +22,7 @@ class Server
 
     // networking functions
     void accept_clients();
+    void refresh_admin(std::shared_ptr<ClientConnection> connection);
     void accept_spreadsheet_selection(std::shared_ptr<ClientConnection> connection);
     void accept_edit(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
     void send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> connection);
@@ -30,6 +31,7 @@ class Server
     void send_full_spreadsheet(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
 
     // member functions
+    void admin_controller_list(std::shared_ptr<ClientConnection> connection);
     void add_client_to_list(std::shared_ptr<ClientConnection> connection);
     void add_spreadsheet_to_list(std::shared_ptr<SpreadsheetModel> ss);
     std::shared_ptr<SpreadsheetModel> choose_spreadsheet(json &json_message);
@@ -42,6 +44,7 @@ class Server
   private:
     tcp::acceptor acceptor_;
     std::set<std::shared_ptr<ClientConnection>> connections;
+    std::set<std::shared_ptr<ClientConnection>> admin_connections;
     boost::asio::streambuf buff;
     std::vector<std::shared_ptr<SpreadsheetModel>> spreadsheets;
 };
