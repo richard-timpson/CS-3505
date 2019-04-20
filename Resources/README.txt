@@ -33,4 +33,19 @@ JSON SERIALIZE?
 			//Full Send
 			{"type": "full send", "spreadsheet": {"A2": "=2*A1+1", "A1": 3}}
 
+			//Error
+			{"type" : "error", "code" : 1, "source": ""}
+
+			Richard's IP Adress
+			10.17.188.130
+
+
+			Test Notes:
+				
+				- Revert is a new edit so if I revert then press undo should undo the revert?
+				- Revert on an unedited cell crashes the server
+				- Display a message when the server disconnects
+
+
+
 

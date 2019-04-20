@@ -77,14 +77,14 @@ namespace AdminClient
                         {
 
 
-                            if (obj["Spreadsheets"] != null)
+                            if (obj["spreadsheets"] != null)
                             {
 
                                 recievedDataList = JsonConvert.DeserializeObject<RecievedDataList>(input);
 
                                 view.recieveListData(recievedDataList.names(), 1);
                             }
-                            else if (obj["Users"] != null)
+                            else if (obj["users"] != null)
                             {
 
                                 recievedDataList = JsonConvert.DeserializeObject<RecievedDataList>(input);

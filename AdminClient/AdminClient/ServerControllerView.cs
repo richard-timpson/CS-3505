@@ -54,6 +54,46 @@ namespace AdminClient
                 spreadsheetListView.Items.Add("Test");
 
 
+                // Set the view to show details.
+                activeSpreadsheetsAndUsers.View = View.Details;
+                // Allow the user to edit item text.
+                activeSpreadsheetsAndUsers.LabelEdit = true;
+                // Allow the user to rearrange columns.
+                activeSpreadsheetsAndUsers.AllowColumnReorder = true;
+                // Display check boxes.
+                activeSpreadsheetsAndUsers.CheckBoxes = true;
+                // Select the item and subitems when selection is made.
+                activeSpreadsheetsAndUsers.FullRowSelect = true;
+                // Display grid lines.
+                activeSpreadsheetsAndUsers.GridLines = true;
+                // Sort the items in the list in ascending order.
+                activeSpreadsheetsAndUsers.Sorting = SortOrder.Ascending;
+                activeSpreadsheetsAndUsers.CheckBoxes = false;
+
+                // Create three items and three sets of subitems for each item.
+                ListViewItem item1 = new ListViewItem("TestSpreadsheet");
+                // Place a check mark next to the item.
+                
+                item1.SubItems.Add("blah, blah, blah, blah, blah, blah,");
+              
+                ListViewItem item2 = new ListViewItem("TestSpreadsheet2");
+                item2.SubItems.Add("Steve, Joan");
+               
+                ListViewItem item3 = new ListViewItem("TestSpreadsheet3");
+                // Place a check mark next to the item.
+                
+                item3.SubItems.Add("Bob, Bob, BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBOB");
+              
+
+                // Create columns for the items and subitems.
+                // Width of -2 indicates auto-size.
+                activeSpreadsheetsAndUsers.Columns.Add("Item Column", -2, HorizontalAlignment.Left);
+                activeSpreadsheetsAndUsers.Columns.Add("Column 2", -2, HorizontalAlignment.Left);
+               
+
+                //Add the items to the ListView.
+                activeSpreadsheetsAndUsers.Items.AddRange(new ListViewItem[] { item1, item2, item3 });
+
             }
             else
                 Close();

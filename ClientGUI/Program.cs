@@ -9,6 +9,7 @@ namespace ClientGUI
 {
     static class Program
     {
+        private static SpreadsheetView ssView;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -19,13 +20,22 @@ namespace ClientGUI
             Application.SetCompatibleTextRenderingDefault(false);
 
             SpreadsheetAplicationContext appContext = SpreadsheetAplicationContext.getAppContext();
-            appContext.RunForm(new ClientLogIn());
+            ClientLogIn startup = new ClientLogIn();
+
+            ssView = startup.SSView;
+
+            appContext.RunForm(startup);
+
+
             Application.Run(appContext);
 
-            //SpreadsheetAplicationContext appContext = SpreadsheetAplicationContext.getAppContext();
-            //appContext.RunForm(new ClientLogIn());
-            //// Application.Run(new ClientLogIn());
-            //Application.Run(appContext);
+        }
+
+        public static void runView(Dictionary<string, IEnumerable<string>> cellDependencies, string name)
+        {
+            ssView.Text = name;
+            SpreadsheetAplicationContext.getAppContext().RunForm(ssView);
+            ssView.PopulateSpreadsheet(cellDependencies);
         }
     }
 }

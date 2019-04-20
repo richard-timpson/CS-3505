@@ -38,6 +38,8 @@ namespace SpreadsheetGUI
         /// </summary>
         private SoundPlayer music;
 
+        private static bool closing = false;
+
         /// <summary>
         /// Controller for sending and receiving edits from a server
         /// </summary>
@@ -50,11 +52,17 @@ namespace SpreadsheetGUI
             FormClosing += saveCheck;
             SetCellContentsText.KeyUp += KeyReleased;
             SetCellContentsText.PreviewKeyDown += KeyPressed;
+
+            cellEditBox.TextChanged += UpdateSetCellContentsText;
+            SetCellContentsText.TextChanged += UpdateCellEditBox;
+
             // SetCellContentsText.KeyDown += KeyReleased;
             music = new SoundPlayer(Directory.GetCurrentDirectory() + "\\WiiMusic.wav");
 
             this.ssController = ssController;
             ssController.SpreadsheetUpdated += SpreadsheetUpdate;
+            ssController.SpreadsheetError += ProcessError;
+            ssController.ConnectionLostEvent += ConnectionLostNotification;
             formSheet = ssController.Sheet;
            
             
@@ -62,13 +70,12 @@ namespace SpreadsheetGUI
             //formSheet = new Spreadsheet(x => true, x => x.ToUpper(), "ps6");
 
             this.AcceptButton = SetCellContentsButton;
-            
+          
+
             // the initial selection should be the first cell
             spreadsheetPanel1.SetSelection(0, 0);
             SetCellContentsText.Focus();
         }
-
-       
 
 
         #region(oldocde)
@@ -202,18 +209,15 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void saveCheck(Object sender, FormClosingEventArgs e)
         {
-            if (!saved)
+
+            //{
+            if (!closing)
             {
-                DialogResult saveResult = MessageBox.Show("Your data has not been saved. Would you like to save before continuing?", "Unsaved Data", MessageBoxButtons.YesNoCancel);
-                if (saveResult == DialogResult.Yes)
-                {
-                    save();
-                }
-                else if (saveResult == DialogResult.Cancel)
-                {
-                    e.Cancel = true;
-                }
+                closing = true;
+                MethodInvoker m = new MethodInvoker(() => this.Close());
+                this.Invoke(m);
             }
+      
         }
         /// <summary>
         /// A private helper method that, upon loading an existing sheet if the current sheet
@@ -250,7 +254,7 @@ namespace SpreadsheetGUI
         {
             //TODO SET TEXT BOX FOR EDITING THE CELL DIRECTLY
 
-          
+
             // set the cursor to the set cell contents text box when a new cell is selected
             SetCellContentsText.Focus();
             displayCellName(ss);
@@ -359,6 +363,53 @@ namespace SpreadsheetGUI
 
         }
         #endregion
+
+        /// <summary>
+        /// Notifies the User That the Connection to the server was lost
+        /// </summary>
+        private void ConnectionLostNotification()
+        {
+            MessageBox.Show("Connection to the Server Was Lost Please Reconnect", "Connection Lost",
+                                          MessageBoxButtons.OK,
+                                          MessageBoxIcon.Warning);
+        }
+
+        /// <summary>
+        /// When the SetCellContents text box updates, update
+        /// the cellEditBox text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateCellEditBox(object sender, EventArgs e)
+        {
+            cellEditBox.Text = SetCellContentsText.Text;
+        }
+
+        /// <summary>
+        /// When the cellEditBox text box updates, update
+        /// the SetCellContents text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateSetCellContentsText(object sender, EventArgs e)
+        {
+            SetCellContentsText.Text = cellEditBox.Text;
+        }
+
+        /// <summary>
+        /// Event handler for Processing spreadsheet errors
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="source"></param>
+        private void ProcessError(int code, string source)
+        {
+            // only code 2 is processed by the spreadsheet view
+            if (code == 2)
+            {
+                MessageBox.Show("Circular Dependency Created in Cell: " + source + "\n\n The Requested Edit was not Applied to the Cell", "Circular Dependency", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         /// <summary>
         /// Helper method that uses the Spreadsheet controller to send an edit Request to the server
         /// </summary>
@@ -397,11 +448,11 @@ namespace SpreadsheetGUI
         /// <param name="updatedCells"></param>
         private void SpreadsheetUpdate(Dictionary<string, IEnumerable<string>> cellDependies)
         {
-           
+
             //update the underlying spreadsheet and all of the values that rely on the updated cells
             foreach (string dependent in cellDependies.Keys)
             {
-                foreach(string cell in cellDependies[dependent])
+                foreach (string cell in cellDependies[dependent])
                 {
                     // get the location of the dependent cell
                     int col = (int)cell[0] - 65;
@@ -431,8 +482,8 @@ namespace SpreadsheetGUI
             IEnumerable<string> dependentList;
             try
             {
-               dependentList = formSheet.SetContentsOfCell(cellName, SetCellContentsText.Text);
-               //dependentList = formSheet.get
+                dependentList = formSheet.SetContentsOfCell(cellName, SetCellContentsText.Text);
+                //dependentList = formSheet.get
 
 
                 //update the underlying spreadsheet and all of the values that rely on the updated cell
@@ -454,7 +505,7 @@ namespace SpreadsheetGUI
             }
             catch (CircularException e)
             {
-               
+
                 MessageBox.Show("Cells Cannot Be Set So That a Circular Dependency is Introduced to the SpreadSheet /n" + e.Message, "Input Error");
             }
 
@@ -513,11 +564,11 @@ namespace SpreadsheetGUI
                     if (saveFile.FilterIndex == 2)
                     {
                         saveFile.DefaultExt = "sprd";
-                           
-                           }
+
+                    }
 
 
-                  
+
 
                     return saveFile.FileName;
                 }
@@ -894,7 +945,7 @@ namespace SpreadsheetGUI
             {
                 music.Play();
             }
-            catch( Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show("Invalid Music file path, please be sure a wav file has been selected", "Music error");
             }
@@ -910,18 +961,19 @@ namespace SpreadsheetGUI
                 {
                     musicFile.InitialDirectory = "c:\\";
                     musicFile.Filter = "wav files (*.wav)|*.wav";
-                    
+
 
                     musicFile.ShowDialog();
                     musicFile.RestoreDirectory = true;
                     string fileName = musicFile.FileName;
 
                     music.SoundLocation = fileName;
-                }catch(System.ArgumentException e)
+                }
+                catch (System.ArgumentException e)
                 {
 
                 }
-              
+
                 catch (Exception e)
                 {
                     MessageBox.Show("An error occured while selecting the file");
@@ -955,6 +1007,7 @@ namespace SpreadsheetGUI
 
         private void UndoButton_Click(object sender, EventArgs e)
         {
+            cellEditBox.Hide();
             ssController.ClientUndo();
         }
 
@@ -971,7 +1024,16 @@ namespace SpreadsheetGUI
             char columnLetter = getColumnLetter(col);
             string cellName = columnLetter.ToString() + (row + 1).ToString();
 
+            cellEditBox.Hide();
+
             ssController.ClientRevert(cellName);
+        }
+
+        private void Menu_Click(object sender, EventArgs e)
+        {
+            //{
+            //    MethodInvoker m = new MethodInvoker(() => this.menu);
+            //    this.Invoke(m);
         }
     }
 

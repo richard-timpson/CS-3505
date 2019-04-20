@@ -78,6 +78,9 @@ namespace CS3505
         public delegate void ConnectionTimeoutEventHandler();
         public static event ConnectionTimeoutEventHandler Timeout;
 
+        public delegate void ConnectionLostEventHandler();
+        public static event ConnectionLostEventHandler ConnectionLost;
+
 
         public const int DEFAULT_PORT = 2112;
 
@@ -195,7 +198,14 @@ namespace CS3505
         /// <param name="ss"></param>
         public static void GetData(SocketState ss)
         {
-            ss.theSocket.BeginReceive(ss.messageBuffer, 0, ss.messageBuffer.Length, SocketFlags.None, ReceiveCallback, ss);
+            try
+            {
+                ss.theSocket.BeginReceive(ss.messageBuffer, 0, ss.messageBuffer.Length, SocketFlags.None, ReceiveCallback, ss);
+            }
+            catch(Exception e)
+            {
+
+            }
         }
 
         /// <summary>
@@ -231,7 +241,6 @@ namespace CS3505
 
             try
             {
-                //FIXME Handle disconnected clients
                 if (s.Connected)
                 {
                     s.EndSend(ar);
@@ -240,7 +249,9 @@ namespace CS3505
             }
             catch (Exception e)
             {
+
                 s.Close();
+                ConnectionLost();
             }
 
 
@@ -278,6 +289,7 @@ namespace CS3505
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
                 ss.theSocket.Close();
+                ConnectionLost();
             }
             // continue the loop -- actually happens in ss.CallMe
 

@@ -18,11 +18,21 @@ namespace ClientGUI
     {
         private SpreadsheetView ssView;
 
+        private string name = "";
         /// <summary>
         /// Holds onto the spreadsheet and server connection
         /// </summary>
         private SpreadsheetController ssController;
 
+        public SpreadsheetView SSView
+        {
+            get
+            {
+                return ssView;
+            }
+
+        }
+       
         public ClientLogIn()
         {
             InitializeComponent();
@@ -35,6 +45,8 @@ namespace ClientGUI
             ssController.SpreadsheetsReceived += UpdateListOfSpreadsheets;
             ssController.SpreadsheetUpdated += UpdateSpreadsheet;
             ssController.InvalidUsername += UsernameInvalid;
+            ssController.SpreadsheetError += ProcessError;
+            ssController.ConnectionLostEvent += ConnectionLostNotification;
             //------------------------------------------------------------------------------
 
             //----------ListOfSpreadsheets Initialization-------------------------------
@@ -49,7 +61,27 @@ namespace ClientGUI
             NewSpreadsheetButton.Enabled = false;
             //--------------------------------------------------------------------------
 
-            ssView = null;
+            //ssView = null;
+
+            ssView = new SpreadsheetView(ssController);
+
+        }
+
+        /// <summary>
+        /// notifies the user that the Connection was lost with the server
+        /// </summary>
+        private void ConnectionLostNotification()
+        {
+            if (!this.IsDisposed)
+            {
+                MessageBox.Show("Connection to the Server Was Lost Please Reconnect", "Connection Lost",
+                                       MessageBoxButtons.OK,
+                                       MessageBoxIcon.Warning);
+
+                MethodInvoker m = new MethodInvoker(() => ListOfSpreadsheets.Items.Clear());
+                this.Invoke(m);
+            }
+            
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -83,7 +115,9 @@ namespace ClientGUI
 
             //Otherwise, send the message to open the spreadsheet
             System.Diagnostics.Debug.WriteLine(ListOfSpreadsheets.SelectedItem.ToString());
+            name = ListOfSpreadsheets.SelectedItem.ToString();
             ssController.ChooseSpreadsheet(ListOfSpreadsheets.SelectedItem.ToString(), UsernameTextBox.Text, PasswordTextBox.Text);
+          
         }
 
         /// <summary>
@@ -165,27 +199,36 @@ namespace ClientGUI
         /// </summary>
         private void UpdateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependencies)
         {
-            //Is the spreadsheet already open?
-            if (ssView == null)
+            // Launch the SpreadsheetView
+            //try
+            //{
+            if (!this.IsDisposed)
             {
-                //Open a new SpreadsheetGUI if it isn't
-                ssView = new SpreadsheetView(ssController);
-                MethodInvoker m = new MethodInvoker(() => SpreadsheetAplicationContext.getAppContext().RunForm(ssView));//new SpreadsheetView(ssController)));
+                MethodInvoker m = new MethodInvoker(() => Program.runView(cellDependencies, name));
                 this.Invoke(m);
-                System.Diagnostics.Debug.WriteLine("Opened new form");
 
-                ssView.PopulateSpreadsheet(cellDependencies);
-                
+                // Close the Client GUI
+                MethodInvoker m1 = new MethodInvoker(() => this.Close());
+                this.Invoke(m1);
+            }
+            //}
+            //catch (Exception)
+            //{
+
+
+            //}
+
+        }
+
+
+        private void ProcessError(int code, string source)
+        {
+            if(code == 1)
+            {
+                MessageBox.Show(source, "Connection Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        //private async Task<DialogResult> ShowDialogAsync(this Form @this)
-        //{
-        //    await Task.Yield();
-        //    if (@this.IsDisposed)
-        //        return DialogResult.OK;
-        //    return @this.ShowDialog();
-        //}
 
         /// <summary>
         /// When the New Spreadsheet button is clicked, verify that the name
@@ -215,6 +258,8 @@ namespace ClientGUI
                 }
                 else //If the spreadsheet doesn't already exist, send a message to make a spreadsheet
                 {
+                    
+                    name = newSheetName;
                     ssController.ChooseSpreadsheet(newSheetName, UsernameTextBox.Text, PasswordTextBox.Text);
                     break;
                 }
