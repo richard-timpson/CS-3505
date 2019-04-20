@@ -33,6 +33,7 @@ int main()
     test8();
     test9();
     test10();
+    test11();
 }
 
 /**
@@ -234,9 +235,14 @@ void test9()
     std::cout << "Test 9: spreadsheet is saved correctly" << std::endl;
     std::vector<std::string> dependents;
     std::vector<std::string> dependents1{"A1"};
+    std::vector<std::string> dependents2{"A2"};
+    std::vector<std::string> dependents3{"A3"};
+    std::cout << "Got past making vectors   ";
     alpha.do_edit("C3", "=A1+1", dependents1, "string");
-    alpha.do_edit("C3", "=A1+2", dependents, "string");
-    alpha.do_edit("C3", "=A1+3", dependents, "string");
+    std::cout << "Got past making A1   ";
+    alpha.do_edit("C3", "=A1+2", dependents2, "string");
+    std::cout << "Got past making A2   ";
+    alpha.do_edit("C3", "=A1+3", dependents3, "string");
 
     alpha.write_json_ss_file();
 
@@ -263,6 +269,34 @@ void test10()
     success = edit.contents == "10";
     print_success_or_failure(success);
     std::cout << "Test 10 finished " << std::endl << std::endl;
+
+}
+
+/**
+ * Test if personal history dependents is working
+ */
+void test11()
+{
+    /*std::cout << "Test 11: personal history dependents" << std::endl << std::endl;
+    SpreadsheetModel alpha("Alpha", true);
+    std::vector<std::string>dependents;
+    //dependents.push_back("C1");
+    alpha.do_edit("A1", "5 + C1", dependents, "int");
+    //dependents.pop_back();
+    //dependents.push_back("C2");
+    alpha.do_edit("A1", "10 + C2", dependents, "int");
+    //dependents.pop_back();
+    //dependents.push_back("C2");
+    alpha.do_edit("A1", "20 + C3", dependents, "int");
+    CellEdit edit = alpha.top_cell_personal_history("A1");
+    bool success = edit.direct_dependents.size() == 1;
+    print_success_or_failure(success);
+    alpha.pop_cell_personal_history("A1");
+    edit = alpha.top_cell_personal_history("A1");
+    success = edit.direct_dependents.size() == 1;
+    print_success_or_failure(success);
+    std::cout << "Test 11 finished " << std::endl << std::endl;
+    */
 
 }
 

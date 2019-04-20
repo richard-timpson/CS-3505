@@ -45,8 +45,9 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     // Cell exists
     else
     {
-        std::cout << "editing existing cell " << std::endl;
+        std::cout << "editing existing cell " << it->second.get_name() << std::endl;
         Cell *current_cell = &it->second;
+        std::cout << "HERE";
         current_cell->set_direct_dependents(dependents);
 
         // get cells to recalculate with throw circular exception if there is one
