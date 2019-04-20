@@ -58,3 +58,8 @@ void Cell::set_contents(std::string contents)
 {
     this->current_contents = contents;
 }
+
+void Cell::set_type(std::string type)
+{
+    this->type = type;
+}

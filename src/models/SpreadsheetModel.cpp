@@ -72,13 +72,14 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
         {
             std::cout << "actually setting the cell contents" << std::endl;
             current_cell->set_contents(contents);
+            current_cell->set_type(type);
             std::cout << "successfully set cell contents" << std::endl;
             // std::unordered_map<std::string, Cell>::iterator it1 = cell_dictionary.find(name);
             // Cell *new_cell = &it1->second;
         }
         else
         {
-            throw CircularException();
+            throw CircularException(name);
         }
     }
 }
@@ -303,6 +304,7 @@ void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std:
     edit.direct_dependents = dependents;
     edit.type = type;
     this->global_history.push(edit);
+    this->push_cell_personal_history(cell_name, edit);
     // Change the cell's contents, then add the CellEdit struct
     //  to the global history as well as the cell's personal history.
 }

@@ -2,6 +2,7 @@
 #include <string>
 #include "./Server.h"
 #include "ClientConnection.h"
+#include "../models/CircularException.h"
 #include "../controllers/SpreadsheetController.h"
 
 
@@ -61,7 +62,7 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
             if (!ec)
             {
                 // get the message from the client
-                buff.commit(size);
+                // buff.commit(size);
                 std::istream istrm(&connection->buff);
                 std::string message;
                 istrm >> message;
@@ -113,7 +114,7 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
             if (!ec)
             {
                 // get the message from the client
-                buff.commit(size);
+                // buff.commit(size);
                 std::istream istrm(&connection->buff);
                 std::string message;
                 istrm >> message;
@@ -131,6 +132,12 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
                 {
                     std::cout << e.what() << std::endl;
                     accept_edit(connection, sm);
+                }
+                catch (const CircularException &e)
+                {
+                    std::cout << e.what() << std::endl;
+                    std::string cell(e.what());
+                    send_type_2_error(connection, sm, cell);
                 }
                 // parse the message the correct way, edit the model, write back the edit, and then read again. 
             }
@@ -160,9 +167,9 @@ void Server::send_type_1_error(std::shared_ptr<ClientConnection> connection)
             });
 }
 
-void Server::send_type_2_error(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
+void Server::send_type_2_error(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm, std::string cell_name)
 {
-    std::string message = SpreadsheetController::create_type_2_error();
+    std::string message = SpreadsheetController::create_type_2_error(cell_name);
     message += "\n\n";
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
             [message, connection, sm, this](boost::system::error_code ec, std::size_t){

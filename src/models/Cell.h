@@ -20,6 +20,7 @@ class Cell
     Cell(std::string name, std::string contents, std::vector<std::string> direct_dependents, std::string type);
     void set_contents(std::string input);
     void set_direct_dependents(std::vector<std::string>);
+    void set_type(std::string type);
     std::string get_contents();
     std::string get_name();
     std::string get_type();

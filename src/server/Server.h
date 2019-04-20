@@ -26,7 +26,7 @@ class Server
     void accept_edit(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
     void send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> connection);
     void send_type_1_error(std::shared_ptr<ClientConnection> connection);
-    void send_type_2_error(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
+    void send_type_2_error(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm, std::string cell_name);
     void send_full_spreadsheet(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
 
     // member functions

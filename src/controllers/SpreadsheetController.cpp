@@ -62,6 +62,7 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
             }
             else if (type == "double")
             {
+                std::cout << "creating full send with contents: " << contents << std::endl;
                 cells[name] = stod(contents);
             }
             else
@@ -217,12 +218,12 @@ std::string SpreadsheetController::create_type_1_error()
     return message.dump();
 }
 
-std::string SpreadsheetController::create_type_2_error()
+std::string SpreadsheetController::create_type_2_error(std::string name)
 {
     json message = {
         {"type", "error"},
-        {"code", 1},
-        {"source", " "}};
+        {"code", 2},
+        {"source", name}};
     return message.dump();
 }
 
