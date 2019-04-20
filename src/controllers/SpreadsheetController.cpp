@@ -74,14 +74,14 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
     json cells;
     if (cell_dictionary.begin() == cell_dictionary.end())
     {
-        std::cout << "setting cells to empty object " << std::endl;
+        // std::cout << "setting cells to empty object " << std::endl;
         cells = json({});
     }
     else
     {
         for (std::pair<std::string, Cell> cell : cell_dictionary)
         {
-            std::cout << "entered loop in full send " << std::endl;
+            // std::cout << "entered loop in full send " << std::endl;
             std::string name = cell.second.get_name();
             std::string contents = cell.second.get_contents();
             std::string type = cell.second.get_type();
@@ -239,12 +239,14 @@ bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<Spreadsh
 bool SpreadsheetController::handle_undo(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
     sm->do_undo();
+    return true;
 }
 
 bool SpreadsheetController::handle_revert(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
     std::string cell = message.value("cell", "-1");
     sm->do_revert(cell);
+    return true;
 }
 
 std::string SpreadsheetController::create_type_1_error()

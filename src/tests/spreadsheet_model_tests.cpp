@@ -229,7 +229,8 @@ void test9()
     SpreadsheetModel alpha("Alpha", true);
     std::cout << "Test 9: spreadsheet is saved correctly" << std::endl;
     std::vector<std::string> dependents;
-    alpha.do_edit("C3", "=A1+1");
+    std::vector<std::string> dependents1{"A1"};
+    alpha.do_edit("C3", "=A1+1", dependents1, "string" );
     alpha.set_cell_contents("C3", "=A1+2", dependents, "string");
     alpha.set_cell_contents("C3", "=A1+3", dependents, "string");
 

@@ -32,6 +32,7 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
 
 void SpreadsheetModel::set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents, std::string type)
 {
+    std::cout << "setting the cell contents" << std::endl;
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
 
     // Cell doesn't exist
@@ -61,6 +62,7 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     // Cell exists
     else
     {
+        std::cout << "editing existing cell " << std::endl;
         Cell *current_cell = &it->second;
         current_cell->set_direct_dependents(dependents);
 
@@ -68,9 +70,11 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
         bool circular_dependency = circular_dependency_check(name);
         if (!circular_dependency)
         {
+            std::cout << "actually setting the cell contents" << std::endl;
             current_cell->set_contents(contents);
-            std::unordered_map<std::string, Cell>::iterator it1 = cell_dictionary.find(name);
-            Cell *new_cell = &it1->second;
+            std::cout << "successfully set cell contents" << std::endl;
+            // std::unordered_map<std::string, Cell>::iterator it1 = cell_dictionary.find(name);
+            // Cell *new_cell = &it1->second;
         }
         else
         {
@@ -142,6 +146,15 @@ CellEdit SpreadsheetModel::top_cell_personal_history(std::string name)
     }
 }
 
+bool SpreadsheetModel::check_cell_personal_history_empty(std::string name)
+{
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    if (it != cell_dictionary.end())
+    {
+        return it->second.get_personal_history().empty();
+    }
+}
+
 std::unordered_map<std::string, Cell> SpreadsheetModel::get_cell_dictionary()
 {
     return this->cell_dictionary;
@@ -151,7 +164,6 @@ std::stack<CellEdit> SpreadsheetModel::get_global_history()
 {
     return this->global_history;
 }
-
 
 void SpreadsheetModel::open_json_ss_file()
 {
@@ -194,18 +206,15 @@ void SpreadsheetModel::write_json_ss_file()
             fields["contents"] = contents;
             fields["type"] = type;
             fields["dependents"] = dependents;
-            
+
             json j_cell_history;
             // loop through all of the stack edits
             while (cell_history.empty() != true)
             {
-                j_cell_history.push_back({
-                {"name", cell_history.top().name},
-                {"contents", cell_history.top().contents},
-                {"dependents", cell_history.top().direct_dependents}
-                });
+                j_cell_history.push_back({{"name", cell_history.top().name},
+                                          {"contents", cell_history.top().contents},
+                                          {"dependents", cell_history.top().direct_dependents}});
                 cell_history.pop();
-
             }
 
             fields["history"] = j_cell_history;
@@ -213,22 +222,18 @@ void SpreadsheetModel::write_json_ss_file()
             cells[name] = fields;
         }
     }
-    
-    ss["spreadsheet"] = cells;
 
+    ss["spreadsheet"] = cells;
 
     std::stack<CellEdit> global_history = this->get_global_history();
     json j_global_history;
     // loop through all of the stack edits
     while (global_history.empty() != true)
     {
-        j_global_history.push_back({
-        {"name", global_history.top().name},
-        {"contents", global_history.top().contents},
-        {"dependents", global_history.top().direct_dependents}
-        });
+        j_global_history.push_back({{"name", global_history.top().name},
+                                    {"contents", global_history.top().contents},
+                                    {"dependents", global_history.top().direct_dependents}});
         global_history.pop();
-
     }
 
     ss["global_history"] = j_global_history;
@@ -237,9 +242,7 @@ void SpreadsheetModel::write_json_ss_file()
     write_file.open("../../data/" + this->name + ".json", std::ios::out);
     write_file << ss;
     write_file.close();
-
 }
-
 
 std::string SpreadsheetModel::get_name()
 {
@@ -283,13 +286,13 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
     return false;
 }
 
-void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std::vector<std::string> & dependents, std::string type)
+void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std::vector<std::string> &dependents, std::string type)
 {
     try
     {
         this->set_cell_contents(cell_name, contents, dependents, type);
     }
-    catch(const CircularException& e)
+    catch (const CircularException &e)
     {
         std::cerr << e.what() << '\n';
         throw e;
@@ -302,40 +305,71 @@ void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std:
     this->global_history.push(edit);
     // Change the cell's contents, then add the CellEdit struct
     //  to the global history as well as the cell's personal history.
-
 }
 
 void SpreadsheetModel::do_undo()
 {
-    this->global_history.pop();
-    CellEdit edit = this->global_history.top();
-    try
+    std::cout << "calling do undo" << std::endl;
+    if (!this->global_history.empty())
     {
-        this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
+        CellEdit edit = this->global_history.top();
+        this->global_history.pop();
+
+        this->do_revert(edit.name);
+        this->global_history.pop();
     }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-        throw e;
-    }
-    
-    // Pop the latest change off the global history
-    // Peek the global stack and set the contents of that cell.
 }
 
 void SpreadsheetModel::do_revert(std::string name)
 {
+    std::cout << "calling do revert" << std::endl;
     // pop the latest change on the cell's personal history
-    this->pop_cell_personal_history(name);
-    
-    // CellEdit edit = edits->top();
-    CellEdit edit = this->top_cell_personal_history(name);
-    
-    // Peek the personal stack and make a do_edit command, BUT DO NOT ADD BACK TO PERSONAL HISTORY.
-    //do_edit(edit.name, edit.contents, edit.direct_dependents, edit.type);
+    CellEdit edit;
+    if (this->check_cell_personal_history_empty(name))
+    {
+        edit.name = name;
+        edit.contents = "";
+        std::vector<std::string> dep;
+        edit.direct_dependents = dep;
+        edit.type = "string";
+        try
+        {
+            std::cout << "setting cell contents" << std::endl;
+            this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
+            this->global_history.push(edit);
+        }
+        catch (const CircularException &e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+    }
+    else 
+    {
+        this->pop_cell_personal_history(name);
+
+        if (this->check_cell_personal_history_empty(name))
+        {
+            edit.name = name;
+            edit.contents = "";
+            std::vector<std::string> dep;
+            edit.direct_dependents = dep;
+            edit.type = "string";
+        }
+        else
+        {
+            edit = this->top_cell_personal_history(name);
+        }
+        try
+        {
+            this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
+            this->global_history.push(edit);
+        }
+        catch (const CircularException &e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+    }
 }
-
-
 
 bool check_if_int(std::string &contents)
 {
