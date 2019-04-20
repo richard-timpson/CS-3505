@@ -155,45 +155,45 @@ void test6()
 
 void test7()
 {
-    std::cout << "Test 7: choose spreadsheet that's not in active or txt file" << std::endl;
-    int port = 2112;
-    boost::asio::io_context io_context;
-    tcp::endpoint endpoint(tcp::v4(), port);
-    Server server(io_context, endpoint);
-    json message;
-    message["name"] = "test";
-    message["username"] = "test";
-    message["password"] = "test";
-    message["type"] = "open";
+    // std::cout << "Test 7: choose spreadsheet that's not in active or txt file" << std::endl;
+    // int port = 2112;
+    // boost::asio::io_context io_context;
+    // tcp::endpoint endpoint(tcp::v4(), port);
+    // Server server(io_context, endpoint);
+    // json message;
+    // message["name"] = "test";
+    // message["username"] = "test";
+    // message["password"] = "test";
+    // message["type"] = "open";
 
-    // make a copy of spreadsheets.txt
-    std::rename("../../data/spreadsheets.txt", "../../data/spreadsheets_temp.txt");
+    // // make a copy of spreadsheets.txt
+    // std::rename("../../data/spreadsheets.txt", "../../data/spreadsheets_temp.txt");
 
-    // make an empty spreadsheets.txt file
-    std::ofstream write_file;
-    write_file.open("../../data/spreadsheets.txt");
-    write_file << "";
-    write_file.close();
+    // // make an empty spreadsheets.txt file
+    // std::ofstream write_file;
+    // write_file.open("../../data/spreadsheets.txt");
+    // write_file << "";
+    // write_file.close();
 
-    // choose the spreadsheet
-    std::shared_ptr<SpreadsheetModel> sm = server.choose_spreadsheet(message);
+    // // choose the spreadsheet
+    // std::shared_ptr<SpreadsheetModel> sm = server.choose_spreadsheet(message);
 
-    // delete the spreadsheets.txt with no entries, and replace it with temp
-    std::remove("../../data/spreadsheets.txt");
-    std::rename("../../data/spreadsheets_temp.txt", "../../data/spreadsheets.txt");
+    // // delete the spreadsheets.txt with no entries, and replace it with temp
+    // std::remove("../../data/spreadsheets.txt");
+    // std::rename("../../data/spreadsheets_temp.txt", "../../data/spreadsheets.txt");
 
-    bool success;
-    if (sm->get_name() != "test")
-    {
-        success = false;
-    }
-    else 
-    {
-        success = false;
-    }
-    print_success_or_failure(success);
+    // bool success;
+    // if (sm->get_name() != "test")
+    // {
+    //     success = false;
+    // }
+    // else 
+    // {
+    //     success = false;
+    // }
+    // print_success_or_failure(success);
 
-    std::cout << "Test 7 finished" << std::endl;
+    // std::cout << "Test 7 finished" << std::endl;
 }
 
 void test8()
@@ -219,47 +219,47 @@ void test8()
 
 void test9()
 {
-    std::cout << "Test 9: choose spreadsheet that's not in active but in text file" << std::endl;
-    int port = 2112;
-    boost::asio::io_context io_context;
-    tcp::endpoint endpoint(tcp::v4(), port);
-    Server server(io_context, endpoint);
-    json message;
-    message["name"] = "test";
-    message["username"] = "test";
-    message["password"] = "test";
-    message["type"] = "open";
+    // std::cout << "Test 9: choose spreadsheet that's not in active but in text file" << std::endl;
+    // int port = 2112;
+    // boost::asio::io_context io_context;
+    // tcp::endpoint endpoint(tcp::v4(), port);
+    // Server server(io_context, endpoint);
+    // json message;
+    // message["name"] = "test";
+    // message["username"] = "test";
+    // message["password"] = "test";
+    // message["type"] = "open";
 
-    // write test to the file and close file stream
-    std::ofstream write_file;
-    write_file.open("../../data/spreadsheets.txt", std::ios::app);
-    write_file << std::endl << "test" << std::endl;
-    write_file.close();
+    // // write test to the file and close file stream
+    // std::ofstream write_file;
+    // write_file.open("../../data/spreadsheets.txt", std::ios::app);
+    // write_file << std::endl << "test" << std::endl;
+    // write_file.close();
 
-    // choose the spreadsheet
-    std::shared_ptr<SpreadsheetModel> sm = server.choose_spreadsheet(message);
+    // // choose the spreadsheet
+    // std::shared_ptr<SpreadsheetModel> sm = server.choose_spreadsheet(message);
 
-    // open up write file stream
-    write_file.open("../../data/spreadsheets_temp.txt", std::ios::app);
+    // // open up write file stream
+    // write_file.open("../../data/spreadsheets_temp.txt", std::ios::app);
 
-    // open up read file stream 
-    std::ifstream read_file;
-    read_file.open("../../data/spreadsheets.txt");
-    std::string line;
-    while (std::getline(read_file,line ))
-    {
-        if (line != "test")
-        {
-            write_file << line << std::endl;
-        }
-    }
+    // // open up read file stream 
+    // std::ifstream read_file;
+    // read_file.open("../../data/spreadsheets.txt");
+    // std::string line;
+    // while (std::getline(read_file,line ))
+    // {
+    //     if (line != "test")
+    //     {
+    //         write_file << line << std::endl;
+    //     }
+    // }
 
-    write_file.close();
-    read_file.close();
-    std::remove("../../data/spreadsheets.txt");
-    std::rename("../../data/spreadsheets_temp.txt", "../../data/spreadsheets.txt");
+    // write_file.close();
+    // read_file.close();
+    // std::remove("../../data/spreadsheets.txt");
+    // std::rename("../../data/spreadsheets_temp.txt", "../../data/spreadsheets.txt");
 
-    std::cout << "\tTest 9 finished" << std::endl;
+    // std::cout << "\tTest 9 finished" << std::endl;
 
 }
 
