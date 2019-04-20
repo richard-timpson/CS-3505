@@ -38,24 +38,6 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     // Cell doesn't exist
     if (it == cell_dictionary.end())
     {
-        // std::string type;
-        // bool is_int = check_if_int(contents);
-        // if (is_int)
-        // {
-        //     type = "int";
-        // }
-        // else
-        // {
-        //     bool is_double = check_if_double(contents);
-        //     if (is_double)
-        //     {
-        //         type = "double";
-        //     }
-        //     else
-        //     {
-        //         type = "string";
-        //     }
-        // }
         Cell new_cell(name, contents, dependents, type);
         cell_dictionary.insert({name, new_cell});
     }
@@ -74,8 +56,6 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
             current_cell->set_contents(contents);
             current_cell->set_type(type);
             std::cout << "successfully set cell contents" << std::endl;
-            // std::unordered_map<std::string, Cell>::iterator it1 = cell_dictionary.find(name);
-            // Cell *new_cell = &it1->second;
         }
         else
         {
@@ -154,6 +134,11 @@ bool SpreadsheetModel::check_cell_personal_history_empty(std::string name)
     {
         return it->second.personal_history.empty();
     }
+    else
+    {
+        return true;
+    }
+    
 }
 
 std::unordered_map<std::string, Cell> SpreadsheetModel::get_cell_dictionary()

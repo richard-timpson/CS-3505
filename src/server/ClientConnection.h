@@ -13,10 +13,19 @@ class ClientConnection : public std::enable_shared_from_this<ClientConnection>
     void do_read();
     void do_write();
     void add_to_server();
+    void set_name(std::string name)
+    {
+        this->spreadsheet_name = name;
+    }
+    std::string get_name()
+    {
+        return this->spreadsheet_name;
+    }
     tcp::socket socket_;
     boost::asio::streambuf buff;
   private:
     Server *server_;
+    std::string spreadsheet_name;
 };
 
 #endif
