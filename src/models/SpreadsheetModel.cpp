@@ -159,12 +159,39 @@ void SpreadsheetModel::open_json_ss_file()
     // function call
 
     std::ifstream input_file("../../data/" + this->name + ".json");
-    json jsons = json::parse(input_file);
+    json ss;
+    input_file >> ss;
 
-    // for (auto it = jsons.begin(); it != jsons.end(); it++)
-    // {
-    //     set_cell_contents(it->first, it->second, it->third);
-    // }
+    json j_global_history = ss["global_history"];
+
+    std::stack<CellEdit> global_history;
+
+    for (auto& el : j_global_history.items())
+    {
+        
+        std::cout << el.value() << "                      " << el.value() << std::endl;
+        CellEdit current_edit;
+        current_edit.name = el.value;
+        std::cout << current_edit.name << std::endl;
+    }
+
+    //this->global_history = global_history;
+/*
+    json j_cells = ss["cells"];
+    std::unordered_map<std::string, Cell> cell_dictionary;
+
+    for (json::iterator jcell_it = j_global_history.begin(); jcell_it != j_global_history.end(); ++jcell_it)
+    {
+        cell_dictionary.insert(jcell_it.key, jcell_it.value);
+    }
+
+    this->cell_dictionary = cell_dictionary;
+
+    */
+
+
+
+
     input_file.close();
 }
 

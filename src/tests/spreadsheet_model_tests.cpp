@@ -13,6 +13,7 @@ void test6();
 void test7();
 void test8();
 void test9();
+void test9_1();
 void test10();
 void test11();
 void test12();
@@ -31,7 +32,7 @@ int main()
     test6();
     test7();
     test8();
-    test9();
+    test9_1();
     test10();
     test11();
 }
@@ -245,6 +246,30 @@ void test9()
     alpha.do_edit("C3", "=A1+3", dependents3, "string");
 
     alpha.write_json_ss_file();
+
+    std::cout << "Test 9 finished " << std::endl << std::endl;
+
+}
+
+/**
+ *  Test if the spreadsheet is written correctly.
+ */
+void test9_1()
+{
+    SpreadsheetModel alpha("Alpha", true);
+    std::cout << "Test 9_1: spreadsheet is loaded correctly" << std::endl;
+
+    std::vector<std::string> dependents;
+    std::vector<std::string> dependents1{"A1"};
+
+    std::cout << "Got past making vectors   ";
+    alpha.do_edit("C3", "=A1+1", dependents1, "string");
+    alpha.do_edit("C8", "=A1+1", dependents1, "string");
+
+    alpha.write_json_ss_file();
+    alpha.open_json_ss_file();
+
+
 
     std::cout << "Test 9 finished " << std::endl << std::endl;
 
