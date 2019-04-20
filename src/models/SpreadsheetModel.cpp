@@ -116,7 +116,7 @@ std::stack<CellEdit> SpreadsheetModel::get_cell_personal_history(std::string nam
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.get_personal_history();
+        return it->second.personal_history;
     }
 }
 
@@ -125,7 +125,7 @@ void SpreadsheetModel::push_cell_personal_history(std::string name, CellEdit edi
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        it->second.get_personal_history().push(edit);
+        it->second.personal_history.push(edit);
     }
 }
 
@@ -134,7 +134,7 @@ void SpreadsheetModel::pop_cell_personal_history(std::string name)
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.get_personal_history().pop();
+        return it->second.personal_history.pop();
     }
 }
 
@@ -143,7 +143,7 @@ CellEdit SpreadsheetModel::top_cell_personal_history(std::string name)
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.get_personal_history().top();
+        return it->second.personal_history.top();
     }
 }
 
@@ -152,7 +152,7 @@ bool SpreadsheetModel::check_cell_personal_history_empty(std::string name)
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.get_personal_history().empty();
+        return it->second.personal_history.empty();
     }
 }
 
