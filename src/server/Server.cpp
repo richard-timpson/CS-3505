@@ -55,16 +55,17 @@ void Server::send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> c
 void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> connection)
 {
     std::cout << "trying to accept spreadsheet selection " << std::endl;
-    boost::asio::async_read_until(connection->socket_, buff, "\n\n", 
+    boost::asio::async_read_until(connection->socket_, connection->buff, "\n\n", 
         [connection, this](boost::system::error_code ec, std::size_t size){
             std::cout << "async read handler called" << std::endl;
             if (!ec)
             {
                 // get the message from the client
                 buff.commit(size);
-                std::istream istrm(&buff);
+                std::istream istrm(&connection->buff);
                 std::string message;
                 istrm >> message;
+                connection->buff.consume(size);
                 std::cout << "message is " << message << std::endl;
                 std::string error_message;
                 json json_message = json::parse(message);
@@ -106,16 +107,17 @@ void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection,
 void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
 {
     std::cout << "trying to accept edit" << std::endl;
-    boost::asio::async_read_until(connection->socket_, buff, "\n\n", 
+    boost::asio::async_read_until(connection->socket_, connection->buff, "\n\n", 
         [connection, this, sm](boost::system::error_code ec, std::size_t size){
             std::cout << "async read handler called" << std::endl;
             if (!ec)
             {
                 // get the message from the client
                 buff.commit(size);
-                std::istream istrm(&buff);
+                std::istream istrm(&connection->buff);
                 std::string message;
                 istrm >> message;
+                connection->buff.consume(size);
                 std::cout << "message is " << message << std::endl;
                 std::string error_message;
                 try
@@ -134,7 +136,7 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
             }
             else
             {
-                std::cout << "Error reading spreadsheet selection " << std::endl;
+                std::cout << "Error reading spreadsheet edit: " << ec.message() << std::endl;
             }
             
         });
