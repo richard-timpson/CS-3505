@@ -33,9 +33,9 @@ int main()
     test7();
     test8();
     test9();
-    // test9_1();
-    // test10();
-    // test11();
+    test9_1();
+    test10();
+    test11();
 }
 
 /**
@@ -241,7 +241,7 @@ void test9()
     std::vector<std::string> dependents3{"A3"};
     alpha.do_edit("A1", "=5", dependents, "string");
     alpha.do_edit("A2", "=10", dependents, "string");
-    // alpha.do_edit("A3", "=15", dependents, "string");
+    alpha.do_edit("A3", "=15", dependents, "string");
     std::cout << "Got past making vectors   ";
     alpha.do_edit("C3", "=A1+1", dependents1, "string");
     std::cout << "Got past making A1   ";
