@@ -63,41 +63,17 @@ namespace SpreadsheetGUI
 
             ssController.SpreadsheetUpdated += SpreadsheetUpdate;
             ssController.SpreadsheetError += ProcessError;
+            ssController.ConnectionLostEvent += ConnectionLostNotification;
             formSheet = ssController.Sheet;
             //formSheet = new Spreadsheet(x => true, x => x.ToUpper(), "ps6");
 
             this.AcceptButton = SetCellContentsButton;
+          
 
             // the initial selection should be the first cell
             spreadsheetPanel1.SetSelection(0, 0);
             SetCellContentsText.Focus();
         }
-
-        /// <summary>
-        /// When the SetCellContents text box updates, update
-        /// the cellEditBox text
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void UpdateCellEditBox(object sender, EventArgs e)
-        {
-            cellEditBox.Text = SetCellContentsText.Text;
-        }
-
-        /// <summary>
-        /// When the cellEditBox text box updates, update
-        /// the SetCellContents text
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void UpdateSetCellContentsText(object sender, EventArgs e)
-        {
-            SetCellContentsText.Text = cellEditBox.Text;
-        }
-
-
-
-
 
 
         #region(oldocde)
@@ -385,6 +361,38 @@ namespace SpreadsheetGUI
 
         }
         #endregion
+
+        /// <summary>
+        /// Notifies the User That the Connection to the server was lost
+        /// </summary>
+        private void ConnectionLostNotification()
+        {
+            MessageBox.Show("Connection to the Server Was Lost Please Reconnect", "Connection Lost",
+                                          MessageBoxButtons.OK,
+                                          MessageBoxIcon.Warning);
+        }
+
+        /// <summary>
+        /// When the SetCellContents text box updates, update
+        /// the cellEditBox text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateCellEditBox(object sender, EventArgs e)
+        {
+            cellEditBox.Text = SetCellContentsText.Text;
+        }
+
+        /// <summary>
+        /// When the cellEditBox text box updates, update
+        /// the SetCellContents text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateSetCellContentsText(object sender, EventArgs e)
+        {
+            SetCellContentsText.Text = cellEditBox.Text;
+        }
 
         /// <summary>
         /// Event handler for Processing spreadsheet errors
@@ -997,6 +1005,7 @@ namespace SpreadsheetGUI
 
         private void UndoButton_Click(object sender, EventArgs e)
         {
+            cellEditBox.Hide();
             ssController.ClientUndo();
         }
 
@@ -1012,6 +1021,8 @@ namespace SpreadsheetGUI
             // get the appropriate column letter and cell name
             char columnLetter = getColumnLetter(col);
             string cellName = columnLetter.ToString() + (row + 1).ToString();
+
+            cellEditBox.Hide();
 
             ssController.ClientRevert(cellName);
         }

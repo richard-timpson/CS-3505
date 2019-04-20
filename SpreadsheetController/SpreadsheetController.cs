@@ -18,18 +18,44 @@ namespace CS3505
     /// </summary>
     public class SpreadsheetController
     {
+        /// <summary>
+        /// The connection to the sever through which communication will occur
+        /// </summary>
         private Socket theServer;
+        /// <summary>
+        /// Holds the Socket and the string builder so that messages can continue to 
+        /// Be received and sent after waiting to select the spreadsheet
+        /// </summary>
         private SocketState theServerState;
 
-       
+        /// <summary>
+        /// Event that notifies the client that the spreadsheet has been updated
+        /// by the server
+        /// </summary>
+        /// <param name="updatedDependencies"></param>
         public delegate void SpreadsheetUpdatedEventHandler(Dictionary<string, IEnumerable<string>> updatedDependencies);
         public event SpreadsheetUpdatedEventHandler SpreadsheetUpdated;
 
-
+        /// <summary>
+        /// Event that notifies the client that an error has been sent by the server
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="source"></param>
         public delegate void SpreadsheetErrorEventHandler(int code, string source);
         public event SpreadsheetErrorEventHandler SpreadsheetError;
+
+        /// <summary>
+        /// Event that notifies the clients that a spreadsheets list has been received
+        /// </summary>
         public delegate void SpreadsheetsReceivedHandler();
         public event SpreadsheetsReceivedHandler SpreadsheetsReceived;
+
+        /// <summary>
+        /// Event that notifies the Client that connection to the server has been
+        /// lost
+        /// </summary>
+        public delegate void ConnectionLostHandler();
+        public event ConnectionLostHandler ConnectionLostEvent;
 
         /// <summary>
         /// Usernames cannot have whitespace, this lets the client know
@@ -64,6 +90,9 @@ namespace CS3505
         /// </summary>
         private Spreadsheet sheet;
 
+        /// <summary>
+        /// Access to the underlying spreadsheet
+        /// </summary>
         public Spreadsheet Sheet
         {
             get
@@ -89,7 +118,10 @@ namespace CS3505
                 return SheetOptions;
             }
         }
-
+        /// <summary>
+        /// Creates a spreadsheet controller object to controll client-server communications
+        /// </summary>
+        /// <param name="spreadsheet">The underlying spreadsheet of the application</param>
         public SpreadsheetController(Spreadsheet spreadsheet)
         {
             sheet = spreadsheet;
@@ -101,6 +133,15 @@ namespace CS3505
         public void Connect(string ipAddress)
         {
             theServer = Networking.ConnectToServer(ipAddress, ReceiveSpreadsheetsList);
+            Networking.ConnectionLost += ConnectionLost;
+        }
+
+        /// <summary>
+        /// Notifies those Connected to the Controller that the connection was lost
+        /// </summary>
+        private void ConnectionLost()
+        {
+            ConnectionLostEvent();
         }
 
 
@@ -144,7 +185,8 @@ namespace CS3505
                 receive = JsonConvert.DeserializeAnonymousType(p, receive);
 
 
-                // ignore if it is the wrong kind of message
+                // if it is the wrong kind of message check if it is an error
+                // otherwise ignore it
                 if (receive.type != "list")
                 {
                     if(receive.type == "error")
@@ -161,7 +203,7 @@ namespace CS3505
                     return;
                 }
 
-                //Otherwise Process the message and output the lists
+                // Process the message and output the lists
                 var list = new
                 {
                     type = "",
@@ -191,6 +233,10 @@ namespace CS3505
         /// <param name="sheet"></param>
         public void ChooseSpreadsheet(string sheetName, string username, string password)
         {
+            if(!theServer.Connected)
+            {
+                ConnectionLost();
+            }
             Username = username;
 
             //Usernames cannot have whitespaces. If the given username has a whitespace,
@@ -210,9 +256,7 @@ namespace CS3505
                 username = Username,
                 password = Password
             };
-
             
-
             // send the request to the server
             string message = JsonConvert.SerializeObject(open) + ENDOFMESSAGE;
             Networking.Send(theServer, message);
@@ -229,12 +273,17 @@ namespace CS3505
         /// <param name="cellContents"></param>
         public void ClientEdit(string cellName, string cellContents)
         {
+            if (!theServer.Connected)
+            {
+                ConnectionLost();
+            }
             string[] depend = new string[0];
             // if a formula is entered
             if (cellContents.Length != 0 && cellContents[0] == '=')
             {
                 // create a formula 
                 Formula formula = new Formula(cellContents.Substring(1));
+                // get the dependencies
                 depend = formula.GetVariables().ToArray();
             }
 
@@ -270,6 +319,10 @@ namespace CS3505
         /// </summary>
         public void ClientUndo()
         {
+            if (!theServer.Connected)
+            {
+                ConnectionLost();
+            }
             // create the request
             var undo = new { type = "undo" };
             // send the message
@@ -284,6 +337,10 @@ namespace CS3505
         /// <param name="cellContents"></param>
         public void ClientRevert(string cellName)
         {
+            if (!theServer.Connected)
+            {
+                ConnectionLost();
+            }
             // create the request
             var revert = new { type = "revert", cell = cellName };
             // send the message
@@ -299,7 +356,7 @@ namespace CS3505
             string totalData = ss.sb.ToString();
             string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
 
-           // lock (sheet)
+            lock (sheet)
             {
                 foreach (string p in parts)
                 {

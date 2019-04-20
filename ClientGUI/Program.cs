@@ -31,8 +31,9 @@ namespace ClientGUI
 
         }
 
-        public static void runView(Dictionary<string, IEnumerable<string>> cellDependencies)
+        public static void runView(Dictionary<string, IEnumerable<string>> cellDependencies, string name)
         {
+            ssView.Text = name;
             SpreadsheetAplicationContext.getAppContext().RunForm(ssView);
             ssView.PopulateSpreadsheet(cellDependencies);
         }

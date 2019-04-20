@@ -18,6 +18,7 @@ namespace ClientGUI
     {
         private SpreadsheetView ssView;
 
+        private string name = "";
         /// <summary>
         /// Holds onto the spreadsheet and server connection
         /// </summary>
@@ -45,6 +46,7 @@ namespace ClientGUI
             ssController.SpreadsheetUpdated += UpdateSpreadsheet;
             ssController.InvalidUsername += UsernameInvalid;
             ssController.SpreadsheetError += ProcessError;
+            ssController.ConnectionLostEvent += ConnectionLostNotification;
             //------------------------------------------------------------------------------
 
             //----------ListOfSpreadsheets Initialization-------------------------------
@@ -63,6 +65,23 @@ namespace ClientGUI
 
             ssView = new SpreadsheetView(ssController);
 
+        }
+
+        /// <summary>
+        /// notifies the user that the Connection was lost with the server
+        /// </summary>
+        private void ConnectionLostNotification()
+        {
+            if (!this.IsDisposed)
+            {
+                MessageBox.Show("Connection to the Server Was Lost Please Reconnect", "Connection Lost",
+                                       MessageBoxButtons.OK,
+                                       MessageBoxIcon.Warning);
+
+                MethodInvoker m = new MethodInvoker(() => ListOfSpreadsheets.Items.Clear());
+                this.Invoke(m);
+            }
+            
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -96,7 +115,9 @@ namespace ClientGUI
 
             //Otherwise, send the message to open the spreadsheet
             System.Diagnostics.Debug.WriteLine(ListOfSpreadsheets.SelectedItem.ToString());
+            name = ListOfSpreadsheets.SelectedItem.ToString();
             ssController.ChooseSpreadsheet(ListOfSpreadsheets.SelectedItem.ToString(), UsernameTextBox.Text, PasswordTextBox.Text);
+          
         }
 
         /// <summary>
@@ -179,21 +200,24 @@ namespace ClientGUI
         private void UpdateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependencies)
         {
             // Launch the SpreadsheetView
-            try
+            //try
+            //{
+            if (!this.IsDisposed)
             {
-                MethodInvoker m = new MethodInvoker(() => Program.runView(cellDependencies));
+                MethodInvoker m = new MethodInvoker(() => Program.runView(cellDependencies, name));
                 this.Invoke(m);
 
                 // Close the Client GUI
                 MethodInvoker m1 = new MethodInvoker(() => this.Close());
                 this.Invoke(m1);
             }
-            catch (Exception)
-            {
+            //}
+            //catch (Exception)
+            //{
 
-                
-            }
-            
+
+            //}
+
         }
 
 
@@ -234,6 +258,8 @@ namespace ClientGUI
                 }
                 else //If the spreadsheet doesn't already exist, send a message to make a spreadsheet
                 {
+                    
+                    name = newSheetName;
                     ssController.ChooseSpreadsheet(newSheetName, UsernameTextBox.Text, PasswordTextBox.Text);
                     break;
                 }
