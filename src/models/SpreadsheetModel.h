@@ -26,7 +26,7 @@ class SpreadsheetModel
     std::string get_name();
     std::stack<CellEdit> get_global_history();
 
-    void set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents, std::string type);
+    void set_cell_contents(std::string name, std::string contents, std::vector<std::string> &dependents, std::string type);
     std::string get_cell_contents(std::string name);
     std::string get_cell_type(std::string name);
     std::vector<std::string> get_cell_direct_dependents(std::string name);

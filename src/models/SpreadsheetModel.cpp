@@ -30,7 +30,7 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
     }
 }
 
-void SpreadsheetModel::set_cell_contents(std::string name, std::string contents, std::vector<std::string> dependents, std::string type)
+void SpreadsheetModel::set_cell_contents(std::string name, std::string contents, std::vector<std::string> &dependents, std::string type)
 {
     std::cout << "setting the cell contents" << std::endl;
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
@@ -46,17 +46,18 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     else
     {
         std::cout << "editing existing cell " << it->second.get_name() << std::endl;
-        Cell *current_cell = &it->second;
+        Cell current_cell = it->second;
         std::cout << "HERE";
-        current_cell->set_direct_dependents(dependents);
+        it->second.direct_dependents = dependents;
+        // current_cell->set_direct_dependents(dependents);
 
         // get cells to recalculate with throw circular exception if there is one
         bool circular_dependency = circular_dependency_check(name);
         if (!circular_dependency)
         {
             std::cout << "actually setting the cell contents" << std::endl;
-            current_cell->set_contents(contents);
-            current_cell->set_type(type);
+            current_cell.set_contents(contents);
+            current_cell.set_type(type);
             std::cout << "successfully set cell contents" << std::endl;
             // std::unordered_map<std::string, Cell>::iterator it1 = cell_dictionary.find(name);
             // Cell *new_cell = &it1->second;
