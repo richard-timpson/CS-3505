@@ -122,7 +122,7 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
                 {
                     json json_message = json::parse(message);
                     std::cout << "successfully parsed message" << std::endl;
-                    // send_edit();
+                    send_full_spreadsheet(connection, sm);
                     accept_edit(connection, sm);
                 }
                 catch (json::parse_error &e)
