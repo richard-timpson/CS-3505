@@ -100,7 +100,7 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
     std::string message = SpreadsheetController::get_list_of_spreadsheets();
     message += "\n\n";
     message += SpreadsheetController::get_list_of_users();
-    message += "\n\n"
+    message += "\n\n";
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
             [message, connection, this](boost::system::error_code ec, std::size_t){
                 if (!ec)
@@ -116,6 +116,27 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
 
 
 }
+
+void admin_parser_operations(std::shared_ptr<ClientConnection> connection)
+   {
+       std::cout << "trying to accept spreadsheet selection " << std::endl;
+    boost::asio::async_read_until(connection->socket_, buff, "\n\n", 
+        [connection, this](boost::system::error_code ec, std::size_t size){
+            std::cout << "async read handler called" << std::endl;
+
+                // get the message from the client
+                buff.commit(size);
+                std::istream istrm(&buff);
+                std::string message;
+                istrm >> message;
+                std::cout << "message is " << message << std::endl;
+                std::string error_message;
+                json json_message = json::parse(message);
+                
+             
+            
+        });
+   }
 
 void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
 {

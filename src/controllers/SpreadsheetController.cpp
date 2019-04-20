@@ -56,7 +56,7 @@ std::string SpreadsheetController::get_list_of_users()
     if (count != 0)
     {
         std::cout << "count is 0" << std::endl;
-        for (std::vector<std::string>::iterator it = spreadsheet_names.begin(); it != spreadsheet_names.end(); it++)
+        for (std::vector<std::string>::iterator it = user_names.begin(); it != user_names.end(); it++)
         {
             users["users"].push_back(*it);
         }

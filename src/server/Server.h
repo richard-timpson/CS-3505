@@ -23,6 +23,7 @@ class Server
     // networking functions
     void accept_clients();
     void refresh_admin(std::shared_ptr<ClientConnection> connection);
+    void admin_parser_operations(std::shared_ptr<ClientConnection> connection);
     void accept_spreadsheet_selection(std::shared_ptr<ClientConnection> connection);
     void accept_edit(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
     void send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> connection);
