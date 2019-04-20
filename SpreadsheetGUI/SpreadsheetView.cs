@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Media;
 using CS3505;
+using SpreadsheetUtilities;
 
 namespace SpreadsheetGUI
 {
@@ -63,6 +64,7 @@ namespace SpreadsheetGUI
             ssController.SpreadsheetUpdated += SpreadsheetUpdate;
             ssController.SpreadsheetError += ProcessError;
             ssController.ConnectionLostEvent += ConnectionLostNotification;
+            //ssController.FormulaException += FormulaExceptionNotification;
             formSheet = ssController.Sheet;
            
             
@@ -76,6 +78,8 @@ namespace SpreadsheetGUI
             spreadsheetPanel1.SetSelection(0, 0);
             SetCellContentsText.Focus();
         }
+
+       
 
 
         #region(oldocde)
@@ -374,6 +378,14 @@ namespace SpreadsheetGUI
                                           MessageBoxIcon.Warning);
         }
 
+        private void FormulaExceptionNotification(string message, string contents)
+        {
+            MessageBox.Show(message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            cellEditBox.Text = contents;
+            cellEditBox.Focus();
+            cellEditBox.Visible = true;
+        }
+
         /// <summary>
         /// When the SetCellContents text box updates, update
         /// the cellEditBox text
@@ -427,6 +439,20 @@ namespace SpreadsheetGUI
             string cellName = columnLetter.ToString() + (row + 1).ToString();
 
             SetCellContentsText.Text = cellEditBox.Text;
+            string contents = SetCellContentsText.Text;
+
+            if(contents.Length != 0 && contents[0] == '=' )
+            {
+                try
+                {
+                    Formula cellFormula = new Formula(contents.Substring(1));
+                }
+                catch (FormulaFormatException e)
+                {
+                    FormulaExceptionNotification(e.Message, contents);
+                    return;
+                }
+            }
             ssController.ClientEdit(cellName, SetCellContentsText.Text);
 
         }

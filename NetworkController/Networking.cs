@@ -225,6 +225,7 @@ namespace CS3505
             }
             catch 
             {
+                System.Diagnostics.Debug.WriteLine("Send Exception caught");
                 return false;
             }
 
@@ -249,7 +250,7 @@ namespace CS3505
             }
             catch (Exception e)
             {
-
+                System.Diagnostics.Debug.WriteLine("SendCallback Exception caught");
                 s.Close();
                 ConnectionLost();
             }

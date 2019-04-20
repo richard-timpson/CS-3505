@@ -44,6 +44,9 @@ namespace CS3505
         public delegate void SpreadsheetErrorEventHandler(int code, string source);
         public event SpreadsheetErrorEventHandler SpreadsheetError;
 
+        //public delegate void FormulaFormatErrorEventHandler(string message, string contents);
+        //public event FormulaFormatErrorEventHandler FormulaException;
+
         /// <summary>
         /// Event that notifies the clients that a spreadsheets list has been received
         /// </summary>
