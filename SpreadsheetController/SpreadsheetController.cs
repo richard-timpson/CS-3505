@@ -356,7 +356,7 @@ namespace CS3505
             string totalData = ss.sb.ToString();
             string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
 
-            lock (sheet)
+            //lock (sheet)
             {
                 foreach (string p in parts)
                 {
@@ -475,7 +475,7 @@ namespace CS3505
             }
 
             Dictionary<string, IEnumerable<string>> cellDependencies = new Dictionary<string, IEnumerable<string>>();
-           // lock (sheet)
+            lock (sheet)
             {
                 // process changes
                 foreach (string cell in edits.Keys)
