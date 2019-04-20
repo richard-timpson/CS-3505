@@ -39,7 +39,7 @@ std::string SpreadsheetController::get_list_of_spreadsheets()
     }
 }
 
-std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cell*> & cell_dictionary)
+std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cell> & cell_dictionary)
 {
     json ss;
     json cells;
@@ -50,19 +50,12 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
     }
     else
     {
-        for (std::pair<std::string, Cell*> cell : cell_dictionary)
+        for (std::pair<std::string, Cell> cell : cell_dictionary)
         {
-<<<<<<< HEAD
-            std::cout << "entered loop in full send " << std::endl;
-            std::string name = cell.second->get_name();
-            std::string contents = cell.second->get_contents();
-            std::string type = cell.second->get_type();
-=======
             // std::cout << "entered loop in full send " << std::endl;
             std::string name = cell.second.get_name();
             std::string contents = cell.second.get_contents();
             std::string type = cell.second.get_type();
->>>>>>> NetworkLibrary
             if (type == "int")
             {
                 cells[name] = stoi(contents);

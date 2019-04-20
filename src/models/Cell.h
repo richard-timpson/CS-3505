@@ -28,7 +28,6 @@ class Cell
     std::string get_name();
     std::string get_type();
     std::vector<std::string> get_direct_dependents();
-    std::stack<CellEdit> personal_history;
   private:
     std::string current_contents;
     std::string type;

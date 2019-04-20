@@ -45,11 +45,7 @@ class SpreadsheetModel
 
     bool circular_dependency_check(std::string name);
     bool circular_dependency_check(std::set<std::string> names);
-
-    std::stack<CellEdit> get_cell_personal_history(std::string name);
-    CellEdit top_cell_personal_history(std::string name);
-    void pop_cell_personal_history(std::string name);
-    void push_cell_personal_history(std::string name, CellEdit input);
+    
     bool check_cell_personal_history_empty(std::string name);
 
   private:
