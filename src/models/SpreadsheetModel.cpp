@@ -539,7 +539,7 @@ void SpreadsheetModel::do_revert(std::string name)
         {
             std::cout << "setting cell contents" << std::endl;
             this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
-            this->global_history.push(edit);
+            this->global_history.push(name);
         }
         catch (const CircularException &e)
         {
