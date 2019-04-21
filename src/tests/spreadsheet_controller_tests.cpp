@@ -45,9 +45,14 @@ int main()
     test5();
     test6();
     testSpreadsheetSelection();
+    test9();
     test10();
     test11();
     test12();
+    test13();
+    test14();
+    test15();
+
 }
 
 void test1()
@@ -151,45 +156,45 @@ void test6()
 
 void test7()
 {
-    std::cout << "Test 7: choose spreadsheet that's not in active or txt file" << std::endl;
-    int port = 2112;
-    boost::asio::io_context io_context;
-    tcp::endpoint endpoint(tcp::v4(), port);
-    Server server(io_context, endpoint);
-    json message;
-    message["name"] = "test";
-    message["username"] = "test";
-    message["password"] = "test";
-    message["type"] = "open";
+    // std::cout << "Test 7: choose spreadsheet that's not in active or txt file" << std::endl;
+    // int port = 2112;
+    // boost::asio::io_context io_context;
+    // tcp::endpoint endpoint(tcp::v4(), port);
+    // Server server(io_context, endpoint);
+    // json message;
+    // message["name"] = "test";
+    // message["username"] = "test";
+    // message["password"] = "test";
+    // message["type"] = "open";
 
-    // make a copy of spreadsheets.txt
-    std::rename("../../data/spreadsheets.txt", "../../data/spreadsheets_temp.txt");
+    // // make a copy of spreadsheets.txt
+    // std::rename("../../data/spreadsheets.txt", "../../data/spreadsheets_temp.txt");
 
-    // make an empty spreadsheets.txt file
-    std::ofstream write_file;
-    write_file.open("../../data/spreadsheets.txt");
-    write_file << "";
-    write_file.close();
+    // // make an empty spreadsheets.txt file
+    // std::ofstream write_file;
+    // write_file.open("../../data/spreadsheets.txt");
+    // write_file << "";
+    // write_file.close();
 
-    // choose the spreadsheet
-    std::shared_ptr<SpreadsheetModel> sm = server.choose_spreadsheet(message);
+    // // choose the spreadsheet
+    // std::shared_ptr<SpreadsheetModel> sm = server.choose_spreadsheet(message);
 
-    // delete the spreadsheets.txt with no entries, and replace it with temp
-    std::remove("../../data/spreadsheets.txt");
-    std::rename("../../data/spreadsheets_temp.txt", "../../data/spreadsheets.txt");
+    // // delete the spreadsheets.txt with no entries, and replace it with temp
+    // std::remove("../../data/spreadsheets.txt");
+    // std::rename("../../data/spreadsheets_temp.txt", "../../data/spreadsheets.txt");
 
-    bool success;
-    if (sm->get_name() != "test")
-    {
-        success = false;
-    }
-    else 
-    {
-        success = false;
-    }
-    print_success_or_failure(success);
+    // bool success;
+    // if (sm->get_name() != "test")
+    // {
+    //     success = false;
+    // }
+    // else 
+    // {
+    //     success = false;
+    // }
+    // print_success_or_failure(success);
 
-    std::cout << "Test 7 finished" << std::endl;
+    // std::cout << "Test 7 finished" << std::endl;
 }
 
 void test8()
@@ -279,12 +284,12 @@ void test10()
     std::vector<std::string> a3_dependents{"A2"};
     std::vector<std::string> a4_dependents{"A3"};
     std::vector<std::string> a5_dependents{"A4"};
-    alpha.set_cell_contents("A1", "5", a1_dependents );
-    alpha.set_cell_contents("A2", "A1 + 5", a2_dependents );
-    alpha.set_cell_contents("A3", "A2 + 5", a3_dependents );
-    alpha.set_cell_contents("A4", "A3 + 5", a4_dependents );
-    alpha.set_cell_contents("A5", "A4 + 5", a5_dependents );
-    alpha.set_cell_contents("A6", "2.00012341234", a5_dependents );
+    alpha.set_cell_contents("A1", "5", a1_dependents, "int" );
+    alpha.set_cell_contents("A2", "A1 + 5", a2_dependents, "string" );
+    alpha.set_cell_contents("A3", "A2 + 5", a3_dependents, "string" );
+    alpha.set_cell_contents("A4", "A3 + 5", a4_dependents, "string" );
+    alpha.set_cell_contents("A5", "A4 + 5", a5_dependents, "string" );
+    alpha.set_cell_contents("A6", "2.00012341234", a5_dependents, "double" );
 
 
     std::unordered_map<std::string, Cell> cell_dictionary = alpha.get_cell_dictionary();
@@ -309,7 +314,7 @@ void test11()
 }
 
 /**
- * Test making normal edit
+ * Test making a normal string edit
  */
 void test12()
 {
@@ -322,12 +327,149 @@ void test12()
     message["value"] = "=2*A1+1+B3";
     message["dependencies"] = j_vec;
 
+    std::cout << "\t Hitting handle edit message" << std::endl;
     std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>("test", true);
     bool valid = SpreadsheetController::handle_edit_message(message, sm);
-    
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+    }
+    else
+    {
+        std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
+        std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
+        print_success_or_failure(valid);
+    }
+}
+
+
+/**
+ * Test an integer edit
+ */
+void test13()
+{
+    std::cout << "Test 13: Test for correct int to be printed on normal edit" << std::endl;
+    std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>("test", true);
+    std::vector<std::string> dependencies;
+    json message;
+    json j_vec(dependencies);
+    message["type"] = "edit";
+    message["cell"] = "A2";
+    message["value"] = 5;
+    message["dependencies"] = j_vec;
+    bool valid = SpreadsheetController::handle_edit_message(message, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+    }
     std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
     std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
     print_success_or_failure(valid);
+    std::cout << "Test 13 finished " << std::endl <<std::endl;
+}
+
+
+/**
+ * Test an integer edit
+ */
+void test14()
+{
+    std::cout << "Test 14: Test for correct double to be printed on normal edit" << std::endl;
+    std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>("test", true);
+    std::vector<std::string> dependencies;
+    json message;
+    json j_vec(dependencies);
+    message["type"] = "edit";
+    message["cell"] = "A2";
+    message["value"] = 5.12345;
+    message["dependencies"] = j_vec;
+    bool valid = SpreadsheetController::handle_edit_message(message, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+    }
+    std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
+    std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
+    print_success_or_failure(valid);
+    std::cout << "Test 14 finished " << std::endl <<std::endl;
+
+}
+
+
+/**
+ * Test global stack working for one edit on cell
+ */
+void test15()
+{
+    std::cout << "Test 15: Test for correct values to be pushed and popped of global stack" << std::endl;
+    std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>("test", true);
+    std::vector<std::string> dependencies;
+    json message;
+    json j_vec(dependencies);
+    message["type"] = "edit";
+    message["cell"] = "A2";
+    message["value"] = 5.12345;
+    message["dependencies"] = j_vec;
+    bool valid = SpreadsheetController::handle_edit_message(message, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+    }
+
+    json message1;
+    std::vector<std::string> dependencies1{"A2"};
+    json j_vec1(dependencies1);
+    message1["type"] = "edit";
+    message1["cell"] = "A3";
+    message1["value"] = "=A2+1";
+    message1["dependencies"] = j_vec1;
+    valid = SpreadsheetController::handle_edit_message(message1, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+        return;
+    }
+
+    json message2;
+    std::vector<std::string> dependencies2{"A3"};
+    json j_vec2(dependencies2);
+    message2["type"] = "edit";
+    message2["cell"] = "A4";
+    message2["value"] = "=A3+1";
+    message2["dependencies"] = j_vec2;
+    valid = SpreadsheetController::handle_edit_message(message2, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+        return;
+    }
+
+    json message3;
+    std::vector<std::string> dependencies3{"A2"};
+    json j_vec3(dependencies3);
+    message3["type"] = "undo";
+    valid = SpreadsheetController::handle_edit_message(message3, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+        return;
+    }
+    std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
+    std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
+
+    std::cout << "calling handle edit" << std::endl;
+    valid = SpreadsheetController::handle_edit_message(message3, sm);
+    if (!valid)
+    {
+        print_success_or_failure(valid);
+        return;
+    }
+    std::cout << "called handle edit" << std::endl;
+    std::unordered_map<std::string, Cell> cells1 = sm->get_cell_dictionary();
+    std::cout << "calling full send" << std::endl;
+    std::cout << "\t" << SpreadsheetController::full_send(cells1) << std::endl;
+    print_success_or_failure(valid);
+    std::cout << "Test 15 finished " << std::endl <<std::endl;   
 }
 
 

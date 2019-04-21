@@ -5,33 +5,51 @@
 #include <string>
 #include <iterator>
 #include <list>
+#include <set>
+#include <algorithm>
 
 using json = nlohmann::json;
 
 std::vector<std::string> split(std::string s, std::string delimiter);
 // std::string check_type
-std::string SpreadsheetController::get_list_of_spreadsheets()
+std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets)
 {
     std::ifstream file("../../data/spreadsheets.txt");
     std::string line;
-    std::vector<std::string> spreadsheet_names;
+    std::set<std::string> spreadsheet_names;
     int count = 0;
     while (std::getline(file, line))
     {
-        spreadsheet_names.push_back(line);
+        spreadsheet_names.insert(line);
         count++;
     }
-    json spreadsheets;
-    spreadsheets["type"] = "list";
-    spreadsheets["spreadsheets"] = {};
+    json json_spreadsheets;
+    json_spreadsheets["type"] = "list";
+    json_spreadsheets["spreadsheets"] = {};
     if (count != 0)
     {
         std::cout << "count is 0" << std::endl;
-        for (std::vector<std::string>::iterator it = spreadsheet_names.begin(); it != spreadsheet_names.end(); it++)
+        for (std::shared_ptr<SpreadsheetModel> sheet : spreadsheets)
         {
-            spreadsheets["spreadsheets"].push_back(*it);
+            json_spreadsheets["spreadsheets"].push_back(sheet->get_name());
         }
-        return spreadsheets.dump();
+        for (std::string name: spreadsheet_names)
+        {
+            bool exists;
+            for (std::shared_ptr<SpreadsheetModel> sheet1: spreadsheets)
+            {
+                if (sheet1->get_name() == name)
+                {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists)
+            {
+                json_spreadsheets["spreadsheets"].push_back(name);
+            }
+        }
+        return json_spreadsheets.dump();
     }
     else
     {
@@ -45,14 +63,14 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
     json cells;
     if (cell_dictionary.begin() == cell_dictionary.end())
     {
-        std::cout << "setting cells to empty object " << std::endl;
+        // std::cout << "setting cells to empty object " << std::endl;
         cells = json({});
     }
     else
     {
         for (std::pair<std::string, Cell> cell : cell_dictionary)
         {
-            std::cout << "entered loop in full send " << std::endl;
+            // std::cout << "entered loop in full send " << std::endl;
             std::string name = cell.second.get_name();
             std::string contents = cell.second.get_contents();
             std::string type = cell.second.get_type();
@@ -62,6 +80,7 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
             }
             else if (type == "double")
             {
+                std::cout << "creating full send with contents: " << contents << std::endl;
                 cells[name] = stod(contents);
             }
             else
@@ -86,17 +105,25 @@ bool SpreadsheetController::validate_user(json message, std::string &error_messa
     }
     std::ifstream file("../../data/users.txt");
     std::string line;
-    bool valid_user;
+    bool valid_user; // is this value ever used?
+    // search for the user
     while (std::getline(file, line))
     {
+        // read a line of the file
         std::vector<std::string> current_line = split(line, " ");
         std::vector<std::string>::iterator it = current_line.begin();
         std::string username = *it;
         it++;
         std::string password = *it;
+        // compare the username and the password?
         if (message.value("username", " ") != username && message.value("password", " ") != password)
         {
-            valid_user = false;
+            
+        }
+        else if(message.value("username", " ") == username && message.value("password", " ") != password)
+        {
+            //send as an invalid function
+            return false;
         }
         else
         {
@@ -106,7 +133,7 @@ bool SpreadsheetController::validate_user(json message, std::string &error_messa
         }
     }
     file.close();
-
+    // if Username is not found create a new user
     std::ofstream write_file;
     write_file.open("../../data/users.txt", std::ios::app);
     write_file << message.value("username", " ") << " " << message.value("password", " ") << std::endl;
@@ -145,12 +172,11 @@ bool SpreadsheetController::check_if_spreadsheet_in_storage(json & message, std:
 
 bool SpreadsheetController::handle_edit_message(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
-    std::string type = message.value("type", "-1");
-    if (type == "-1") return false;
+    if (!message.contains("type")) return false;
+    std::string type = message.at("type");
     if (type == "edit") return handle_edit(message, sm);
-    if (type == "undo") return handle_undo(message, sm);
-    if (type == "revert") return handle_revert(message, sm);
-
+    else if (type == "undo") return handle_undo(message, sm);
+    else if (type == "revert") return handle_revert(message, sm);
 }
 
 bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<SpreadsheetModel> sm)
@@ -158,11 +184,12 @@ bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<Spreadsh
     // std::cout << message.value("cell", "-1")  << message.value("value", "-1") << std::endl;
     if (!message.contains("cell") || !message.contains("value") || !message.contains("dependencies"))
     {
-        std::cout << "return false" << std::endl;
+        // std::cout << "edit message is invalid" << std::endl;
         return false;
     }
     else
     {
+        // std::cout << "edit message is valid" << std::endl;
         std::string cell = message.value("cell", "-1");
         json value_ = message["value"];
         std::string value;
@@ -181,7 +208,8 @@ bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<Spreadsh
         }
         
         std::vector<std::string> dependents = message["dependencies"].get<std::vector<std::string>>();
-        //sm->do_edit(cell, value, dependents, );
+        sm->do_edit(cell, value, dependents, type);
+        return true;
     }
     
 }
@@ -189,12 +217,14 @@ bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<Spreadsh
 bool SpreadsheetController::handle_undo(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
     sm->do_undo();
+    return true;
 }
 
 bool SpreadsheetController::handle_revert(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
     std::string cell = message.value("cell", "-1");
     sm->do_revert(cell);
+    return true;
 }
 
 std::string SpreadsheetController::create_type_1_error()
@@ -206,12 +236,12 @@ std::string SpreadsheetController::create_type_1_error()
     return message.dump();
 }
 
-std::string SpreadsheetController::create_type_2_error()
+std::string SpreadsheetController::create_type_2_error(std::string name)
 {
     json message = {
         {"type", "error"},
-        {"code", 1},
-        {"source", " "}};
+        {"code", 2},
+        {"source", name}};
     return message.dump();
 }
 

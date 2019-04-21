@@ -21,7 +21,7 @@ server_all: ./server/Server.cpp ./server/Server.h ./server/ClientConnection.h
 # Neutral
 ############################
 spreadsheet_model: ./models/SpreadsheetModel.cpp ./models/SpreadsheetModel.h
-	g++ -std=c++11  -o ../bin/objects/spreadsheet_model.o -c ./models/SpreadsheetModel.cpp 
+	g++ -std=c++11  -o ../bin/objects/spreadsheet_model.o -c ./models/SpreadsheetModel.cpp -g
 
 spreadsheet_controller: ./controllers/SpreadsheetController.cpp ./controllers/SpreadsheetController.h
 	g++ -std=c++11  -o ../bin/objects/spreadsheet_controller.o -c ./controllers/SpreadsheetController.cpp
@@ -42,10 +42,16 @@ spreadsheet_controller_tests: ./tests/spreadsheet_controller_tests.cpp
 	g++ -std=c++11 -o ../bin/tests/spreadsheet_controller ./tests/spreadsheet_controller_tests.cpp ../bin/objects/spreadsheet_controller.o ../bin/objects/server.o ../bin/objects/spreadsheet_model.o ../bin/objects/cell.o
 
 spreadsheet_model_tests: ./tests/spreadsheet_model_tests.cpp
-	g++ -std=c++11 -o ../bin/tests/spreadsheet_model ../bin/objects/spreadsheet_model.o ../bin/objects/cell.o ./tests/spreadsheet_model_tests.cpp
+	g++ -std=c++11 -o ../bin/tests/spreadsheet_model ../bin/objects/spreadsheet_model.o ../bin/objects/cell.o ./tests/spreadsheet_model_tests.cpp 
+
+spreadsheet_model_tests_debug: ./tests/spreadsheet_model_tests.cpp
+	g++ -std=c++11 -o ../bin/tests/spreadsheet_model_debug ../bin/objects/spreadsheet_model.o ../bin/objects/cell.o ./tests/spreadsheet_model_tests.cpp -g
 
 ######################
 # Cleaning binaries
 ######################
 clean:
 	rm -rf ../bin/objects/* ../bin/executables/* ../bin/tests/*
+
+clean_tests:
+	rm -rf ../bin/tests/*
