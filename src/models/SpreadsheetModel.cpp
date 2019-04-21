@@ -59,6 +59,8 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
             current_cell.set_contents(contents);
             current_cell.set_type(type);
             std::cout << "successfully set cell contents" << std::endl;
+            // std::unordered_map<std::string, Cell>::iterator it1 = cell_dictionary.find(name);
+            // Cell *new_cell = &it1->second;
         }
         else
         {
@@ -138,61 +140,6 @@ bool SpreadsheetModel::check_cell_personal_history_empty(std::string name)
     {
         return it->second.personal_history.empty();
     }
-    else
-    {
-        return true;
-    }
-    
-}
-
-std::stack<CellEdit> SpreadsheetModel::get_cell_undo_history(std::string name)
-{
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
-    if (it != cell_dictionary.end())
-    {
-        return it->second.undo_history;
-    }
-}
-
-void SpreadsheetModel::push_cell_undo_history(std::string name, CellEdit edit)
-{
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
-    if (it != cell_dictionary.end())
-    {
-        it->second.undo_history.push(edit);
-    }
-}
-
-void SpreadsheetModel::pop_cell_undo_history(std::string name)
-{
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
-    if (it != cell_dictionary.end())
-    {
-        return it->second.undo_history.pop();
-    }
-}
-
-CellEdit SpreadsheetModel::top_cell_undo_history(std::string name)
-{
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
-    if (it != cell_dictionary.end())
-    {
-        return it->second.undo_history.top();
-    }
-}
-
-bool SpreadsheetModel::check_cell_undo_history_empty(std::string name)
-{
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
-    if (it != cell_dictionary.end())
-    {
-        return it->second.undo_history.empty();
-    }
-    else
-    {
-        return true;
-    }
-    
 }
 
 std::unordered_map<std::string, Cell> SpreadsheetModel::get_cell_dictionary()
@@ -373,7 +320,8 @@ void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std:
     edit.type = type;
     this->global_history.push(edit);
     this->push_cell_personal_history(cell_name, edit);
-    this->push_cell_undo_history(cell_name, edit);
+    // Change the cell's contents, then add the CellEdit struct
+    //  to the global history as well as the cell's personal history.
 }
 
 void SpreadsheetModel::do_undo()
@@ -381,35 +329,11 @@ void SpreadsheetModel::do_undo()
     std::cout << "calling do undo" << std::endl;
     if (!this->global_history.empty())
     {
-        // get the last edit from the global history
         CellEdit edit = this->global_history.top();
         this->global_history.pop();
 
-        // find the name from the edit, and pop off the cells undo_history
-        this->pop_cell_undo_history(edit.name);
-        CellEdit edit1;
-        
-        if (this->check_cell_undo_history_empty(edit.name))
-        {
-            edit1.name = edit.name;
-            edit1.contents = "";
-            std::vector<std::string> dep;
-            edit.direct_dependents = dep;
-            edit.type = "string";
-        }
-        else
-        {
-            edit1 = this->top_cell_undo_history(edit.name);
-        }
-        try
-        {
-            this->set_cell_contents(edit1.name, edit1.contents, edit1.direct_dependents, edit1.type);
-            this->push_cell_personal_history(edit1.name, edit1);
-        }
-        catch(const CircularException& e)
-        {
-            std::cerr << e.what() << '\n';
-        }
+        this->do_revert(edit.name);
+        this->global_history.pop();
     }
 }
 
@@ -418,7 +342,25 @@ void SpreadsheetModel::do_revert(std::string name)
     std::cout << "calling do revert" << std::endl;
     // pop the latest change on the cell's personal history
     CellEdit edit;
-    if (!this->check_cell_personal_history_empty(name))
+    if (this->check_cell_personal_history_empty(name))
+    {
+        edit.name = name;
+        edit.contents = "";
+        std::vector<std::string> dep;
+        edit.direct_dependents = dep;
+        edit.type = "string";
+        try
+        {
+            std::cout << "setting cell contents" << std::endl;
+            this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
+            this->global_history.push(edit);
+        }
+        catch (const CircularException &e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+    }
+    else 
     {
         this->pop_cell_personal_history(name);
 
@@ -438,12 +380,10 @@ void SpreadsheetModel::do_revert(std::string name)
         {
             this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
             this->global_history.push(edit);
-            this->push_cell_undo_history(edit.name, edit);
         }
         catch (const CircularException &e)
         {
             std::cerr << e.what() << '\n';
-            throw e;
         }
     }
 }
