@@ -251,10 +251,14 @@ void SpreadsheetModel::open_json_ss_file()
         std::string new_cell_type;
         std::string new_cell_name;
 
-        new_cell_name = cell["name"];
+        std::cout << "getting the cell name" << std::endl;
+        new_cell_name = el.key();
+        std::cout << "getting the cell contents" << std::endl;
         new_cell_current_contents = cell["contents"];
+        std::cout << "getting the cell type" << std::endl;
         new_cell_type = cell["type"];
 
+        std::cout << "getting the cell dependnts " << std::endl;
         json j_dependents = cell["dependents"];
 
         // Going through a cell's Revert personal history's dependents
@@ -381,7 +385,8 @@ void SpreadsheetModel::write_json_ss_file()
             {
                 j_cell_history.push_back({{"name", cell_history.top().name},
                                           {"contents", cell_history.top().contents},
-                                          {"dependents", cell_history.top().direct_dependents}});
+                                          {"dependents", cell_history.top().direct_dependents},
+                                          {"type", cell_history.top().type}});
                 cell_history.pop();
             }
 
@@ -390,7 +395,8 @@ void SpreadsheetModel::write_json_ss_file()
             {
                 j_undo_history.push_back({{"name", undo_history.top().name},
                                           {"contents", undo_history.top().contents},
-                                          {"dependents", undo_history.top().direct_dependents}});
+                                          {"dependents", undo_history.top().direct_dependents},
+                                          {"type", undo_history.top().type}});
                 undo_history.pop();
             }
 
