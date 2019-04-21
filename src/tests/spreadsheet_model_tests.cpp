@@ -273,9 +273,15 @@ void test9_1()
     alpha.write_json_ss_file();
     alpha.open_json_ss_file();
 
+    std::string c3_contents = alpha.get_cell_contents("C3");
+    std::string c8_contents = alpha.get_cell_contents("C8");
+    std::cout << "c3 contents " << c3_contents << std::endl;
+    std::cout << "c8 contents " << c8_contents << std::endl;
 
+    bool success = c3_contents == "=A1+1" && c8_contents == "=A1+1";
+    print_success_or_failure(success);
 
-    std::cout << "Test 9 finished " << std::endl << std::endl;
+    std::cout << "Test 9_1 finished " << std::endl << std::endl;
 
 }
 
