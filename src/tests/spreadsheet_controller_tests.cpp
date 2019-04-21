@@ -45,6 +45,7 @@ int main()
     test5();
     test6();
     testSpreadsheetSelection();
+    test9();
     test10();
     test11();
     test12();
@@ -155,45 +156,45 @@ void test6()
 
 void test7()
 {
-    std::cout << "Test 7: choose spreadsheet that's not in active or txt file" << std::endl;
-    int port = 2112;
-    boost::asio::io_context io_context;
-    tcp::endpoint endpoint(tcp::v4(), port);
-    Server server(io_context, endpoint);
-    json message;
-    message["name"] = "test";
-    message["username"] = "test";
-    message["password"] = "test";
-    message["type"] = "open";
+    // std::cout << "Test 7: choose spreadsheet that's not in active or txt file" << std::endl;
+    // int port = 2112;
+    // boost::asio::io_context io_context;
+    // tcp::endpoint endpoint(tcp::v4(), port);
+    // Server server(io_context, endpoint);
+    // json message;
+    // message["name"] = "test";
+    // message["username"] = "test";
+    // message["password"] = "test";
+    // message["type"] = "open";
 
-    // make a copy of spreadsheets.txt
-    std::rename("../../data/spreadsheets.txt", "../../data/spreadsheets_temp.txt");
+    // // make a copy of spreadsheets.txt
+    // std::rename("../../data/spreadsheets.txt", "../../data/spreadsheets_temp.txt");
 
-    // make an empty spreadsheets.txt file
-    std::ofstream write_file;
-    write_file.open("../../data/spreadsheets.txt");
-    write_file << "";
-    write_file.close();
+    // // make an empty spreadsheets.txt file
+    // std::ofstream write_file;
+    // write_file.open("../../data/spreadsheets.txt");
+    // write_file << "";
+    // write_file.close();
 
-    // choose the spreadsheet
-    std::shared_ptr<SpreadsheetModel> sm = server.choose_spreadsheet(message);
+    // // choose the spreadsheet
+    // std::shared_ptr<SpreadsheetModel> sm = server.choose_spreadsheet(message);
 
-    // delete the spreadsheets.txt with no entries, and replace it with temp
-    std::remove("../../data/spreadsheets.txt");
-    std::rename("../../data/spreadsheets_temp.txt", "../../data/spreadsheets.txt");
+    // // delete the spreadsheets.txt with no entries, and replace it with temp
+    // std::remove("../../data/spreadsheets.txt");
+    // std::rename("../../data/spreadsheets_temp.txt", "../../data/spreadsheets.txt");
 
-    bool success;
-    if (sm->get_name() != "test")
-    {
-        success = false;
-    }
-    else 
-    {
-        success = false;
-    }
-    print_success_or_failure(success);
+    // bool success;
+    // if (sm->get_name() != "test")
+    // {
+    //     success = false;
+    // }
+    // else 
+    // {
+    //     success = false;
+    // }
+    // print_success_or_failure(success);
 
-    std::cout << "Test 7 finished" << std::endl;
+    // std::cout << "Test 7 finished" << std::endl;
 }
 
 void test8()

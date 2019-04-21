@@ -5,33 +5,51 @@
 #include <string>
 #include <iterator>
 #include <list>
+#include <set>
+#include <algorithm>
 
 using json = nlohmann::json;
 
 std::vector<std::string> split(std::string s, std::string delimiter);
 // std::string check_type
-std::string SpreadsheetController::get_list_of_spreadsheets()
+std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets)
 {
     std::ifstream file("../../data/spreadsheets.txt");
     std::string line;
-    std::vector<std::string> spreadsheet_names;
+    std::set<std::string> spreadsheet_names;
     int count = 0;
     while (std::getline(file, line))
     {
-        spreadsheet_names.push_back(line);
+        spreadsheet_names.insert(line);
         count++;
     }
-    json spreadsheets;
-    spreadsheets["type"] = "list";
-    spreadsheets["spreadsheets"] = {};
+    json json_spreadsheets;
+    json_spreadsheets["type"] = "list";
+    json_spreadsheets["spreadsheets"] = {};
     if (count != 0)
     {
         std::cout << "count is 0" << std::endl;
-        for (std::vector<std::string>::iterator it = spreadsheet_names.begin(); it != spreadsheet_names.end(); it++)
+        for (std::shared_ptr<SpreadsheetModel> sheet : spreadsheets)
         {
-            spreadsheets["spreadsheets"].push_back(*it);
+            json_spreadsheets["spreadsheets"].push_back(sheet->get_name());
         }
-        return spreadsheets.dump();
+        for (std::string name: spreadsheet_names)
+        {
+            bool exists;
+            for (std::shared_ptr<SpreadsheetModel> sheet1: spreadsheets)
+            {
+                if (sheet1->get_name() == name)
+                {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists)
+            {
+                json_spreadsheets["spreadsheets"].push_back(name);
+            }
+        }
+        return json_spreadsheets.dump();
     }
     else
     {
@@ -91,6 +109,7 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
             }
             else if (type == "double")
             {
+                std::cout << "creating full send with contents: " << contents << std::endl;
                 cells[name] = stod(contents);
             }
             else
@@ -258,12 +277,12 @@ std::string SpreadsheetController::create_type_1_error()
     return message.dump();
 }
 
-std::string SpreadsheetController::create_type_2_error()
+std::string SpreadsheetController::create_type_2_error(std::string name)
 {
     json message = {
         {"type", "error"},
-        {"code", 1},
-        {"source", " "}};
+        {"code", 2},
+        {"source", name}};
     return message.dump();
 }
 
