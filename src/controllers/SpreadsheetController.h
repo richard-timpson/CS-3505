@@ -13,12 +13,7 @@ class SpreadsheetController
 {
   public:
     // get a json string that is an array of strings with the spreadsheet names. 
-<<<<<<< HEAD
-    static std::string get_list_of_spreadsheets();
-    static std::string SpreadsheetController::get_list_of_users();
-=======
     static std::string get_list_of_spreadsheets(std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets);
->>>>>>> SpreadsheetModel
     static std::string full_send(std::unordered_map<std::string, Cell> & cell_dictionary);
     static bool validate_admin(json message, std::string &error_message);  
     static bool validate_user(json message, std::string &error_message);    

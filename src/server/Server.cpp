@@ -84,7 +84,8 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                 {
                     std::shared_ptr<SpreadsheetModel> sm = choose_spreadsheet(json_message);
                     connection->set_name(sm->get_name());
-                    send_full_spreadsheet(connection, sm);
+                    send_full_spreadsheet(
+                        connection, sm);
                 }
             }
             else
@@ -371,15 +372,9 @@ void Server::add_client_to_list(std::shared_ptr<ClientConnection> connection)
     connections.insert(connection);
 }
 
-<<<<<<< HEAD
-void Server::admin_controller_list(std::shared_ptr<ClientConnection> admin_connection)
-{
-    admin_connections.insert(admin_connection);
-=======
 void Server::remove_client_from_list(std::shared_ptr<ClientConnection> connection)
 {
     connections.erase(connection);
->>>>>>> SpreadsheetModel
 }
 
 void Server::add_spreadsheet_to_list(std::shared_ptr<SpreadsheetModel> ss)
