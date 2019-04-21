@@ -1,10 +1,11 @@
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <vector>
 #include "./Server.h"
 #include "ClientConnection.h"
 #include "../models/CircularException.h"
 #include "../controllers/SpreadsheetController.h"
-
 
 /********************************************
  * Server class
@@ -123,12 +124,113 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
 
 }
 
+void Server::admin_remove_spreadsheet(json json_message)
+{
+    std::string name_spreadsheet;
+    name_spreadsheet = json_message["name"];
+
+    std::ifstream file("../../data/spreadsheets.txt");
+    std::string line;
+    std::set<std::string> spreadsheet_names;
+    while (std::getline(file, line))
+    {
+        if(line != name_spreadsheet)
+        {
+            spreadsheet_names.insert(line);
+        }
+    }
+    file.close();
+    
+    remove("../../data/spreadsheets.txt");
+
+    std::ofstream outfile("../../data/spreadsheets.txt");
+
+    for(std::string s : spreadsheet_names)
+    {
+        outfile << s << std::endl;
+    }
+
+    outfile.close();
+
+
+   
+}
+
+std::vector<std::string> split(std::string s, std::string delimiter)
+{
+    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    std::string token;
+    std::vector<std::string> res;
+
+    while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos)
+    {
+        token = s.substr(pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back(token);
+    }
+
+    res.push_back(s.substr(pos_start));
+    return res;
+}
+
 void Server::admin_add_user(std::string add_user_name, std::string add_user_pass)
     {
-
+        std::ifstream file("../../data/users.txt");
+        std::string line;
+        bool already_exists = false;
+        while (std::getline(file, line))
+        {
+            std::vector<std::string> current_line = split(line, " ");
+            if(current_line.front() == add_user_name)
+            {
+                if(current_line.back() != add_user_pass)
+                {
+                    file.close();
+                    admin_delete_user(add_user_name);
+                    break;
+                }
+                else
+                {
+                    already_exists = true;
+                    break;
+                }
+                
+            }
+        }
+        if(!already_exists)
+        {
+            std::ofstream file;
+            file.open("../../data/users.txt", std::ios_base::app);
+            file << add_user_name << " " << add_user_pass <<std::endl;
+            file.close();
+        }
     }
 void Server::admin_delete_user(std::string del_user)
     {
+
+        std::ifstream file("../../data/users.txt");
+        std::string line;
+        std::set<std::string> user_names;
+        while (std::getline(file, line))
+        {
+            std::vector<std::string> current_line = split(line, " ");
+            if(current_line.front != del_user)
+            {
+             user_names.insert(line);
+            }
+        }
+        file.close();
+    
+        remove("../../data/spreadsheets.txt");
+
+        std::ofstream outfile("../../data/users.txt");
+
+        for(std::string u : user_names)
+        {
+            outfile << u <<std::endl;
+        }
+
+        outfile.close();
 
     }
 void Server::admin_add_spreadsheet(json json_message)
@@ -149,13 +251,16 @@ void Server::admin_delete_spreadsheet(json json_message)
         bool is_in_storage = SpreadsheetController::check_if_spreadsheet_in_storage(json_message, no_use_spread);
         if (is_in_storage)
         {
-            sm = std::make_shared<SpreadsheetModel>(json_message["name"], true);
-            this->add_spreadsheet_to_list(sm);
+            admin_remove_spreadsheet(json_message);
+        }
+        else
+        {
+            // do nothing because it doesn't exist 
         }
     }
 void Server::admin_off()
     {
-
+        
     }
 
 void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connection)

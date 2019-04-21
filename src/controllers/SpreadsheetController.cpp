@@ -14,6 +14,8 @@ std::vector<std::string> split(std::string s, std::string delimiter);
 // std::string check_type
 std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets)
 {
+
+
     std::ifstream file("../../data/spreadsheets.txt");
     std::string line;
     std::set<std::string> spreadsheet_names;

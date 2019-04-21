@@ -28,6 +28,8 @@ class Server
     void admin_delete_user(std::string delete_user_username);
     void admin_add_spreadsheet(json json_message);
     void admin_delete_spreadsheet(json json_message);
+    void admin_remove_spreadsheet(json json_message);
+    void admin_remove_client(json json_message);
     void admin_off();
     void accept_spreadsheet_selection(std::shared_ptr<ClientConnection> connection);
     void accept_edit(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
