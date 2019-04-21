@@ -137,9 +137,16 @@ void Server::admin_add_spreadsheet(json json_message)
             this->add_spreadsheet_to_list(sm);
         }
     }
-void Server::admin_delete_spreadsheet(std::string del_spread)
+void Server::admin_delete_spreadsheet(json json_message)
     {
-
+        std::string no_use_spread;
+        std::shared_ptr<SpreadsheetModel> sm(nullptr);
+        bool is_in_storage = SpreadsheetController::check_if_spreadsheet_in_storage(json_message, no_use_spread);
+        if (is_in_storage)
+        {
+            sm = std::make_shared<SpreadsheetModel>(json_message["name"], true);
+            this->add_spreadsheet_to_list(sm);
+        }
     }
 void Server::admin_off()
     {
