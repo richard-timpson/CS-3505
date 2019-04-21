@@ -39,17 +39,12 @@ std::string Cell::get_type()
     return this->type;
 }
 
-std::stack<CellEdit> Cell::get_personal_history()
-{
-    return this->personal_history;
-}
-
 std::vector<std::string> Cell::get_direct_dependents()
 {
     return this->direct_dependents;
 }
 
-void Cell::set_direct_dependents(std::vector<std::string> direct_dependents)
+void Cell::set_direct_dependents(std::vector<std::string> &direct_dependents)
 {
     this->direct_dependents = direct_dependents;
 }
