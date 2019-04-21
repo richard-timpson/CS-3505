@@ -102,8 +102,8 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
 
 void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
 {
-
-    std::string message = SpreadsheetController::get_list_of_spreadsheets();
+    std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets;
+    std::string message = SpreadsheetController::get_list_of_spreadsheets(spreadsheets);
     message += "\n\n";
     message += SpreadsheetController::get_list_of_users();
     message += "\n\n";
