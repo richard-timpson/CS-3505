@@ -71,7 +71,10 @@ you can run
 ```shell
 make all
 ```
-Either method will install the project correctly. 
+Either method will install the project correctly. If for any reason you need to clear the binary files, run 
+```shell
+make clean
+```
 
 
 ## Team notes
