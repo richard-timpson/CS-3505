@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CS3505
 {
@@ -239,6 +240,7 @@ namespace CS3505
             if(!theServer.Connected)
             {
                 ConnectionLost();
+                return;
             }
             Username = username;
 
@@ -483,7 +485,9 @@ namespace CS3505
                 // process changes
                 foreach (string cell in edits.Keys)
                 {
-                   cellDependencies[cell] = this.sheet.SetContentsOfCell(cell, edits[cell]);
+                   // MethodInvoker mi = new MethodInvoker(() => this.sheet.SetContentsOfCell(cell, edits[cell]);
+                    //SpreadsheetController.Invoke(mi);
+                  cellDependencies[cell] = this.sheet.SetContentsOfCell(cell, edits[cell]);
                 }
 
             }

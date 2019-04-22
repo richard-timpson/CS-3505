@@ -41,7 +41,6 @@ namespace ClientGUI
             //On start up, set the Spreadsheet in the controller to null, since there
             //is no Spreadsheet associated with the client yet.
             ssController = new SpreadsheetController(new Spreadsheet(x => true, x => x.ToUpper(), "cs3505"));
-            //Subscribe To Spreadsheets Received by updating ListOfSpreadsheets
             ssController.SpreadsheetsReceived += UpdateListOfSpreadsheets;
             ssController.SpreadsheetUpdated += UpdateSpreadsheet;
             ssController.InvalidUsername += UsernameInvalid;
@@ -60,9 +59,7 @@ namespace ClientGUI
             EditSpreadsheetButton.Enabled = false;
             NewSpreadsheetButton.Enabled = false;
             //--------------------------------------------------------------------------
-
-            //ssView = null;
-
+  
             ssView = new SpreadsheetView(ssController);
 
         }
@@ -129,7 +126,7 @@ namespace ClientGUI
         /// <param name="e"></param>
         private void ConnectButton_Click(object sender, EventArgs e)
         {
-
+            bool success = false;
             //If AddressTextBox is null, empty, or whitespace, connect to Generics Server.
             if (String.IsNullOrWhiteSpace(AddressTextBox.Text))
             {
@@ -137,10 +134,16 @@ namespace ClientGUI
             }
             else //Otherwise, connect with the given address
             {
+                
                 try //To connect to server with given address
                 {
+                    //Disable controls while the client connects
+                    DisableEverything();
+
+                    //Connect
                     ssController.Connect(AddressTextBox.Text);
                     NewSpreadsheetButton.Enabled = true;
+                    success = true;
 
                 }
                 catch //Fails to connect because of invalid address.
@@ -150,8 +153,12 @@ namespace ClientGUI
                                     "Failed To Connect",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
+                    success = false;
                 }
             }
+
+            //After the connection attempt is complete, reenable the controls accordingly
+            EnableEverything(success);
         }
 
         /// <summary>
@@ -200,8 +207,6 @@ namespace ClientGUI
         private void UpdateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependencies)
         {
             // Launch the SpreadsheetView
-            //try
-            //{
             if (!this.IsDisposed)
             {
                 MethodInvoker m = new MethodInvoker(() => Program.runView(cellDependencies, name));
@@ -211,12 +216,6 @@ namespace ClientGUI
                 MethodInvoker m1 = new MethodInvoker(() => this.Close());
                 this.Invoke(m1);
             }
-            //}
-            //catch (Exception)
-            //{
-
-
-            //}
 
         }
 
@@ -281,7 +280,47 @@ namespace ClientGUI
                             MessageBoxIcon.Stop);
         }
 
+        /// <summary>
+        /// When the connect button is clicked, disable the 
+        /// controls so users don't mash buttons while connecting
+        /// </summary>
+        private void DisableEverything()
+        {
+            ListOfSpreadsheets.Enabled = false;
+            NewSpreadsheetButton.Enabled = false;
+            EditSpreadsheetButton.Enabled = false;
+            ConnectButton.Enabled = false;
+            UsernameTextBox.Enabled = false;
+            PasswordTextBox.Enabled = false;
+            AddressTextBox.Enabled = false;
 
+            //Force the label to update so it shows up when attempting to connect
+            AttemptingToConnectLabel.Text = "Attempting to connect to " + AddressTextBox.Text + "...";
+            AttemptingToConnectLabel.Refresh();
+        }
+
+        /// <summary>
+        /// Enables all of the controls that were disabled after
+        /// the attempted connection
+        /// </summary>
+        /// <param name="success">whether or not there was a successful connection</param>
+        private void EnableEverything(bool success)
+        {
+            //If the connection was successful, enable the spreadsheet buttons.
+            if (success)
+            {
+                NewSpreadsheetButton.Enabled = true;
+                EditSpreadsheetButton.Enabled = true;
+            }
+
+            //Enable everything else
+            ListOfSpreadsheets.Enabled = true;
+            ConnectButton.Enabled = true;
+            UsernameTextBox.Enabled = true;
+            PasswordTextBox.Enabled = true;
+            AddressTextBox.Enabled = true;
+            AttemptingToConnectLabel.Text = "";
+        }
     }
 }
 

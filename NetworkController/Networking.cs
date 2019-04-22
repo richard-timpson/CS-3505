@@ -31,7 +31,7 @@ namespace CS3505
         public event ConnectionTimeoutEventHandler Timeout;
 
         // This is the buffer where we will receive data from the socket
-        public byte[] messageBuffer = new byte[2048];
+        public byte[] messageBuffer = new byte[4096];
 
         // This is a larger (growable) buffer, in case a single receive does not contain the full message.
         public StringBuilder sb = new StringBuilder();
