@@ -46,6 +46,7 @@ namespace ClientGUI
             ssController.InvalidUsername += UsernameInvalid;
             ssController.SpreadsheetError += ProcessError;
             ssController.ConnectionLostEvent += ConnectionLostNotification;
+            ssController.DeniedConnection += ConnectionDenied;
             //------------------------------------------------------------------------------
 
             //----------ListOfSpreadsheets Initialization-------------------------------
@@ -62,6 +63,21 @@ namespace ClientGUI
   
             ssView = new SpreadsheetView(ssController);
 
+        }
+
+        /// <summary>
+        /// When the connection is denied, notify the user
+        /// and reenable the controls accordingly
+        /// </summary>
+        private void ConnectionDenied()
+        {
+            MessageBox.Show("The connection to " + AddressTextBox.Text + " has been denied.",
+                            "Connection Denied",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+
+            MethodInvoker mi = new MethodInvoker(() => EnableEverything(false));
+            this.Invoke(mi);
         }
 
         /// <summary>
@@ -295,7 +311,7 @@ namespace ClientGUI
             AddressTextBox.Enabled = false;
 
             //Force the label to update so it shows up when attempting to connect
-            AttemptingToConnectLabel.Text = "Attempting to connect to " + AddressTextBox.Text + "...";
+            AttemptingToConnectLabel.Text = "Attempting to connect to\n" + AddressTextBox.Text + "...";
             AttemptingToConnectLabel.Refresh();
         }
 
@@ -306,20 +322,26 @@ namespace ClientGUI
         /// <param name="success">whether or not there was a successful connection</param>
         private void EnableEverything(bool success)
         {
-            //If the connection was successful, enable the spreadsheet buttons.
+            //These should be reenabled if the connection is successful
             if (success)
             {
                 NewSpreadsheetButton.Enabled = true;
                 EditSpreadsheetButton.Enabled = true;
+                ConnectButton.Text = "Connected";
             }
-
-            //Enable everything else
-            ListOfSpreadsheets.Enabled = true;
-            ConnectButton.Enabled = true;
+            else
+            {
+                //These should be reenabled if the connection fails
+                ListOfSpreadsheets.Enabled = true;
+                ConnectButton.Enabled = true;
+                AddressTextBox.Enabled = true;
+                ConnectButton.Text = "Connect";
+            }
+            //These should be reenabled regardless of the resulting connection
             UsernameTextBox.Enabled = true;
             PasswordTextBox.Enabled = true;
-            AddressTextBox.Enabled = true;
             AttemptingToConnectLabel.Text = "";
+
         }
     }
 }

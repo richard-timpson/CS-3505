@@ -15,6 +15,9 @@ namespace CS3505
 
     public delegate void NetworkAction(SocketState ss);
 
+
+
+
     /// <summary>
     /// This class holds all the necessary state to represent a socket connection
     /// Note that all of its fields are public because we are using it like a "struct"
@@ -27,8 +30,7 @@ namespace CS3505
         public Socket theSocket;
         public int ID;
         public NetworkAction CallMe;
-        public delegate void ConnectionTimeoutEventHandler();
-        public event ConnectionTimeoutEventHandler Timeout;
+        
 
         // This is the buffer where we will receive data from the socket
         public byte[] messageBuffer = new byte[4096];
@@ -75,6 +77,10 @@ namespace CS3505
     /// </summary>
     public static class Networking
     {
+
+        public delegate void ConnectionDeniedHandler();
+        public static event ConnectionDeniedHandler ConnectionDenied;
+
         public delegate void ConnectionTimeoutEventHandler();
         public static event ConnectionTimeoutEventHandler Timeout;
 
@@ -184,6 +190,8 @@ namespace CS3505
             }
             catch (System.Net.Sockets.SocketException e)
             {
+                //Let the SpreadsheetController know that the connection was denied
+                ConnectionDenied();
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 return;
             }

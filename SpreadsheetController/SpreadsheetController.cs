@@ -69,6 +69,20 @@ namespace CS3505
         public event InvalidUsernameHandler InvalidUsername;
 
         /// <summary>
+        /// Handles Denied Connections by passing it forward to the client
+        /// </summary>
+        public delegate void DeniedConnectionHandler();
+        public event DeniedConnectionHandler DeniedConnection;
+
+        /// <summary>
+        /// Updates the Contents of the cell through the GUI via a MethodInvoker
+        /// </summary>
+        /// <param name="name">Name Of Cell</param>
+        /// <param name="content">Contents of Cell</param>
+        public delegate ISet<string> UpdateCellHandler(string name, string content);
+        public event UpdateCellHandler GUIUpdateCell;
+
+        /// <summary>
         /// LogIn Username
         /// </summary>
         private string Username;
@@ -129,7 +143,17 @@ namespace CS3505
         public SpreadsheetController(Spreadsheet spreadsheet)
         {
             sheet = spreadsheet;
+            Networking.ConnectionDenied += AlertGUI;
         }
+
+        /// <summary>
+        /// Lets the client GUI know that the connection was denied
+        /// </summary>
+        private void AlertGUI()
+        {
+            DeniedConnection();
+        }
+
         /// <summary>
         /// Connects to the given server initiating the client server handshake
         /// </summary>

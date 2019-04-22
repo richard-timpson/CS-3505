@@ -165,7 +165,7 @@
             // AttemptingToConnectLabel
             // 
             this.AttemptingToConnectLabel.AutoSize = true;
-            this.AttemptingToConnectLabel.Location = new System.Drawing.Point(28, 372);
+            this.AttemptingToConnectLabel.Location = new System.Drawing.Point(12, 372);
             this.AttemptingToConnectLabel.Name = "AttemptingToConnectLabel";
             this.AttemptingToConnectLabel.Size = new System.Drawing.Size(0, 17);
             this.AttemptingToConnectLabel.TabIndex = 14;

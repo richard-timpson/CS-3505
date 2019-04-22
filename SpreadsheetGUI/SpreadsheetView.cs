@@ -70,7 +70,7 @@ namespace SpreadsheetGUI
             ssController.SpreadsheetUpdated += SpreadsheetUpdate;
             ssController.SpreadsheetError += ProcessError;
             ssController.ConnectionLostEvent += ConnectionLostNotification;
-            //ssController.FormulaException += FormulaExceptionNotification;
+            ssController.GUIUpdateCell += UpdateCell;
             formSheet = ssController.Sheet;
            
             
@@ -84,6 +84,19 @@ namespace SpreadsheetGUI
             spreadsheetPanel1.SetSelection(0, 0);
             SetCellContentsText.Focus();
         }
+
+        //private ISet<string> UpdateCell(string name, string content)
+        //{
+        //    //MethodInvoker mi = new MethodInvoker(() => foo);
+        //    return null;
+        //}
+
+        //public ISet<string> InvokeUpdateCell(string name, string content)
+        //{
+        //    MethodInvoker mi = new MethodInvoker(() => ssController.Sheet.SetContentsOfCell(name, content));
+        //    return null;
+
+        //}
 
         private void ScrollUpdate(object sender, ScrollEventArgs e)
         {
@@ -502,8 +515,10 @@ namespace SpreadsheetGUI
                         // get the location of the dependent cell
                         int col = (int)cell[0] - 65;
                         int row = int.Parse(cell.Substring(1)) - 1;
-                        //set the new value to the dependent cells                
-                        spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(cell).ToString());
+                        //set the new value to the dependent cells     
+                        MethodInvoker mi = new MethodInvoker(() => spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(cell).ToString()));
+                        //spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(cell).ToString());
+                        this.Invoke(mi);
                     }
                 }
             }
