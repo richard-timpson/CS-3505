@@ -312,17 +312,19 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
                 connection->buff.consume(size);
                 std::cout << "message is " << message << std::endl;
                 std::string error_message;
-                json json_message = json::parse(message);
-                if(json_message.value("type", " ") != "open")
-                    {
-                        refresh_admin(connection);
-                    }
-                if (json_message["Operation"]== "AU")
-                    {
-                        admin_add_user(json_message["name"], json_message["password"]);
-                        refresh_admin(connection);
-                    }
-                else if (json_message["Operation"]=="DU")
+                if(message != "")
+                {
+                     json json_message = json::parse(message);
+                    if(json_message.value("type", " ") != "open")
+                        {
+                            refresh_admin(connection);
+                        }
+                    if (json_message["Operation"]== "AU")
+                        {
+                            admin_add_user(json_message["name"], json_message["password"]);
+                            refresh_admin(connection);
+                        }
+                    else if (json_message["Operation"]=="DU")
                     {
                         admin_delete_user(json_message["name"]);
                         refresh_admin(connection);
@@ -347,6 +349,12 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
                         //operation doesn't exist
                         refresh_admin(connection);
                     }
+                }
+                else
+                {
+                    refresh_admin(connection);
+                }
+               
     
 
                 
