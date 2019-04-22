@@ -55,7 +55,7 @@ class Server
   private:
     tcp::acceptor acceptor_;
     std::set<std::shared_ptr<ClientConnection>> connections;
-    std::set<std::shared_ptr<ClientConnection>> admin_connections;
+    //std::set<std::shared_ptr<ClientConnection>> admin_connections;
     boost::asio::streambuf buff;
     std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets;
 };

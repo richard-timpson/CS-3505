@@ -14,7 +14,7 @@ std::vector<std::string> split(std::string s, std::string delimiter);
 // std::string check_type
 std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets)
 {
-
+    mu_lock_file_spreadsheet_txt.lock();
 
     std::ifstream file("../../data/spreadsheets.txt");
     std::string line;
@@ -25,11 +25,16 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
         spreadsheet_names.insert(line);
         count++;
     }
+    file.close();
+    mu_lock_file_spreadsheet_txt.unlock();
+
     json json_spreadsheets;
     json_spreadsheets["type"] = "list";
     json_spreadsheets["spreadsheets"] = {};
+    
     if (count != 0)
     {
+        mu_lock_spreadsheet_list.lock();
         std::cout << "count is 0" << std::endl;
         for (std::shared_ptr<SpreadsheetModel> sheet : spreadsheets)
         {
@@ -51,16 +56,19 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
                 json_spreadsheets["spreadsheets"].push_back(name);
             }
         }
+        mu_lock_spreadsheet_list.unlock();
         return json_spreadsheets.dump();
     }
     else
     {
+        
         return "[]";
     }
 }
 
 std::string SpreadsheetController::get_list_of_users()
 {
+    mu_lock_file_user_txt.lock();
     std::ifstream file("../../data/users.txt");
     std::string line;
     std::vector<std::string> user_names;
@@ -70,6 +78,8 @@ std::string SpreadsheetController::get_list_of_users()
         user_names.push_back(line);
         count++;
     }
+    file.close();
+    mu_lock_file_user_txt.unlock();
     json users;
     users["type"] = "list";
     users["users"] = {};
@@ -134,6 +144,7 @@ bool SpreadsheetController::validate_user(json message, std::string &error_messa
         error_message = "Didn't send correct message type";
         return false;
     }
+    mu_lock_file_user_txt.lock();
     std::ifstream file("../../data/users.txt");
     std::string line;
     bool valid_user; // is this value ever used?
@@ -154,21 +165,25 @@ bool SpreadsheetController::validate_user(json message, std::string &error_messa
         else if(message.value("username", " ") == username && message.value("password", " ") != password)
         {
             //send as an invalid function
+            mu_lock_file_user_txt.unlock();
             return false;
         }
         else
         {
             valid_user = true;
             file.close();
+            mu_lock_file_user_txt.unlock();
             return true;
         }
     }
     file.close();
+    
     // if Username is not found create a new user
     std::ofstream write_file;
     write_file.open("../../data/users.txt", std::ios::app);
     write_file << message.value("username", " ") << " " << message.value("password", " ") << std::endl;
     write_file.close();
+    mu_lock_file_user_txt.unlock();
     return true;
 }
 
@@ -198,6 +213,7 @@ bool SpreadsheetController::validate_login_message(json & message)
 
 bool SpreadsheetController::check_if_spreadsheet_in_storage(json & message, std::string & spreadsheet)
 {
+    mu_lock_file_spreadsheet_txt.lock();
     std::ifstream file("../../data/spreadsheets.txt");
     std::string line;
     std::vector<std::string> spreadsheet_names;
@@ -207,9 +223,11 @@ bool SpreadsheetController::check_if_spreadsheet_in_storage(json & message, std:
         if (message.value("name", "-1") == line)
         {
             spreadsheet = line;
+            mu_lock_file_spreadsheet_txt.unlock();
             return true;
         }
     }
+    mu_lock_file_spreadsheet_txt.unlock();
     return false;
 }
 
