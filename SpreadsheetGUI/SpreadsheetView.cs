@@ -70,7 +70,7 @@ namespace SpreadsheetGUI
             ssController.SpreadsheetUpdated += SpreadsheetUpdate;
             ssController.SpreadsheetError += ProcessError;
             ssController.ConnectionLostEvent += ConnectionLostNotification;
-            ssController.GUIUpdateCell += UpdateCell;
+            //ssController.GUIUpdateCell += UpdateCell;
             formSheet = ssController.Sheet;
            
             
