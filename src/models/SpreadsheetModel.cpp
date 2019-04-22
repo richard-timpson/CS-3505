@@ -26,7 +26,8 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
     }
     else
     {
-        // this->open_json_ss_file();
+        this->name = input_name;
+        this->open_json_ss_file();
     }
 }
 
@@ -45,20 +46,20 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     // Cell exists
     else
     {
-        Cell current_cell = it->second;
+        Cell *current_cell = &it->second;
         std::cout << "editing existing cell " << std::endl;
         std::cout << "here" << std::endl;
         it->second.direct_dependents = dependents;
         it++;
-        current_cell.set_direct_dependents(dependents);
+        current_cell->set_direct_dependents(dependents);
 
         // get cells to recalculate with throw circular exception if there is one
         bool circular_dependency = circular_dependency_check(name);
         if (!circular_dependency)
         {
             std::cout << "actually setting the cell contents" << std::endl;
-            current_cell.set_contents(contents);
-            current_cell.set_type(type);
+            current_cell->set_contents(contents);
+            current_cell->set_type(type);
             std::cout << "successfully set cell contents" << std::endl;
             // std::unordered_map<std::string, Cell>::iterator it1 = cell_dictionary.find(name);
             // Cell *new_cell = &it1->second;
@@ -237,7 +238,8 @@ void SpreadsheetModel::open_json_ss_file()
     
 
     // Looping through the cells
-    for (auto &el : j_cells.items())
+    for (json::iterator el = j_cells.begin(); el != j_cells.end(); el++)
+    // for (auto &el : j_cells.items())
     {
         std::cout << "looping through cells" << std::endl;
         json cell = el.value();
@@ -422,9 +424,39 @@ void SpreadsheetModel::write_json_ss_file()
     ss["global_history"] = j_global_history;
 
     std::ofstream write_file;
-    write_file.open("../../data/" + this->name + ".json", std::ios::out);
-    write_file << ss;
+    write_file.open("../../data/" + this->name + ".json", std::ios_base::app);
+    //if (write_file.open())
+    {
+        write_file << ss;    
+        write_file.close();
+    }
+    //else
+    {
+        std::cout << "stream not open" << std::endl;
+    }
+    
+}
+
+void SpreadsheetModel::write_ss_file_if_needed()
+{
+    std::ifstream read_file;
+    read_file.open("../../data/spreadsheets.txt");
+    std::string line;
+    while (std::getline(read_file,line ))
+    {
+        if (line == this->get_name())
+        {
+       	    std::cout << "not writing to spreadsheets.txt file" <<std::endl;
+            return;
+        }
+    }
+    read_file.close();
+    std::cout << "writing spreadsheet " << this->get_name() << " to spreadsheets.txt file" << std::endl;
+    std::ofstream write_file;
+    write_file.open("../../data/spreadsheets.txt", std::ios_base::out | std::ios_base::app);
+    write_file << this->get_name() << std::endl;
     write_file.close();
+
 }
 
 std::string SpreadsheetModel::get_name()
@@ -488,6 +520,7 @@ void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std:
     edit.type = type;
     this->global_history.push(edit.name);
     this->push_cell_personal_history(cell_name, edit);
+    this->push_cell_undo_history(cell_name, edit);
     // Change the cell's contents, then add the CellEdit struct
     //  to the global history as well as the cell's personal history.
 }
@@ -497,6 +530,7 @@ void SpreadsheetModel::do_undo()
     std::cout << "calling do undo" << std::endl;
     if (!this->global_history.empty())
     {
+        std::cout << "checked that global history is empty " << std::endl;
         // get the last edit from the global history
         std::string name = this->global_history.top();
         this->global_history.pop();
@@ -507,6 +541,7 @@ void SpreadsheetModel::do_undo()
 
         if (this->check_cell_undo_history_empty(name))
         {
+            std::cout << "undo history is empty" << std::endl;
             edit.name = name;
             edit.contents = "";
             std::vector<std::string> dep;
@@ -515,10 +550,12 @@ void SpreadsheetModel::do_undo()
         }
         else
         {
+            std::cout << "undo history isn't empty" << std::endl;
             edit = this->top_cell_undo_history(edit.name);
         }
         try
         {
+            std::cout << "setting the cell contents in undo " << std::endl;
             this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
             this->push_cell_personal_history(edit.name, edit);
         }

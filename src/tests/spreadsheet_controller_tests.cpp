@@ -57,10 +57,10 @@ int main()
 
 void test1()
 {
-    std::cout << "Test 1: Getting list of spreadsheets" << std::endl;
-    std::string sheets = SpreadsheetController::get_list_of_spreadsheets();
-    std::cout << "\t" << sheets << std::endl;
-    std::cout << "Test 1 finished " << std::endl;
+    // std::cout << "Test 1: Getting list of spreadsheets" << std::endl;
+    // std::string sheets = SpreadsheetController::get_list_of_spreadsheets();
+    // std::cout << "\t" << sheets << std::endl;
+    // std::cout << "Test 1 finished " << std::endl;
 }
 void test2()
 {
@@ -128,7 +128,7 @@ void test5()
 
 void test6()
 {
-    std::cout << "Test 6: check spreadhseet list with non-empty spreadsheet" << std::endl;
+    std::cout << "Test 6: check spreadsheet list with non-empty spreadsheet" << std::endl;
     int port = 2112;
     boost::asio::io_context io_context;
     tcp::endpoint endpoint(tcp::v4(), port);
