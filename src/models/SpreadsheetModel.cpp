@@ -355,7 +355,8 @@ void SpreadsheetModel::open_json_ss_file()
 
 void SpreadsheetModel::write_json_ss_file()
 {
-
+    std::cout << "writing to json file" << std::endl;
+    std::remove(("../../data" + this->get_name() + ".json").c_str());
     json ss;
     json cells;
     json fields;
@@ -424,16 +425,9 @@ void SpreadsheetModel::write_json_ss_file()
     ss["global_history"] = j_global_history;
 
     std::ofstream write_file;
-    write_file.open("../../data/" + this->name + ".json", std::ios_base::app);
-    //if (write_file.open())
-    {
-        write_file << ss;    
-        write_file.close();
-    }
-    //else
-    {
-        std::cout << "stream not open" << std::endl;
-    }
+    write_file.open("../../data/" + this->name + ".json");
+    write_file << ss;    
+    write_file.close();
     
 }
 
