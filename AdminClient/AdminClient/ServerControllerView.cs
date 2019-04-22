@@ -47,7 +47,7 @@ namespace AdminClient
 
                 spreadsheetListView.View = View.List;
                 userListView.View = View.List;
-
+                Thread.Sleep(1000);
                 Controler.startGetData();
 
                 // Set the view to show details.
@@ -411,6 +411,11 @@ namespace AdminClient
                 deleteSpreadsheetButton.Enabled = false;
                 logTextBox.AppendText("Delete spreadsheet(s) command sent\n");
             }
+        }
+
+        private void refreshButton_Click(object sender, EventArgs e)
+        {
+            Controler.SendCommand(new OperationAdmin("R", "", ""));
         }
 
         public void errorMessageShow(string error)

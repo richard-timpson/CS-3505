@@ -79,23 +79,26 @@ namespace AdminClient
 
                             if (obj["spreadsheets"] != null)
                             {
+                                if (obj["type"].Equals("\"full send\"") || obj["type"].Equals("\"edit\""))
+                                {
+                                    continue;
+                                }
 
                                 recievedDataList = JsonConvert.DeserializeObject<RecievedDataList>(input);
 
                                 view.recieveListData(recievedDataList.names(), 1);
                             }
-                            else if (obj["spreadsheet"]!=null)
+                            else if (obj["spreadsheet"] != null)
                             {
-                                if (obj["type"].Equals("\"full send\"") || obj["type"].Equals("edit"))
+                                if (obj["type"].Equals("\"full send\"") || obj["type"].Equals("\"edit\""))
                                 {
+                                    continue;
+                                }
 
-                                }
-                                else
-                                {
-                                    ActiveDataRecieve activeDataRecieve = JsonConvert.DeserializeObject<ActiveDataRecieve>(input);
-                                    view.addActiveItems(activeDataRecieve.namesSpread, activeDataRecieve.namesUse);
-                                }
-                               
+                                ActiveDataRecieve activeDataRecieve = JsonConvert.DeserializeObject<ActiveDataRecieve>(input);
+                                view.addActiveItems(activeDataRecieve.namesSpread, activeDataRecieve.namesUse);
+
+
                             }
                             else if (obj["users"] != null)
                             {
@@ -104,7 +107,7 @@ namespace AdminClient
 
                                 view.recieveListData(recievedDataList.names(), 0);
                             }
-                            
+
                             else if (obj["sorce"] != null)
                             {
                                 view.errorMessageShow(obj["source"].ToString());
@@ -148,7 +151,7 @@ namespace AdminClient
         [JsonProperty(PropertyName = "users")]
         public string[] namesUse;
 
-        
+
     }
     public class RecievedDataList
     {
