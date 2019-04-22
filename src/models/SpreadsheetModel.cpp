@@ -26,7 +26,7 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
     }
     else
     {
-        // this->open_json_ss_file();
+        this->open_json_ss_file();
     }
 }
 

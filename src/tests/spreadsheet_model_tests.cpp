@@ -34,10 +34,10 @@ int main()
     test7();
     test8();
     test9();
-    //test9_1();
-    test10();
-    test11();
-    test12();
+    test9_1();
+    //test10();
+    //test11();
+    //test12();
     // test13();
 }
 
