@@ -70,7 +70,9 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                 // buff.commit(size);
                 std::istream istrm(&connection->buff);
                 std::string message;
-                istrm >> message;
+                std::getline(istrm, message);
+                // while (istrm >> std::noskipws >> message)
+                // istrm >> std::noskipws >> message;
                 connection->buff.consume(size);
                 std::cout << "message is " << message << std::endl;
                 std::string error_message;
@@ -305,7 +307,8 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
   //              buff.commit(size);
                 std::istream istrm(&connection->buff);
                 std::string message;
-                istrm >> message;
+                std::getline(istrm, message);
+                // istrm >> std::noskipws >> message;
                 connection->buff.consume(size);
                 std::cout << "message is " << message << std::endl;
                 std::string error_message;
@@ -388,6 +391,8 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
                 // buff.commit(size);
                 std::istream istrm(&connection->buff);
                 std::string message;
+                std::getline(istrm, message);
+                // while (istrm >> std::noskipws >> message)
                 istrm >> message;
                 connection->buff.consume(size);
                 std::cout << "message is " << message << std::endl;
