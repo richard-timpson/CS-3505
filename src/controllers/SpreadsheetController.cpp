@@ -32,14 +32,16 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
     json_spreadsheets["type"] = "list";
     json_spreadsheets["spreadsheets"] = {};
     
-    if (count != 0)
+    
+    for (std::shared_ptr<SpreadsheetModel> sheet : spreadsheets)
+    {
+        std::cout << "Writing active spreadsheet " << sheet->get_name() << " to spreadsheet list " << std::endl;
+        json_spreadsheets["spreadsheets"].push_back(sheet->get_name());
+    }
+    //if (count != 0)
     {
         //mu_lock_spreadsheet_list.lock();
         std::cout << "count is 0" << std::endl;
-        for (std::shared_ptr<SpreadsheetModel> sheet : spreadsheets)
-        {
-            json_spreadsheets["spreadsheets"].push_back(sheet->get_name());
-        }
         for (std::string name: spreadsheet_names)
         {
             bool exists;
@@ -53,16 +55,18 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
             }
             if (!exists)
             {
+                std::cout << "Writing stored spreadsheet " << name << " to spreadsheet list " << std::endl;
                 json_spreadsheets["spreadsheets"].push_back(name);
             }
         }
        // mu_lock_spreadsheet_list.unlock();
-        return json_spreadsheets.dump();
     }
-    else
-    {
-        return "{\"type\":\"list\",\"spreadsheets\":[]}";
-    }
+    //else
+    //{
+      //json_spreadsheets[""]
+      //return "{\"type\":\"list\",\"spreadsheets\":[]}";
+    //}
+    return json_spreadsheets.dump();
 }
 
 std::string SpreadsheetController::get_list_of_users()
