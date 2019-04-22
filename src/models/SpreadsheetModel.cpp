@@ -26,7 +26,7 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
     }
     else
     {
-        // this->open_json_ss_file();
+        this->open_json_ss_file();
     }
 }
 
@@ -237,7 +237,8 @@ void SpreadsheetModel::open_json_ss_file()
     
 
     // Looping through the cells
-    for (auto &el : j_cells.items())
+    for (json::iterator el = j_cells.begin(); el != j_cells.end(); el++)
+    // for (auto &el : j_cells.items())
     {
         std::cout << "looping through cells" << std::endl;
         json cell = el.value();

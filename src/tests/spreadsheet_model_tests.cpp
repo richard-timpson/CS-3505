@@ -34,7 +34,7 @@ int main()
     test7();
     test8();
     test9();
-    //test9_1();
+    test9_1();
     test10();
     test11();
     test12();
@@ -274,10 +274,11 @@ void test9_1()
     alpha.do_edit("C8", "=A1+1", dependents1, "string");
 
     alpha.write_json_ss_file();
-    alpha.open_json_ss_file();
+    SpreadsheetModel alpha1("Alpha", false);
+    // alpha.open_json_ss_file();
 
-    std::string c3_contents = alpha.get_cell_contents("C3");
-    std::string c8_contents = alpha.get_cell_contents("C8");
+    std::string c3_contents = alpha1.get_cell_contents("C3");
+    std::string c8_contents = alpha1.get_cell_contents("C8");
     std::cout << "c3 contents " << c3_contents << std::endl;
     std::cout << "c8 contents " << c8_contents << std::endl;
 
