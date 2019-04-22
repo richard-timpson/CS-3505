@@ -526,7 +526,6 @@ namespace CS3505
             }
             // let the subscribers (client) know that the spreadsheet has been updated
             SpreadsheetUpdated(cellDependencies);
-
         }
     }
 }
