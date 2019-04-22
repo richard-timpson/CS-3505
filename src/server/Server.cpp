@@ -266,7 +266,13 @@ void Server::admin_delete_spreadsheet(json json_message)
     }
 void Server::admin_off()
     {
-        
+
+        connections.clear();
+        SpreadsheetController::mu_lock_user_list.lock();
+        SpreadsheetController::mu_lock_spreadsheet_list.lock();
+        SpreadsheetController::mu_lock_file_user_txt.lock();
+        SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
+        exit(0);
     }
 
 void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connection)
