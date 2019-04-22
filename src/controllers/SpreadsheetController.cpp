@@ -186,7 +186,7 @@ bool SpreadsheetController::handle_edit(json & message, std::shared_ptr<Spreadsh
     }
     else
     {
-        // std::cout << "edit message is valid" << std::endl;
+        std::cout << "edit message is valid" << std::endl;
         std::string cell = message.value("cell", "-1");
         json value_ = message["value"];
         std::string value;
