@@ -218,7 +218,7 @@ void Server::admin_delete_user(std::string del_user)
         while (std::getline(file, line))
         {
             std::vector<std::string> current_line = split(line, " ");
-            if(current_line.front != del_user)
+            if(current_line.front() != del_user)
             {
              user_names.insert(line);
             }
