@@ -85,6 +85,7 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                 {
                     std::shared_ptr<SpreadsheetModel> sm = choose_spreadsheet(json_message);
                     connection->set_name(sm->get_name());
+                    connection->set_user_name(json_message["username"]);
                     send_full_spreadsheet(
                         connection, sm);
                 }
@@ -113,7 +114,7 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
                 if (!ec)
                 {
                     std::cout << "writing message " << message << std::endl;
-                    refresh_admin(connection);//Change to a parser later
+                    admin_parser_operations(connection);
                 }
                 else
                 {
@@ -128,7 +129,7 @@ void Server::admin_remove_spreadsheet(json json_message)
 {
     std::string name_spreadsheet;
     name_spreadsheet = json_message["name"];
-
+    SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
     std::ifstream file("../../data/spreadsheets.txt");
     std::string line;
     std::set<std::string> spreadsheet_names;
@@ -152,6 +153,7 @@ void Server::admin_remove_spreadsheet(json json_message)
 
     outfile.close();
 
+    SpreadsheetController::mu_lock_file_spreadsheet_txt.unlock();
 
    
 }
@@ -175,6 +177,7 @@ std::vector<std::string> split(std::string s, std::string delimiter)
 
 void Server::admin_add_user(std::string add_user_name, std::string add_user_pass)
     {
+        SpreadsheetController::mu_lock_file_user_txt.lock();
         std::ifstream file("../../data/users.txt");
         std::string line;
         bool already_exists = false;
@@ -204,10 +207,11 @@ void Server::admin_add_user(std::string add_user_name, std::string add_user_pass
             file << add_user_name << " " << add_user_pass <<std::endl;
             file.close();
         }
+        SpreadsheetController::mu_lock_file_user_txt.unlock();
     }
 void Server::admin_delete_user(std::string del_user)
     {
-
+        SpreadsheetController::mu_lock_file_user_txt.lock();
         std::ifstream file("../../data/users.txt");
         std::string line;
         std::set<std::string> user_names;
@@ -221,7 +225,7 @@ void Server::admin_delete_user(std::string del_user)
         }
         file.close();
     
-        remove("../../data/spreadsheets.txt");
+        remove("../../data/users.txt");
 
         std::ofstream outfile("../../data/users.txt");
 
@@ -231,6 +235,8 @@ void Server::admin_delete_user(std::string del_user)
         }
 
         outfile.close();
+
+        SpreadsheetController::mu_lock_file_user_txt.unlock();
 
     }
 void Server::admin_add_spreadsheet(json json_message)

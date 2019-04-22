@@ -17,15 +17,24 @@ class ClientConnection : public std::enable_shared_from_this<ClientConnection>
     {
         this->spreadsheet_name = name;
     }
+    void set_user_name(std::string name)
+    {
+        this->user_name = name;
+    }
     std::string get_name()
     {
         return this->spreadsheet_name;
+    }
+    std::string get_user_name()
+    {
+        return this->user_name;
     }
     tcp::socket socket_;
     boost::asio::streambuf buff;
   private:
     Server *server_;
     std::string spreadsheet_name;
+    std::string user_name;
 };
 
 #endif
