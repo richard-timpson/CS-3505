@@ -47,7 +47,7 @@ namespace AdminClient
 
                 spreadsheetListView.View = View.List;
                 userListView.View = View.List;
-
+                Thread.Sleep(1000);
                 Controler.startGetData();
 
                 // Set the view to show details.
@@ -315,7 +315,7 @@ namespace AdminClient
                 MessageBox.Show("Please enter a the new Spreadsheet Name");
                 return;
             }
-            Controler.SendCommand(new OperationAdmin("AS", newSpreadhseetTextBox.Text,""));
+            Controler.SendCommand(new OperationAdmin("AS", newSpreadhseetTextBox.Text.ToString(),""));
             logTextBox.AppendText("Add Spreadsheet Command sent for " + newSpreadhseetTextBox.Text + "\n");
             Controler.SendCommand(new OperationAdmin("R", "", ""));
             closeNewSpreadsheetItems();
@@ -411,6 +411,16 @@ namespace AdminClient
                 deleteSpreadsheetButton.Enabled = false;
                 logTextBox.AppendText("Delete spreadsheet(s) command sent\n");
             }
+        }
+
+        private void refreshButton_Click(object sender, EventArgs e)
+        {
+            Controler.SendCommand(new OperationAdmin("R", "", ""));
+        }
+
+        private void newUserTextBox_TextChanged(object sender, EventArgs e)
+        {
+
         }
 
         public void errorMessageShow(string error)
