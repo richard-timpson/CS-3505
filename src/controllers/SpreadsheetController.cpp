@@ -95,7 +95,7 @@ std::string SpreadsheetController::get_list_of_users()
     {
         return "{\"type\":\"list\",\"users\":[]}";
     }
-    return json_spreadsheets.dump();
+    return users.dump();
 }
 
 std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cell> & cell_dictionary)
