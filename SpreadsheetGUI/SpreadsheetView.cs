@@ -486,7 +486,8 @@ namespace SpreadsheetGUI
                 }
             }
             ssController.ClientEdit(cellName, SetCellContentsText.Text);
-
+            spreadsheetPanel1.SetSelection(col, row + 1);
+            displayCellContents(spreadsheetPanel1);
         }
 
         /// <summary>

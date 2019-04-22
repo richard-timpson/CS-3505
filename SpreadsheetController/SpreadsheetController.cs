@@ -298,6 +298,9 @@ namespace CS3505
 
             
             Networking.GetData(theServerState);
+
+            // Launch a spreadsheet to be populated
+            SpreadsheetUpdated(new Dictionary<string, IEnumerable<string>>());
         }
 
 
@@ -523,7 +526,6 @@ namespace CS3505
             }
             // let the subscribers (client) know that the spreadsheet has been updated
             SpreadsheetUpdated(cellDependencies);
-
         }
     }
 }
