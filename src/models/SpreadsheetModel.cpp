@@ -40,8 +40,16 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     if (it == cell_dictionary.end())
     {
         Cell new_cell(name, contents, dependents, type);
-
-        cell_dictionary.insert({name, new_cell});
+        // bool circular_dependency = circular_dependency_check(name);
+        // if (!circular_dependency)
+        {
+            cell_dictionary.insert({name, new_cell});
+        }
+        // else
+        // {
+        //     throw CircularException(name);
+        // }
+        
     }
     // Cell exists
     else
@@ -355,7 +363,8 @@ void SpreadsheetModel::open_json_ss_file()
 
 void SpreadsheetModel::write_json_ss_file()
 {
-
+    std::cout << "writing to json file" << std::endl;
+    std::remove(("../../data" + this->get_name() + ".json").c_str());
     json ss;
     json cells;
     json fields;
@@ -424,16 +433,9 @@ void SpreadsheetModel::write_json_ss_file()
     ss["global_history"] = j_global_history;
 
     std::ofstream write_file;
-    write_file.open("../../data/" + this->name + ".json", std::ios_base::app);
-    //if (write_file.open())
-    {
-        write_file << ss;    
-        write_file.close();
-    }
-    //else
-    {
-        std::cout << "stream not open" << std::endl;
-    }
+    write_file.open("../../data/" + this->name + ".json");
+    write_file << ss;    
+    write_file.close();
     
 }
 
@@ -562,6 +564,7 @@ void SpreadsheetModel::do_undo()
         catch (const CircularException &e)
         {
             std::cerr << e.what() << '\n';
+            throw e;
         }
     }
 }
@@ -587,6 +590,7 @@ void SpreadsheetModel::do_revert(std::string name)
         catch (const CircularException &e)
         {
             std::cerr << e.what() << '\n';
+            throw e;
         }
     }
     else 
@@ -607,13 +611,16 @@ void SpreadsheetModel::do_revert(std::string name)
         }
         try
         {
+            std::cout << "setting cell contents in revert" << std::endl;
             this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
             this->global_history.push(edit.name);
             this->push_cell_undo_history(edit.name, edit);
         }
         catch (const CircularException &e)
         {
-            std::cerr << e.what() << '\n';
+            std::cerr << "circular dependency in revert" << std::endl;;
+            this->push_cell_personal_history(edit.name, edit);
+            throw e;
         }
     }
 }
