@@ -134,6 +134,7 @@
             this.newUserTextBox.Size = new System.Drawing.Size(138, 20);
             this.newUserTextBox.TabIndex = 7;
             this.newUserTextBox.Visible = false;
+            this.newUserTextBox.TextChanged += new System.EventHandler(this.newUserTextBox_TextChanged);
             // 
             // newPasswordTextBox
             // 
