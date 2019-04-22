@@ -109,6 +109,28 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
     message += "\n\n";
     message += SpreadsheetController::get_list_of_users();
     message += "\n\n";
+    int temp=0;
+    for (std::shared_ptr<SpreadsheetModel> ss : this->spreadsheets)
+    {
+        if(ss->get_name()==""){
+            continue;
+        }
+        message+= "{\"type\":\"activeUser\", \"spreadsheet\":"+ss->get_name()+",\"users\":[";
+        temp=0;
+        for (std::shared_ptr<ClientConnection> connection: this->connections)
+        {
+            if(connection->get_name()==ss->get_name())
+            {
+                if(temp!=0){
+                    message+=",";
+                }
+                temp++;
+                message+="\""+connection->get_user_name()+"\"";
+            }
+        }
+        message+="]}\n\n";
+    }
+
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
             [message, connection, this](boost::system::error_code ec, std::size_t){
                 if (!ec)
@@ -158,22 +180,6 @@ void Server::admin_remove_spreadsheet(json json_message)
    
 }
 
-std::vector<std::string> split(std::string s, std::string delimiter)
-{
-    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
-    std::string token;
-    std::vector<std::string> res;
-
-    while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos)
-    {
-        token = s.substr(pos_start, pos_end - pos_start);
-        pos_start = pos_end + delim_len;
-        res.push_back(token);
-    }
-
-    res.push_back(s.substr(pos_start));
-    return res;
-}
 
 void Server::admin_add_user(std::string add_user_name, std::string add_user_pass)
     {
@@ -183,7 +189,7 @@ void Server::admin_add_user(std::string add_user_name, std::string add_user_pass
         bool already_exists = false;
         while (std::getline(file, line))
         {
-            std::vector<std::string> current_line = split(line, " ");
+            std::vector<std::string> current_line = SpreadsheetController::split(line, " ");
             if(current_line.front() == add_user_name)
             {
                 if(current_line.back() != add_user_pass)
@@ -217,7 +223,7 @@ void Server::admin_delete_user(std::string del_user)
         std::set<std::string> user_names;
         while (std::getline(file, line))
         {
-            std::vector<std::string> current_line = split(line, " ");
+            std::vector<std::string> current_line = SpreadsheetController::split(line, " ");
             if(current_line.front() != del_user)
             {
              user_names.insert(line);
@@ -242,18 +248,34 @@ void Server::admin_delete_user(std::string del_user)
 void Server::admin_add_spreadsheet(json json_message)
     {
         std::string no_use_spread;
-        std::shared_ptr<SpreadsheetModel> sm(nullptr);
-        bool is_in_storage = SpreadsheetController::check_if_spreadsheet_in_storage(json_message, no_use_spread);
-        if (!is_in_storage)
-        {
-            sm = std::make_shared<SpreadsheetModel>(json_message["name"], true);
-            this->add_spreadsheet_to_list(sm);
-        }
+        std::cout<<json_message<<std::endl;
+        std::ifstream file("../../data/spreadsheets.txt");
+        std::string line;
+        bool already_exists = false;
+        while (std::getline(file, line))
+            {
+                if(line == json_message["name"]){
+                    std::cout << already_exists <<std::endl;
+                    already_exists=true;
+                }
+                    std::cout << already_exists <<std::endl;
+            }
+        file.close();
+        if(!already_exists)
+            {
+                std::ofstream file;
+                std::cout <<"Was not found"<<std::endl;
+                std::cout << already_exists <<std::endl;
+                file.open("../../data/spreadsheets.txt", std::ios_base::app);
+                file << json_message["name"] <<std::endl;
+                file.close();
+            }
+        
     }
 void Server::admin_delete_spreadsheet(json json_message)
     {
         std::string no_use_spread;
-        std::shared_ptr<SpreadsheetModel> sm(nullptr);
+        
         bool is_in_storage = SpreadsheetController::check_if_spreadsheet_in_storage(json_message, no_use_spread);
         if (is_in_storage)
         {
@@ -289,28 +311,31 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
                 std::cout << "message is " << message << std::endl;
                 std::string error_message;
                 json json_message = json::parse(message);
-
-                if (json_message.value("Operation", "AU") != "Admin")
+                if(json_message.value("type", " ") != "open")
+                    {
+                        refresh_admin(connection);
+                    }
+                if (json_message["Operation"]== "AU")
                     {
                         admin_add_user(json_message["name"], json_message["password"]);
                         refresh_admin(connection);
                     }
-                else if (json_message.value("Operation", "DU") != "Admin")
+                else if (json_message["Operation"]=="DU")
                     {
                         admin_delete_user(json_message["name"]);
                         refresh_admin(connection);
                     }
-                else if (json_message.value("Operation", "AS") != "Admin")
+                else if (json_message["Operation"]=="AS")
                     {
                         admin_add_spreadsheet(json_message);
                         refresh_admin(connection);
                     }
-                else if (json_message.value("Operation", "DS") != "Admin")
+                else if (json_message["Operation"]=="DS")
                     {
                         admin_delete_spreadsheet(json_message);
                         refresh_admin(connection);
                     }
-                else if (json_message.value("Operation", "OFF") != "Admin")
+                else if (json_message["Operation"]=="OFF")
                     {
                         admin_off();
                         refresh_admin(connection);
@@ -474,7 +499,7 @@ bool Server::check_if_spreadsheet_in_list(json message, std::shared_ptr<Spreadsh
     bool found;
     for (std::shared_ptr<SpreadsheetModel> ss : this->spreadsheets)
     {
-        if (message.value("name", "-1") == ss->get_name())
+        if (message["name"] == ss->get_name())
         {
             sm = ss;
             return true;

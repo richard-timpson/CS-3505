@@ -30,6 +30,8 @@ class SpreadsheetController
     static bool handle_edit_message(json & message, std::shared_ptr<SpreadsheetModel> sm);
     static std::string create_type_1_error();
     static std::string create_type_2_error(std::string name);
+    static std::vector<std::string> split(std::string s, std::string delimiter);
+    
   private:
     static bool handle_edit(json & message, std::shared_ptr<SpreadsheetModel> sm);
     static bool handle_undo(json & message, std::shared_ptr<SpreadsheetModel> sm);

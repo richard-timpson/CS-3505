@@ -61,8 +61,7 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
     }
     else
     {
-        
-        return "[]";
+        return "{\"type\":\"list\",\"spreadsheets\":[]}";
     }
 }
 
@@ -94,7 +93,7 @@ std::string SpreadsheetController::get_list_of_users()
     }
     else
     {
-        return "[]";
+        return "{\"type\":\"list\",\"users\":[]}";
     }
 }
 
@@ -189,8 +188,8 @@ bool SpreadsheetController::validate_user(json message, std::string &error_messa
 
 bool SpreadsheetController::validate_admin(json message, std::string &error_message)
 {
-    if (!validate_login_message(message)) return false;
-    if (message.value("type", " ") != "Admin")
+    if (!message.contains("type")|| message["type"]!="Admin") return false;
+    if (message["type"] != "Admin")
     {
         error_message = "not an Admin user";
         return false;
@@ -220,7 +219,7 @@ bool SpreadsheetController::check_if_spreadsheet_in_storage(json & message, std:
     int count = 0;
     while (std::getline(file, line))
     {
-        if (message.value("name", "-1") == line)
+        if (message["name"] == line)
         {
             spreadsheet = line;
             //mu_lock_file_spreadsheet_txt.unlock();
@@ -322,9 +321,10 @@ std::string SpreadsheetController::get_type(json &message)
     }
 }
 
-std::vector<std::string> split(std::string s, std::string delimiter)
+std::vector<std::string> SpreadsheetController::split(std::string s, std::string delimiter)
 {
     size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    
     std::string token;
     std::vector<std::string> res;
 
