@@ -41,6 +41,7 @@
             this.EditSpreadsheetButton = new System.Windows.Forms.Button();
             this.NewSpreadsheetButton = new System.Windows.Forms.Button();
             this.ConnectButton = new System.Windows.Forms.Button();
+            this.AttemptingToConnectLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // TheGenericsLabel
@@ -161,11 +162,20 @@
             this.ConnectButton.UseVisualStyleBackColor = true;
             this.ConnectButton.Click += new System.EventHandler(this.ConnectButton_Click);
             // 
+            // AttemptingToConnectLabel
+            // 
+            this.AttemptingToConnectLabel.AutoSize = true;
+            this.AttemptingToConnectLabel.Location = new System.Drawing.Point(28, 372);
+            this.AttemptingToConnectLabel.Name = "AttemptingToConnectLabel";
+            this.AttemptingToConnectLabel.Size = new System.Drawing.Size(0, 17);
+            this.AttemptingToConnectLabel.TabIndex = 14;
+            // 
             // ClientLogIn
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(839, 413);
+            this.Controls.Add(this.AttemptingToConnectLabel);
             this.Controls.Add(this.ConnectButton);
             this.Controls.Add(this.NewSpreadsheetButton);
             this.Controls.Add(this.EditSpreadsheetButton);
@@ -203,6 +213,7 @@
         private System.Windows.Forms.Button EditSpreadsheetButton;
         private System.Windows.Forms.Button NewSpreadsheetButton;
         private System.Windows.Forms.Button ConnectButton;
+        private System.Windows.Forms.Label AttemptingToConnectLabel;
     }
 }
 

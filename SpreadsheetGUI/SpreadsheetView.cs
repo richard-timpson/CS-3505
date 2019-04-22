@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Media;
 using CS3505;
+using SpreadsheetUtilities;
 
 namespace SpreadsheetGUI
 {
@@ -40,6 +41,8 @@ namespace SpreadsheetGUI
 
         private static bool closing = false;
 
+        private int Vscroll = 0;
+
         /// <summary>
         /// Controller for sending and receiving edits from a server
         /// </summary>
@@ -56,46 +59,39 @@ namespace SpreadsheetGUI
             cellEditBox.TextChanged += UpdateSetCellContentsText;
             SetCellContentsText.TextChanged += UpdateCellEditBox;
 
+            //FIXME
+            Scroll += ScrollUpdate;
+            spreadsheetPanel1.Scroll += ScrollUpdate;
+            
             // SetCellContentsText.KeyDown += KeyReleased;
             music = new SoundPlayer(Directory.GetCurrentDirectory() + "\\WiiMusic.wav");
 
             this.ssController = ssController;
-
             ssController.SpreadsheetUpdated += SpreadsheetUpdate;
             ssController.SpreadsheetError += ProcessError;
+            ssController.ConnectionLostEvent += ConnectionLostNotification;
+            //ssController.FormulaException += FormulaExceptionNotification;
             formSheet = ssController.Sheet;
+           
+            
+            
             //formSheet = new Spreadsheet(x => true, x => x.ToUpper(), "ps6");
 
             this.AcceptButton = SetCellContentsButton;
+          
 
             // the initial selection should be the first cell
             spreadsheetPanel1.SetSelection(0, 0);
             SetCellContentsText.Focus();
         }
 
-        /// <summary>
-        /// When the SetCellContents text box updates, update
-        /// the cellEditBox text
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void UpdateCellEditBox(object sender, EventArgs e)
+        private void ScrollUpdate(object sender, ScrollEventArgs e)
         {
-            cellEditBox.Text = SetCellContentsText.Text;
+            if(e is object)
+            {
+
+            }
         }
-
-        /// <summary>
-        /// When the cellEditBox text box updates, update
-        /// the SetCellContents text
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void UpdateSetCellContentsText(object sender, EventArgs e)
-        {
-            SetCellContentsText.Text = cellEditBox.Text;
-        }
-
-
 
 
 
@@ -344,6 +340,11 @@ namespace SpreadsheetGUI
 
             string cellName = (columnLetter.ToString() + row.ToString());
 
+            //spreadsheetPanel1.AutoScrollPosition = new Point(Math.Abs(spreadsheetPanel1.AutoScrollPosition.X), Math.Abs(spreadsheetPanel1.AutoScrollPosition.Y));
+
+            //System.Diagnostics.Debug.WriteLine(spreadsheetPanel1.VerticalScroll.Value);
+
+            
             cellEditBox.Location = new Point(col * 80 + 29, row * 20 + 90);
 
             if (formSheet.GetCellContents(cellName) is SpreadsheetUtilities.Formula)
@@ -387,6 +388,46 @@ namespace SpreadsheetGUI
         #endregion
 
         /// <summary>
+        /// Notifies the User That the Connection to the server was lost
+        /// </summary>
+        private void ConnectionLostNotification()
+        {
+            MessageBox.Show("Connection to the Server Was Lost Please Reconnect", "Connection Lost",
+                                          MessageBoxButtons.OK,
+                                          MessageBoxIcon.Warning);
+        }
+
+        private void FormulaExceptionNotification(string message, string contents)
+        {
+            MessageBox.Show(message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            cellEditBox.Text = contents;
+            cellEditBox.Focus();
+            cellEditBox.Visible = true;
+        }
+
+        /// <summary>
+        /// When the SetCellContents text box updates, update
+        /// the cellEditBox text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateCellEditBox(object sender, EventArgs e)
+        {
+            cellEditBox.Text = SetCellContentsText.Text;
+        }
+
+        /// <summary>
+        /// When the cellEditBox text box updates, update
+        /// the SetCellContents text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateSetCellContentsText(object sender, EventArgs e)
+        {
+            SetCellContentsText.Text = cellEditBox.Text;
+        }
+
+        /// <summary>
         /// Event handler for Processing spreadsheet errors
         /// </summary>
         /// <param name="code"></param>
@@ -417,6 +458,20 @@ namespace SpreadsheetGUI
             string cellName = columnLetter.ToString() + (row + 1).ToString();
 
             SetCellContentsText.Text = cellEditBox.Text;
+            string contents = SetCellContentsText.Text;
+
+            if(contents.Length != 0 && contents[0] == '=' )
+            {
+                try
+                {
+                    Formula cellFormula = new Formula(contents.Substring(1));
+                }
+                catch (FormulaFormatException e)
+                {
+                    FormulaExceptionNotification(e.Message, contents);
+                    return;
+                }
+            }
             ssController.ClientEdit(cellName, SetCellContentsText.Text);
 
         }
@@ -427,7 +482,6 @@ namespace SpreadsheetGUI
         /// </summary>
         public void PopulateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependies)
         {
-            //FIXME
             SpreadsheetUpdate(cellDependies);
         }
 
@@ -438,17 +492,19 @@ namespace SpreadsheetGUI
         /// <param name="updatedCells"></param>
         private void SpreadsheetUpdate(Dictionary<string, IEnumerable<string>> cellDependies)
         {
-
-            //update the underlying spreadsheet and all of the values that rely on the updated cells
-            foreach (string dependent in cellDependies.Keys)
+            //lock (formSheet) // This deadlocked last time it wasn't commented
             {
-                foreach (string cell in cellDependies[dependent])
+                //update the underlying spreadsheet and all of the values that rely on the updated cells
+                foreach (string dependent in cellDependies.Keys)
                 {
-                    // get the location of the dependent cell
-                    int col = (int)cell[0] - 65;
-                    int row = int.Parse(cell.Substring(1)) - 1;
-                    //set the new value to the dependent cells                
-                    spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(cell).ToString());
+                    foreach (string cell in cellDependies[dependent])
+                    {
+                        // get the location of the dependent cell
+                        int col = (int)cell[0] - 65;
+                        int row = int.Parse(cell.Substring(1)) - 1;
+                        //set the new value to the dependent cells                
+                        spreadsheetPanel1.SetValue(col, row, formSheet.GetCellValue(cell).ToString());
+                    }
                 }
             }
 
@@ -997,6 +1053,7 @@ namespace SpreadsheetGUI
 
         private void UndoButton_Click(object sender, EventArgs e)
         {
+            cellEditBox.Hide();
             ssController.ClientUndo();
         }
 
@@ -1012,6 +1069,8 @@ namespace SpreadsheetGUI
             // get the appropriate column letter and cell name
             char columnLetter = getColumnLetter(col);
             string cellName = columnLetter.ToString() + (row + 1).ToString();
+
+            cellEditBox.Hide();
 
             ssController.ClientRevert(cellName);
         }

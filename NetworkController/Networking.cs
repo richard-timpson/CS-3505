@@ -31,7 +31,7 @@ namespace CS3505
         public event ConnectionTimeoutEventHandler Timeout;
 
         // This is the buffer where we will receive data from the socket
-        public byte[] messageBuffer = new byte[2048];
+        public byte[] messageBuffer = new byte[4096];
 
         // This is a larger (growable) buffer, in case a single receive does not contain the full message.
         public StringBuilder sb = new StringBuilder();
@@ -77,6 +77,9 @@ namespace CS3505
     {
         public delegate void ConnectionTimeoutEventHandler();
         public static event ConnectionTimeoutEventHandler Timeout;
+
+        public delegate void ConnectionLostEventHandler();
+        public static event ConnectionLostEventHandler ConnectionLost;
 
 
         public const int DEFAULT_PORT = 2112;
@@ -195,7 +198,14 @@ namespace CS3505
         /// <param name="ss"></param>
         public static void GetData(SocketState ss)
         {
-            ss.theSocket.BeginReceive(ss.messageBuffer, 0, ss.messageBuffer.Length, SocketFlags.None, ReceiveCallback, ss);
+            try
+            {
+                ss.theSocket.BeginReceive(ss.messageBuffer, 0, ss.messageBuffer.Length, SocketFlags.None, ReceiveCallback, ss);
+            }
+            catch(Exception e)
+            {
+
+            }
         }
 
         /// <summary>
@@ -215,6 +225,7 @@ namespace CS3505
             }
             catch 
             {
+                System.Diagnostics.Debug.WriteLine("Send Exception caught");
                 return false;
             }
 
@@ -231,7 +242,6 @@ namespace CS3505
 
             try
             {
-                //FIXME Handle disconnected clients
                 if (s.Connected)
                 {
                     s.EndSend(ar);
@@ -240,7 +250,9 @@ namespace CS3505
             }
             catch (Exception e)
             {
+                System.Diagnostics.Debug.WriteLine("SendCallback Exception caught");
                 s.Close();
+                ConnectionLost();
             }
 
 
@@ -278,6 +290,7 @@ namespace CS3505
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
                 ss.theSocket.Close();
+                ConnectionLost();
             }
             // continue the loop -- actually happens in ss.CallMe
 
