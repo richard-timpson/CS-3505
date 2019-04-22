@@ -49,12 +49,9 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
                 json_spreadsheets["spreadsheets"].push_back(name);
             }
         }
-        return json_spreadsheets.dump();
+
     }
-    else
-    {
-        return "[]";
-    }
+    return json_spreadsheets.dump();
 }
 
 std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cell> & cell_dictionary)

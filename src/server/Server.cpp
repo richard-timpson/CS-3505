@@ -288,6 +288,7 @@ void Server::save_file_if_needed(std::shared_ptr<SpreadsheetModel> sm)
     }
     sm->write_json_ss_file();
     sm->write_ss_file_if_needed();
+    this->remove_sm_from_list(sm);
 }
 
 std::shared_ptr<SpreadsheetModel> Server::choose_spreadsheet(json & json_message)

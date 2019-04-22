@@ -436,14 +436,15 @@ void SpreadsheetModel::write_ss_file_if_needed()
     {
         if (line == this->get_name())
         {
+       	    std::cout << "not writing to spreadsheets.txt file" <<std::endl;
             return;
         }
     }
     read_file.close();
-
+    std::cout << "writing spreadsheet " << this->get_name() << " to spreadsheets.txt file" << std::endl;
     std::ofstream write_file;
-    write_file.open("../../data/spreadsheets.txt", std::ios::out);
-    write_file << this->get_name() + "\n";
+    write_file.open("../../data/spreadsheets.txt", std::ios_base::out | std::ios_base::app);
+    write_file << this->get_name() << std::endl;
     write_file.close();
 
 }

@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include "../models/CircularException.h"
+#include <fstream>
 
 void print_success_or_failure(bool success);
 void test1();
@@ -33,9 +34,11 @@ int main()
     test7();
     test8();
     test9();
-    test9_1();
+    //test9_1();
     test10();
     test11();
+    test12();
+    test13();
 }
 
 /**
@@ -334,6 +337,52 @@ void test11()
     */
 
 }
+
+/**
+ * Test writing to spreadsheets.txt file if spreadsheet model name isn't already there
+ */
+void test12()
+{
+
+  std::cout << "Test 12: personal history " << std::endl << std::endl;
+  SpreadsheetModel alpha("Alpha", true);
+  std::vector<std::string>dependents;
+  alpha.do_edit("A1", "5", dependents, "int");
+  alpha.do_edit("A1", "10", dependents, "int");
+  alpha.do_edit("A1", "20", dependents, "int");
+
+  alpha.write_ss_file_if_needed();
+  //  print_success_or_failure(success);
+  std::cout << "Test 10 finished " << std::endl << std::endl;
+  
+}
+
+void test13()
+{
+  // quick test checking the write to spreadsheets.txt file
+  std::cout << "Test 13: Quick test for writing to spreadsheets.txt" << std::endl;
+  std::ofstream write_file;
+  std::ios_base::iostate exception_mask = write_file.exceptions() | std::ios::failbit;
+  write_file.exceptions(exception_mask);
+  try
+  {
+    write_file.open("../../data/spreadsheets.txt", std::ios::app);
+  }
+  catch (std::ios_base::failure &e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
+
+  if (write_file.fail())
+  {
+    std::cout << "file stream failed" << std::endl;
+  }
+
+  write_file << std::endl << "test text" << std::endl;
+  write_file.close();
+}
+
+
 
 void print_success_or_failure(bool success)
 {
