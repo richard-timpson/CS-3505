@@ -35,15 +35,9 @@ int main()
     test8();
     test9();
     test9_1();
-<<<<<<< HEAD
-    //test10();
-    //test11();
-    //test12();
-=======
     test10();
     test11();
     test12();
->>>>>>> NetworkLibrary
     // test13();
 }
 

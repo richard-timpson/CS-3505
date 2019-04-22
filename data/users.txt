@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-richard timpson
-peter richardsucks
- 
-=======
  
 ;lkajsdf sdf
 Tyler 123
@@ -18,4 +13,3 @@ l;kjasdf asdfsdf
 peter richardsucks
 richard timpson
 asdfadsfadsf dfadsfasdfasfadsf
->>>>>>> NetworkLibrary

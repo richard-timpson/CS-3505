@@ -1,7 +1,1 @@
-<<<<<<< HEAD
-Alpha
 
-=======
-"able"
-Myspreadsheet
->>>>>>> NetworkLibrary
