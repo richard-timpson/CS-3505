@@ -363,6 +363,7 @@ namespace CS3505
             }
             // create the request
             var undo = new { type = "undo" };
+            System.Diagnostics.Debug.WriteLine(JsonConvert.SerializeObject(undo));
             // send the message
             Networking.Send(theServer, JsonConvert.SerializeObject(undo) + ENDOFMESSAGE);
         }
