@@ -50,10 +50,6 @@ namespace AdminClient
 
                 Controler.startGetData();
 
-                userListView.Items.Add(new ListViewItem("Hello"));
-                spreadsheetListView.Items.Add("Test");
-
-
                 // Set the view to show details.
                 activeSpreadsheetsAndUsers.View = View.Details;
                 // Allow the user to edit item text.
@@ -70,29 +66,10 @@ namespace AdminClient
                 activeSpreadsheetsAndUsers.Sorting = SortOrder.Ascending;
                 activeSpreadsheetsAndUsers.CheckBoxes = false;
 
-                // Create three items and three sets of subitems for each item.
-                ListViewItem item1 = new ListViewItem("TestSpreadsheet");
-                // Place a check mark next to the item.
-                
-                item1.SubItems.Add("blah, blah, blah, blah, blah, blah,");
-              
-                ListViewItem item2 = new ListViewItem("TestSpreadsheet2");
-                item2.SubItems.Add("Steve, Joan");
-               
-                ListViewItem item3 = new ListViewItem("TestSpreadsheet3");
-                // Place a check mark next to the item.
-                
-                item3.SubItems.Add("Bob, Bob, BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBOB");
-              
-
                 // Create columns for the items and subitems.
                 // Width of -2 indicates auto-size.
-                activeSpreadsheetsAndUsers.Columns.Add("Item Column", -2, HorizontalAlignment.Left);
-                activeSpreadsheetsAndUsers.Columns.Add("Column 2", -2, HorizontalAlignment.Left);
-               
-
-                //Add the items to the ListView.
-                activeSpreadsheetsAndUsers.Items.AddRange(new ListViewItem[] { item1, item2, item3 });
+                activeSpreadsheetsAndUsers.Columns.Add("Spreadsheets", -2, HorizontalAlignment.Left);
+                activeSpreadsheetsAndUsers.Columns.Add("Users", -2, HorizontalAlignment.Left);
 
             }
             else
@@ -133,6 +110,35 @@ namespace AdminClient
 
             }
         }
+
+        Dictionary<string, ListViewItem> activeSpreadsheetUserPair = new Dictionary<string, ListViewItem>();
+        public void addActiveItems(string spreadsheetName, string[] users)
+        {
+            // Create three items and three sets of subitems for each item.
+
+            ListViewItem item1 = new ListViewItem(spreadsheetName);
+            // Place a check mark next to the item.
+            StringBuilder listOfUsers = new StringBuilder();
+            foreach (string now in users)
+            {
+                listOfUsers.Append(now + ", ");
+            }
+            MethodInvoker invalidater;
+            item1.SubItems.Add(listOfUsers.ToString());
+            if (activeSpreadsheetUserPair.ContainsKey(spreadsheetName))
+            {
+                ListViewItem toRemove = activeSpreadsheetUserPair[spreadsheetName];
+                invalidater = new MethodInvoker(() => activeSpreadsheetsAndUsers.Items.Remove(toRemove));
+                this.Invoke(invalidater);
+                activeSpreadsheetUserPair.Remove(spreadsheetName);
+            }
+
+            activeSpreadsheetUserPair.Add(spreadsheetName, item1);
+            invalidater = new MethodInvoker(() => activeSpreadsheetsAndUsers.Items.Add(item1));
+
+            this.Invoke(invalidater);
+        }
+
 
         /// <summary>
         /// Shows a dialog box with issues then closes the program
@@ -194,7 +200,7 @@ namespace AdminClient
             if (turnOff == DialogResult.OK)
             {
                 logTextBox.AppendText("Sending Turn off Message");
-                Controler.SendCommand(new OperationAdmin("Off", null, null));
+                Controler.SendCommand(new OperationAdmin("OFF", "", ""));
                 Controler.endContact();
                 this.addUserButton.Visible = false;
                 this.addUserButton.Enabled = false;
@@ -250,7 +256,7 @@ namespace AdminClient
             }
             Controler.SendCommand(new OperationAdmin("AU", newUserTextBox.Text.ToString(), newPasswordTextBox.Text.ToString()));
             logTextBox.AppendText("Add User Command sent for " + newUserTextBox.Text + "\n");
-            Controler.SendCommand(new OperationAdmin("R", null, null));
+            Controler.SendCommand(new OperationAdmin("R", "", ""));
             closeNewUserItems();
 
         }
@@ -309,9 +315,9 @@ namespace AdminClient
                 MessageBox.Show("Please enter a the new Spreadsheet Name");
                 return;
             }
-            Controler.SendCommand(new OperationAdmin("AS", newUserTextBox.Text, newPasswordTextBox.Text));
+            Controler.SendCommand(new OperationAdmin("AS", newSpreadhseetTextBox.Text,""));
             logTextBox.AppendText("Add Spreadsheet Command sent for " + newSpreadhseetTextBox.Text + "\n");
-            Controler.SendCommand(new OperationAdmin("R", null, null));
+            Controler.SendCommand(new OperationAdmin("R", "", ""));
             closeNewSpreadsheetItems();
         }
 
@@ -357,7 +363,8 @@ namespace AdminClient
             StringBuilder hold = new StringBuilder();
             foreach (ListViewItem now in toDelete)
             {
-                hold.Append(now.Text);
+                string[] touse = now.Text.Split();
+                hold.Append(touse[0]);
                 hold.Append("\n");
             }
             DialogResult dialogResult = MessageBox.Show("Do you want to delete the following users:\n" + hold + "?", "Delete Users confirmation", MessageBoxButtons.OKCancel);
@@ -365,10 +372,14 @@ namespace AdminClient
             {
                 foreach (ListViewItem now in toDelete)
                 {
-                    string item = now.Text;
-                    Controler.SendCommand(new OperationAdmin("DU", item, null));
+
+                    string[] touse = now.Text.Split();
+
+                    string item = touse[0];
+                    Controler.SendCommand(new OperationAdmin("DU", item, ""));
+                 
                 }
-                Controler.SendCommand(new OperationAdmin("R", null, null));
+                Controler.SendCommand(new OperationAdmin("R", "", ""));
 
                 deleteUserButton.Enabled = false;
                 deleteUserButton.Visible = false;
@@ -392,9 +403,9 @@ namespace AdminClient
                 foreach (ListViewItem now in toDelete)
                 {
                     string item = now.Text;
-                    Controler.SendCommand(new OperationAdmin("DS", item, null));
+                    Controler.SendCommand(new OperationAdmin("DS", item, ""));
                 }
-                Controler.SendCommand(new OperationAdmin("R", null, null));
+                Controler.SendCommand(new OperationAdmin("R", "", ""));
 
                 deleteSpreadsheetButton.Visible = false;
                 deleteSpreadsheetButton.Enabled = false;

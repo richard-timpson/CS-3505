@@ -84,6 +84,19 @@ namespace AdminClient
 
                                 view.recieveListData(recievedDataList.names(), 1);
                             }
+                            else if (obj["spreadsheet"]!=null)
+                            {
+                                if (obj["type"].Equals("\"full send\"") || obj["type"].Equals("edit"))
+                                {
+
+                                }
+                                else
+                                {
+                                    ActiveDataRecieve activeDataRecieve = JsonConvert.DeserializeObject<ActiveDataRecieve>(input);
+                                    view.addActiveItems(activeDataRecieve.namesSpread, activeDataRecieve.namesUse);
+                                }
+                               
+                            }
                             else if (obj["users"] != null)
                             {
 
@@ -91,7 +104,7 @@ namespace AdminClient
 
                                 view.recieveListData(recievedDataList.names(), 0);
                             }
-
+                            
                             else if (obj["sorce"] != null)
                             {
                                 view.errorMessageShow(obj["source"].ToString());
@@ -128,14 +141,22 @@ namespace AdminClient
         }
 
     }
+    public class ActiveDataRecieve
+    {
+        [JsonProperty(PropertyName = "spreadsheet")]
+        public string namesSpread;
+        [JsonProperty(PropertyName = "users")]
+        public string[] namesUse;
 
+        
+    }
     public class RecievedDataList
     {
 
 
-        [JsonProperty(PropertyName = "Spreadsheets")]
+        [JsonProperty(PropertyName = "spreadsheets")]
         private string[] namesSpread;
-        [JsonProperty(PropertyName = "Users")]
+        [JsonProperty(PropertyName = "users")]
         private string[] namesUser;
 
 
@@ -164,10 +185,10 @@ namespace AdminClient
         [JsonProperty(PropertyName = "Operation")]
         private string function;
 
-        [JsonProperty(PropertyName = "Name")]
+        [JsonProperty(PropertyName = "name")]
         public String name;
 
-        [JsonProperty(PropertyName = "Password")]
+        [JsonProperty(PropertyName = "password")]
         private String password;
 
         public OperationAdmin(String func, string nam, string pass)
