@@ -13,10 +13,10 @@ class SpreadsheetController
 {
   public:
 
-    static std::mutex mu_lock_file_spreadsheet_txt;
-    static std::mutex mu_lock_file_user_txt;
-    static std::mutex mu_lock_spreadsheet_list;
-    static std::mutex mu_lock_user_list;
+    //static std::mutex mu_lock_file_spreadsheet_txt;
+    //static std::mutex mu_lock_file_user_txt;
+    //static std::mutex mu_lock_spreadsheet_list;
+    //static std::mutex mu_lock_user_list;
     //static std::mutex mu_lock_admin_list;
 
     // get a json string that is an array of strings with the spreadsheet names. 

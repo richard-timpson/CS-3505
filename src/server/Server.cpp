@@ -129,7 +129,7 @@ void Server::admin_remove_spreadsheet(json json_message)
 {
     std::string name_spreadsheet;
     name_spreadsheet = json_message["name"];
-    SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
+   // SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
     std::ifstream file("../../data/spreadsheets.txt");
     std::string line;
     std::set<std::string> spreadsheet_names;
@@ -153,7 +153,7 @@ void Server::admin_remove_spreadsheet(json json_message)
 
     outfile.close();
 
-    SpreadsheetController::mu_lock_file_spreadsheet_txt.unlock();
+    //SpreadsheetController::mu_lock_file_spreadsheet_txt.unlock();
 
    
 }
@@ -177,7 +177,7 @@ std::vector<std::string> split(std::string s, std::string delimiter)
 
 void Server::admin_add_user(std::string add_user_name, std::string add_user_pass)
     {
-        SpreadsheetController::mu_lock_file_user_txt.lock();
+        //SpreadsheetController::mu_lock_file_user_txt.lock();
         std::ifstream file("../../data/users.txt");
         std::string line;
         bool already_exists = false;
@@ -207,11 +207,11 @@ void Server::admin_add_user(std::string add_user_name, std::string add_user_pass
             file << add_user_name << " " << add_user_pass <<std::endl;
             file.close();
         }
-        SpreadsheetController::mu_lock_file_user_txt.unlock();
+        //SpreadsheetController::mu_lock_file_user_txt.unlock();
     }
 void Server::admin_delete_user(std::string del_user)
     {
-        SpreadsheetController::mu_lock_file_user_txt.lock();
+        //SpreadsheetController::mu_lock_file_user_txt.lock();
         std::ifstream file("../../data/users.txt");
         std::string line;
         std::set<std::string> user_names;
@@ -236,7 +236,7 @@ void Server::admin_delete_user(std::string del_user)
 
         outfile.close();
 
-        SpreadsheetController::mu_lock_file_user_txt.unlock();
+        //SpreadsheetController::mu_lock_file_user_txt.unlock();
 
     }
 void Server::admin_add_spreadsheet(json json_message)
@@ -268,10 +268,10 @@ void Server::admin_off()
     {
 
         connections.clear();
-        SpreadsheetController::mu_lock_user_list.lock();
-        SpreadsheetController::mu_lock_spreadsheet_list.lock();
-        SpreadsheetController::mu_lock_file_user_txt.lock();
-        SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
+       // SpreadsheetController::mu_lock_user_list.lock();
+       // SpreadsheetController::mu_lock_spreadsheet_list.lock();
+       // SpreadsheetController::mu_lock_file_user_txt.lock();
+       // SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
         exit(0);
     }
 
