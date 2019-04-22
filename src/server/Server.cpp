@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 #include "./Server.h"
 #include "ClientConnection.h"
 #include "../models/CircularException.h"
@@ -92,7 +93,6 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                 connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                 connection->socket_.close();
                 this->remove_client_from_list(connection);
-
             }
             
         });
@@ -116,6 +116,7 @@ void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection,
                     connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                     connection->socket_.close();
                     this->remove_client_from_list(connection);
+                    this->save_file_if_needed(sm);
                 }
             });
 }
@@ -162,6 +163,7 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
                 connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                 connection->socket_.close();
                 this->remove_client_from_list(connection);
+                this->save_file_if_needed(sm);
             }
             
         });
@@ -233,6 +235,7 @@ void Server::send_type_2_error(std::shared_ptr<ClientConnection> connection, std
                     connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                     connection->socket_.close();
                     this->remove_client_from_list(connection);
+                    this->save_file_if_needed(sm);
                 }
             });
 }
@@ -263,9 +266,28 @@ void Server::remove_client_from_list(std::shared_ptr<ClientConnection> connectio
     connections.erase(connection);
 }
 
+void Server::remove_sm_from_list(std::shared_ptr<SpreadsheetModel> sm)
+{
+    spreadsheets.erase(sm);
+}
+
 void Server::add_spreadsheet_to_list(std::shared_ptr<SpreadsheetModel> ss)
 {
     spreadsheets.insert(ss);
+}
+
+void Server::save_file_if_needed(std::shared_ptr<SpreadsheetModel> sm)
+{
+    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
+    for (std::shared_ptr<ClientConnection> connection: this->connections)
+    {
+        if (connection->get_name() == sm->get_name())
+        {
+            return;
+        }
+    }
+    sm->write_json_ss_file();
+    sm->write_ss_file_if_needed();
 }
 
 std::shared_ptr<SpreadsheetModel> Server::choose_spreadsheet(json & json_message)

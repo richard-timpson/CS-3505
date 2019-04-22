@@ -34,9 +34,11 @@ class Server
     // member functions
     void add_client_to_list(std::shared_ptr<ClientConnection> connection);
     void remove_client_from_list(std::shared_ptr<ClientConnection> connection);
+    void remove_sm_from_list(std::shared_ptr<SpreadsheetModel> sm);
     void add_spreadsheet_to_list(std::shared_ptr<SpreadsheetModel> ss);
     std::shared_ptr<SpreadsheetModel> choose_spreadsheet(json &json_message);
     bool check_if_spreadsheet_in_list(json message, std::shared_ptr<SpreadsheetModel> &sm);
+    void save_file_if_needed(std::shared_ptr<SpreadsheetModel> sm);
 
 
     // getters/setters

@@ -427,6 +427,27 @@ void SpreadsheetModel::write_json_ss_file()
     write_file.close();
 }
 
+void SpreadsheetModel::write_ss_file_if_needed()
+{
+    std::ifstream read_file;
+    read_file.open("../../data/spreadsheets.txt");
+    std::string line;
+    while (std::getline(read_file,line ))
+    {
+        if (line == this->get_name())
+        {
+            return;
+        }
+    }
+    read_file.close();
+
+    std::ofstream write_file;
+    write_file.open("../../data/spreadsheets.txt", std::ios::out);
+    write_file << this->get_name() + "\n";
+    write_file.close();
+
+}
+
 std::string SpreadsheetModel::get_name()
 {
     return name;

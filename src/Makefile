@@ -48,10 +48,13 @@ spreadsheet_model_tests_debug: ./tests/spreadsheet_model_tests.cpp
 	g++ -std=c++11 -o ../bin/tests/spreadsheet_model_debug ../bin/objects/spreadsheet_model.o ../bin/objects/cell.o ./tests/spreadsheet_model_tests.cpp -g
 
 ######################
-# Cleaning binaries
+# Cleaning
 ######################
 clean:
 	rm -rf ../bin/objects/* ../bin/executables/* ../bin/tests/*
 
 clean_tests:
 	rm -rf ../bin/tests/*
+
+clean_data: 
+	rm -rf ../data/*
