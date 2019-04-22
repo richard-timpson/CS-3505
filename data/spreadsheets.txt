@@ -1,9 +1,0 @@
-<<<<<<< HEAD
-Test
-=======
-Peter vs Tyler
-asdf
-Spreadsheet.sprd
-sugma.sprd
-test.sprd
->>>>>>> SpreadsheetModel

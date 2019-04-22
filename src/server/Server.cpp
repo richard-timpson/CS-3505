@@ -111,15 +111,18 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
     message += SpreadsheetController::get_list_of_users();
     message += "\n\n";
     int temp=0;
-    for (std::shared_ptr<SpreadsheetModel> ss : this->spreadsheets)
+    for (std::shared_ptr<SpreadsheetModel> ss : spreadsheets)
     {
-        if(ss->get_name()==""){
-            continue;
-        }
+        // if(ss->get_name()==""){
+        //     continue;
+        // }
+        std::cout << "looping throug the spreadsheets at name " << ss->get_name() << std::endl;
         message+= "{\"type\":\"activeUser\", \"spreadsheet\":"+ss->get_name()+",\"users\":[";
+        std::cout << "we have active users got em" <<std::endl;
         temp=0;
         for (std::shared_ptr<ClientConnection> connection: this->connections)
         {
+            std::cout << "looping through the client connections at client " << connection->get_name() << std::endl;
             if(connection->get_name()==ss->get_name())
             {
                 if(temp!=0){
@@ -310,43 +313,51 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
                 std::getline(istrm, message);
                 // istrm >> std::noskipws >> message;
                 connection->buff.consume(size);
-                std::cout << "message is " << message << std::endl;
+                std::cout << "admin message is " << message << std::endl;
                 std::string error_message;
-                json json_message = json::parse(message);
-                if(json_message.value("type", " ") != "open")
-                    {
-                        refresh_admin(connection);
-                    }
-                if (json_message["Operation"]== "AU")
-                    {
-                        admin_add_user(json_message["name"], json_message["password"]);
-                        refresh_admin(connection);
-                    }
-                else if (json_message["Operation"]=="DU")
-                    {
-                        admin_delete_user(json_message["name"]);
-                        refresh_admin(connection);
-                    }
-                else if (json_message["Operation"]=="AS")
-                    {
-                        admin_add_spreadsheet(json_message);
-                        refresh_admin(connection);
-                    }
-                else if (json_message["Operation"]=="DS")
-                    {
-                        admin_delete_spreadsheet(json_message);
-                        refresh_admin(connection);
-                    }
-                else if (json_message["Operation"]=="OFF")
-                    {
-                        admin_off();
-                        refresh_admin(connection);
-                    }
+                if(message != "")
+                {
+                     json json_message = json::parse(message);
+                    if(json_message.value("type", " ") != "open")
+                        {
+                            refresh_admin(connection);
+                        }
+                    if (json_message["Operation"]== "AU")
+                        {
+                            admin_add_user(json_message["name"], json_message["password"]);
+                            refresh_admin(connection);
+                        }
+                    else if (json_message["Operation"]=="DU")
+                        {
+                            admin_delete_user(json_message["name"]);
+                            refresh_admin(connection);
+                        }
+                    else if (json_message["Operation"]=="AS")
+                        {
+                            admin_add_spreadsheet(json_message);
+                            refresh_admin(connection);
+                        }
+                    else if (json_message["Operation"]=="DS")
+                        {
+                            admin_delete_spreadsheet(json_message);
+                            refresh_admin(connection);
+                        }
+                    else if (json_message["Operation"]=="OFF")
+                        {
+                            admin_off();
+                            refresh_admin(connection);
+                        }
+                    else
+                        {
+                            //operation doesn't exist
+                            refresh_admin(connection);
+                        }
+                }
                 else
-                    {
-                        //operation doesn't exist
-                        refresh_admin(connection);
-                    }
+                {
+                    refresh_admin(connection);
+                }
+               
     
 
                 
