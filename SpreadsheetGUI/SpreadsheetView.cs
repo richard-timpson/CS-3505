@@ -41,6 +41,8 @@ namespace SpreadsheetGUI
 
         private static bool closing = false;
 
+        private int Vscroll = 0;
+
         /// <summary>
         /// Controller for sending and receiving edits from a server
         /// </summary>
@@ -57,6 +59,10 @@ namespace SpreadsheetGUI
             cellEditBox.TextChanged += UpdateSetCellContentsText;
             SetCellContentsText.TextChanged += UpdateCellEditBox;
 
+            //FIXME
+            Scroll += ScrollUpdate;
+            spreadsheetPanel1.Scroll += ScrollUpdate;
+            
             // SetCellContentsText.KeyDown += KeyReleased;
             music = new SoundPlayer(Directory.GetCurrentDirectory() + "\\WiiMusic.wav");
 
@@ -79,7 +85,15 @@ namespace SpreadsheetGUI
             SetCellContentsText.Focus();
         }
 
-       
+        private void ScrollUpdate(object sender, ScrollEventArgs e)
+        {
+            if(e is object)
+            {
+
+            }
+        }
+
+
 
 
         #region(oldocde)
@@ -326,6 +340,11 @@ namespace SpreadsheetGUI
 
             string cellName = (columnLetter.ToString() + row.ToString());
 
+            //spreadsheetPanel1.AutoScrollPosition = new Point(Math.Abs(spreadsheetPanel1.AutoScrollPosition.X), Math.Abs(spreadsheetPanel1.AutoScrollPosition.Y));
+
+            //System.Diagnostics.Debug.WriteLine(spreadsheetPanel1.VerticalScroll.Value);
+
+            
             cellEditBox.Location = new Point(col * 80 + 29, row * 20 + 90);
 
             if (formSheet.GetCellContents(cellName) is SpreadsheetUtilities.Formula)
@@ -463,7 +482,6 @@ namespace SpreadsheetGUI
         /// </summary>
         public void PopulateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependies)
         {
-            //FIXME
             SpreadsheetUpdate(cellDependies);
         }
 
@@ -474,7 +492,7 @@ namespace SpreadsheetGUI
         /// <param name="updatedCells"></param>
         private void SpreadsheetUpdate(Dictionary<string, IEnumerable<string>> cellDependies)
         {
-            lock (this.ssController.Sheet)
+            //lock (formSheet) // This deadlocked last time it wasn't commented
             {
                 //update the underlying spreadsheet and all of the values that rely on the updated cells
                 foreach (string dependent in cellDependies.Keys)
