@@ -158,74 +158,79 @@ namespace CS3505
             // begin parsing the data
             string totalData = ss.sb.ToString();
             string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
-
-            foreach (string p in parts)
+            lock (sheet)
             {
-                // ignore empty strings
-                if (p.Length == 0)
-                {
-                    continue;
-                }
-                // if the last two chars are not new lines then there are
-                // no more full messages be evaluated
-                if (p.Length < 3)
-                {
-                    continue;
-                }
-                if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
-                {
-                    break;
-                }
 
 
-                // Create a dynamic type for processing the kind of message sent
-                var receive = new
+                foreach (string p in parts)
                 {
-                    type = ""
-                };
-
-                //if (ss.sb.ToString().Length != 0)
-                //{ 
-                receive = JsonConvert.DeserializeAnonymousType(p, receive);
-
-
-                // if it is the wrong kind of message check if it is an error
-                // otherwise ignore it
-                if (receive.type != "list")
-                {
-                    if(receive.type == "error")
+                    // ignore empty strings
+                    if (p.Length == 0)
                     {
-                        ProcessError(p);
-
+                        continue;
                     }
-                    else
+                    // if the last two chars are not new lines then there are
+                    // no more full messages be evaluated
+                    if (p.Length < 3)
                     {
-                        ss.sb.Remove(0, p.Length);
+                        continue;
+                    }
+                    if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
+                    {
+                        break;
+                    }
+
+
+                    // Create a dynamic type for processing the kind of message sent
+                    var receive = new
+                    {
+                        type = ""
+                    };
+
+                    //if (ss.sb.ToString().Length != 0)
+                    //{ 
+                    receive = JsonConvert.DeserializeAnonymousType(p, receive);
+
+
+                    // if it is the wrong kind of message check if it is an error
+                    // otherwise ignore it
+                    if (receive.type != "list")
+                    {
+                        if (receive.type == "error")
+                        {
+                            ProcessError(p);
+
+                        }
+                        else
+                        {
+                            /// ss.sb.Remove(0, p.Length);
+                            Networking.GetData(ss);
+                        }
                         Networking.GetData(ss);
+                        return;
                     }
-                    
-                    return;
+
+                    // Process the message and output the lists
+                    var list = new
+                    {
+                        type = "",
+                        spreadsheets = new string[0]
+                    };
+
+                    list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
+
+                    this.SheetOptions = list.spreadsheets;
+
+                    // Notify the client that new spreadsheets are available
+                    SpreadsheetsReceived();
+                    theServerState = ss;
+
+                    this.connected = true;
+
+                    //Networking.GetData(ss);
+                    ss.sb.Remove(0, p.Length);
+                    //ss.CallMe = ReceiveEdit; // MAYBE??
                 }
-
-                // Process the message and output the lists
-                var list = new
-                {
-                    type = "",
-                    spreadsheets = new string[0]
-                };
-
-                list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
-
-                this.SheetOptions = list.spreadsheets;
-
-                // Notify the client that new spreadsheets are available
-                SpreadsheetsReceived();
-                theServerState = ss;
-
-                this.connected = true;
-
-                //Networking.GetData(ss);
-                ss.sb.Remove(0, p.Length);
             }
             Networking.GetData(ss);
         }
@@ -264,9 +269,10 @@ namespace CS3505
             
             // send the request to the server
             string message = JsonConvert.SerializeObject(open) + ENDOFMESSAGE;
+            theServerState.CallMe = ReceiveEdit;
             Networking.Send(theServer, message);
 
-            theServerState.CallMe = ReceiveEdit;
+            
             Networking.GetData(theServerState);
         }
 
@@ -361,7 +367,7 @@ namespace CS3505
             string totalData = ss.sb.ToString();
             string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
 
-            //lock (sheet)
+            lock (sheet)
             {
                 foreach (string p in parts)
                 {
