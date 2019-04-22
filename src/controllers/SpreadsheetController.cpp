@@ -38,7 +38,7 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
         std::cout << "Writing active spreadsheet " << sheet->get_name() << " to spreadsheet list " << std::endl;
         json_spreadsheets["spreadsheets"].push_back(sheet->get_name());
     }
-    //if (count != 0)
+    if (count != 0)
     {
         //mu_lock_spreadsheet_list.lock();
         std::cout << "count is 0" << std::endl;
@@ -58,15 +58,16 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
                 std::cout << "Writing stored spreadsheet " << name << " to spreadsheet list " << std::endl;
                 json_spreadsheets["spreadsheets"].push_back(name);
             }
+             return json_spreadsheets.dump();
         }
        // mu_lock_spreadsheet_list.unlock();
     }
-    //else
-    //{
-      //json_spreadsheets[""]
-      //return "{\"type\":\"list\",\"spreadsheets\":[]}";
-    //}
-    return json_spreadsheets.dump();
+    else
+    {
+    //   json_spreadsheets[""]
+      return "{\"type\":\"list\",\"spreadsheets\":[]}";
+    }
+    // return json_spreadsheets.dump();
 }
 
 std::string SpreadsheetController::get_list_of_users()

@@ -116,11 +116,13 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
         // if(ss->get_name()==""){
         //     continue;
         // }
+        std::cout << "looping throug the spreadsheets at name " << ss->get_name() << std::endl;
         message+= "{\"type\":\"activeUser\", \"spreadsheet\":"+ss->get_name()+",\"users\":[";
         std::cout << "we have active users got em" <<std::endl;
         temp=0;
         for (std::shared_ptr<ClientConnection> connection: this->connections)
         {
+            std::cout << "looping through the client connections at client " << connection->get_name() << std::endl;
             if(connection->get_name()==ss->get_name())
             {
                 if(temp!=0){
