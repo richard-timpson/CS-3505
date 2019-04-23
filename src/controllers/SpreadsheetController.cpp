@@ -1,12 +1,12 @@
-#include "SpreadsheetController.h"
 #include <iostream>
 #include <fstream>
-#include "../../libs/json.hpp"
 #include <string>
 #include <iterator>
 #include <list>
 #include <set>
 #include <algorithm>
+#include "SpreadsheetController.h"
+#include "../../libs/json.hpp"
 
 using json = nlohmann::json;
 
@@ -14,72 +14,14 @@ std::vector<std::string> split(std::string s, std::string delimiter);
 // std::string check_type
 std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets)
 {
-    //mu_lock_file_spreadsheet_txt.lock();
-
-    std::ifstream file("../../data/spreadsheets.txt");
-    std::string line;
-    std::set<std::string> spreadsheet_names;
-    int count = 0;
-
-    json json_spreadsheets;
-    json_spreadsheets["type"] = "list";
-    json_spreadsheets["spreadsheets"] = {};
-
-    while (std::getline(file, line))
+    json j_spreadsheet_list;
+    j_spreadsheet_list["type"] = "list";
+    j_spreadsheet_list["spreadsheets"] = {};
+    for (std::shared_ptr<SpreadsheetModel> sm : spreadsheets)
     {
-        std::cout << line << std::endl;
-        //spreadsheet_names.insert(line);
-        json_spreadsheets["spreadsheets"].push_back(line);
-        count++;
+        j_spreadsheet_list.push_back(sm->get_name());
     }
-    file.close();
-    //mu_lock_file_spreadsheet_txt.unlock();
-
-    //json json_spreadsheets;
-    //json_spreadsheets["type"] = "list";
-    //json_spreadsheets["spreadsheets"] = {};
-
-    
-    
-    /*for (std::shared_ptr<SpreadsheetModel> sheet : spreadsheets)
-    {
-        std::cout << "Writing active spreadsheet " << sheet->get_name() << " to spreadsheet list " << std::endl;
-        json_spreadsheets["spreadsheets"].push_back(sheet->get_name());
-        std::cout << sheet->get_name();
-    }*/
-
-    if (count != 0)
-    {
-        //mu_lock_spreadsheet_list.lock();
-        /*std::cout << "count is 0" << std::endl;
-        for (std::string name: spreadsheet_names)
-        {
-            bool exists;
-            for (std::shared_ptr<SpreadsheetModel> sheet1: spreadsheets)
-            {
-                if (sheet1->get_name() == name)
-                {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists)
-            {
-                std::cout << "Writing stored spreadsheet " << name << " to spreadsheet list " << std::endl;
-                json_spreadsheets["spreadsheets"].push_back(name);
-            }
-             return json_spreadsheets.dump();
-        }*/
-        // mu_lock_spreadsheet_list.unlock();
-        return json_spreadsheets.dump();
-
-    }
-    else
-    {
-    //   json_spreadsheets[""]
-      return "{\"type\":\"list\",\"spreadsheets\":[]}";
-    }
-    // return json_spreadsheets.dump();
+    return j_spreadsheet_list.dump();
 }
 
 std::string SpreadsheetController::get_list_of_users()

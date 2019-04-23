@@ -16,47 +16,6 @@ Server::Server(boost::asio::io_context &context, const tcp::endpoint &endpoint)
 {
 }
 
-void Server::load_data()
-{
-    // get all of the users from users.txt and load them into users. 
-    std::ifstream file("../../data/users.txt");
-    std::string line;
-    int count = 0;
-
-    while (std::getline(file, line))
-    {
-        std::string name;
-        std::string password;
-        std::vector<std::string> info = SpreadsheetController::split(line, " ");
-        std::vector<std::string>::iterator it = info.begin();
-        name = *it;
-        it++;
-        password = *it;
-        UserModel user(name, password);
-        users.insert(user);
-    }
-    file.close();
-
-    // get all of the users from users.txt and load them into users. 
-    std::ifstream file("../../data/spreadsheets.txt");
-    std::string name;
-    std::set<std::string> spreadsheet_names;
-    int count = 0;
-
-    while (std::getline(file, name))
-    {
-        spreadsheet_names.insert(name);
-    }
-    file.close();
-
-    for (std::string name : spreadsheet_names)
-    {
-        std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(name, false);
-        this->spreadsheets.insert(sm);
-    }
-
-
-}
 
 void Server::accept_clients()
 {
@@ -108,13 +67,9 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
             std::cout << "async read handler called" << std::endl;
             if (!ec)
             {
-                // get the message from the client
-                // buff.commit(size);
                 std::istream istrm(&connection->buff);
                 std::string message;
                 std::getline(istrm, message);
-                // while (istrm >> std::noskipws >> message)
-                // istrm >> std::noskipws >> message;
                 connection->buff.consume(size);
                 std::cout << "message is " << message << std::endl;
                 std::string error_message;
@@ -145,6 +100,150 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
         });
 }
 
+
+void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
+{
+    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
+    std::string message = SpreadsheetController::full_send(cell_dictionary);
+    message += "\n\n";
+    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
+            [sm, message, connection, this](boost::system::error_code ec, std::size_t){
+                if (!ec)
+                {
+                    std::cout << "writing message " << message << std::endl;
+                    accept_edit(connection, sm);
+                }
+                else
+                {
+                    std::cout << "Error sending message " << ec.message() << std::endl;
+                    connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+                    connection->socket_.close();
+                    this->remove_client_from_list(connection);
+                    this->save_file_if_needed(sm);
+                }
+            });
+}
+
+void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
+{
+    std::cout << "trying to accept edit" << std::endl;
+    boost::asio::async_read_until(connection->socket_, connection->buff, "\n\n", 
+        [connection, this, sm](boost::system::error_code ec, std::size_t size){
+            std::cout << "async read handler called" << std::endl;
+            if (!ec)
+            {
+                // get the message from the client
+                // buff.commit(size);
+                std::istream istrm(&connection->buff);
+                std::string message;
+                std::getline(istrm, message);
+                // while (istrm >> std::noskipws >> message)
+                istrm >> message;
+                connection->buff.consume(size);
+                std::cout << "message is " << message << std::endl;
+                std::string error_message;
+                try
+                {
+                    json json_message = json::parse(message);
+                    std::cout << "successfully parsed message" << std::endl;
+                    SpreadsheetController::handle_edit_message(json_message, sm);
+                    send_full_spreadsheet_to_clients(sm);
+                }
+                catch (json::parse_error &e)
+                {
+                    std::cout << e.what() << std::endl;
+                    accept_edit(connection, sm);
+                }
+                catch (const CircularException &e)
+                {
+                    std::cout << e.what() << std::endl;
+                    std::string cell(e.what());
+                    send_type_2_error(connection, sm, cell);
+                }
+                // parse the message the correct way, edit the model, write back the edit, and then read again. 
+            }
+            else
+            {
+                std::cout << "Error reading spreadsheet edit: " << ec.message() << std::endl;
+                connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+                connection->socket_.close();
+                this->remove_client_from_list(connection);
+                this->save_file_if_needed(sm);
+            }
+            
+        });
+}
+
+void Server::send_full_spreadsheet_to_clients(std::shared_ptr<SpreadsheetModel> sm)
+{
+    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
+    std::string message = SpreadsheetController::full_send(cell_dictionary);
+    message += "\n\n";
+    for (std::shared_ptr<ClientConnection> connection: this->connections)
+    {
+        if (connection->get_name() == sm->get_name())
+        {
+            boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
+                    [sm, message, connection, this](boost::system::error_code ec, std::size_t){
+                        if (!ec)
+                        {
+                            std::cout << "writing message " << message << std::endl;
+                            accept_edit(connection, sm);
+                        }
+                        else
+                        {
+                            std::cout << "Error sending message " << ec.message() << std::endl;
+                            connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+                            connection->socket_.close();
+                            this->remove_client_from_list(connection);
+                        }
+                    });
+        }
+    }
+}
+
+void Server::send_type_1_error(std::shared_ptr<ClientConnection> connection)
+{
+    std::string message = SpreadsheetController::create_type_1_error();
+    message += "\n\n";
+    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
+            [message, connection, this](boost::system::error_code ec, std::size_t){
+                if (!ec)
+                {
+                    std::cout << "writing message " << message << std::endl;
+                    accept_spreadsheet_selection(connection);
+                }
+                else
+                {
+                    std::cout << "Error sending message " << ec.message() << std::endl;
+                    connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+                    connection->socket_.close();
+                    this->remove_client_from_list(connection);
+                }
+            });
+}
+
+void Server::send_type_2_error(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm, std::string cell_name)
+{
+    std::string message = SpreadsheetController::create_type_2_error(cell_name);
+    message += "\n\n";
+    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
+            [message, connection, sm, this](boost::system::error_code ec, std::size_t){
+                if (!ec)
+                {
+                    std::cout << "writing message " << message << std::endl;
+                    accept_edit(connection, sm);
+                }
+                else
+                {
+                    std::cout << "Error sending message " << ec.message() << std::endl;
+                    connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+                    connection->socket_.close();
+                    this->remove_client_from_list(connection);
+                    this->save_file_if_needed(sm);
+                }
+            });
+}
 void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
 {
     std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets;
@@ -195,6 +294,7 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
 
 void Server::admin_remove_spreadsheet(json json_message)
 {
+
     std::string name_spreadsheet;
     name_spreadsheet = json_message["name"];
    // SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
@@ -409,149 +509,46 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
         });
    }
 
-
-void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
+void Server::load_data()
 {
-    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
-    std::string message = SpreadsheetController::full_send(cell_dictionary);
-    message += "\n\n";
-    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
-            [sm, message, connection, this](boost::system::error_code ec, std::size_t){
-                if (!ec)
-                {
-                    std::cout << "writing message " << message << std::endl;
-                    accept_edit(connection, sm);
-                }
-                else
-                {
-                    std::cout << "Error sending message " << ec.message() << std::endl;
-                    connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-                    connection->socket_.close();
-                    this->remove_client_from_list(connection);
-                    this->save_file_if_needed(sm);
-                }
-            });
-}
+    // get all of the users from users.txt and load them into users. 
+    std::ifstream file("../../data/users.txt");
+    std::string line;
+    int count = 0;
 
-void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
-{
-    std::cout << "trying to accept edit" << std::endl;
-    boost::asio::async_read_until(connection->socket_, connection->buff, "\n\n", 
-        [connection, this, sm](boost::system::error_code ec, std::size_t size){
-            std::cout << "async read handler called" << std::endl;
-            if (!ec)
-            {
-                // get the message from the client
-                // buff.commit(size);
-                std::istream istrm(&connection->buff);
-                std::string message;
-                std::getline(istrm, message);
-                // while (istrm >> std::noskipws >> message)
-                istrm >> message;
-                connection->buff.consume(size);
-                std::cout << "message is " << message << std::endl;
-                std::string error_message;
-                try
-                {
-                    json json_message = json::parse(message);
-                    std::cout << "successfully parsed message" << std::endl;
-                    SpreadsheetController::handle_edit_message(json_message, sm);
-                    send_full_spreadsheet_to_clients(sm);
-                }
-                catch (json::parse_error &e)
-                {
-                    std::cout << e.what() << std::endl;
-                    accept_edit(connection, sm);
-                }
-                catch (const CircularException &e)
-                {
-                    std::cout << e.what() << std::endl;
-                    std::string cell(e.what());
-                    send_type_2_error(connection, sm, cell);
-                }
-                // parse the message the correct way, edit the model, write back the edit, and then read again. 
-            }
-            else
-            {
-                std::cout << "Error reading spreadsheet edit: " << ec.message() << std::endl;
-                connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-                connection->socket_.close();
-                this->remove_client_from_list(connection);
-                this->save_file_if_needed(sm);
-            }
-            
-        });
-}
-
-void Server::send_full_spreadsheet_to_clients(std::shared_ptr<SpreadsheetModel> sm)
-{
-    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
-    std::string message = SpreadsheetController::full_send(cell_dictionary);
-    message += "\n\n";
-    for (std::shared_ptr<ClientConnection> connection: this->connections)
+    while (std::getline(file, line))
     {
-        if (connection->get_name() == sm->get_name())
-        {
-            boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
-                    [sm, message, connection, this](boost::system::error_code ec, std::size_t){
-                        if (!ec)
-                        {
-                            std::cout << "writing message " << message << std::endl;
-                            accept_edit(connection, sm);
-                        }
-                        else
-                        {
-                            std::cout << "Error sending message " << ec.message() << std::endl;
-                            connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-                            connection->socket_.close();
-                            this->remove_client_from_list(connection);
-                        }
-                    });
-        }
+        std::string name;
+        std::string password;
+        std::vector<std::string> info = SpreadsheetController::split(line, " ");
+        std::vector<std::string>::iterator it = info.begin();
+        name = *it;
+        it++;
+        password = *it;
+        UserModel user(name, password);
+        users.insert(user);
     }
-}
+    file.close();
 
-void Server::send_type_1_error(std::shared_ptr<ClientConnection> connection)
-{
-    std::string message = SpreadsheetController::create_type_1_error();
-    message += "\n\n";
-    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
-            [message, connection, this](boost::system::error_code ec, std::size_t){
-                if (!ec)
-                {
-                    std::cout << "writing message " << message << std::endl;
-                    accept_spreadsheet_selection(connection);
-                }
-                else
-                {
-                    std::cout << "Error sending message " << ec.message() << std::endl;
-                    connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-                    connection->socket_.close();
-                    this->remove_client_from_list(connection);
-                }
-            });
-}
+    // get all of the users from users.txt and load them into users. 
+    std::ifstream file("../../data/spreadsheets.txt");
+    std::string name;
+    std::set<std::string> spreadsheet_names;
+    int count = 0;
 
-void Server::send_type_2_error(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm, std::string cell_name)
-{
-    std::string message = SpreadsheetController::create_type_2_error(cell_name);
-    message += "\n\n";
-    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
-            [message, connection, sm, this](boost::system::error_code ec, std::size_t){
-                if (!ec)
-                {
-                    std::cout << "writing message " << message << std::endl;
-                    accept_edit(connection, sm);
-                }
-                else
-                {
-                    std::cout << "Error sending message " << ec.message() << std::endl;
-                    connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-                    connection->socket_.close();
-                    this->remove_client_from_list(connection);
-                    this->save_file_if_needed(sm);
-                }
-            });
+    while (std::getline(file, name))
+    {
+        spreadsheet_names.insert(name);
+    }
+    file.close();
+
+    for (std::string name : spreadsheet_names)
+    {
+        std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(name, false);
+        this->spreadsheets.insert(sm);
+    }
+
+
 }
 
 bool Server::check_if_spreadsheet_in_list(json message, std::shared_ptr<SpreadsheetModel> &sm)
