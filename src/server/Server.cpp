@@ -311,32 +311,43 @@ void Server::admin_remove_spreadsheet(json json_message)
 
     std::string name_spreadsheet;
     name_spreadsheet = json_message["name"];
-   // SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
-    std::ifstream file("../../data/spreadsheets.txt");
-    std::string line;
-    std::set<std::string> spreadsheet_names;
-    while (std::getline(file, line))
+    bool exists=false;
+    std::shared_ptr<SpreadsheetModel> toRemove;
+    
+    for (std::shared_ptr<SpreadsheetModel> sm : spreadsheets)
     {
-        //If spreadsheet is found: skip it. Otherwise: insert into set
-        if(line != name_spreadsheet)
+        if(sm->get_name() == name_spreadsheet)
         {
-            spreadsheet_names.insert(line);
+            
+            toRemove = sm;
+            exists = true;
+            break;
         }
     }
-    //close the file and delete it
-    file.close();
-    remove("../../data/spreadsheets.txt");
-    //recreate the file fresh and add all spreadsheets from the set
-    std::ofstream outfile("../../data/spreadsheets.txt");
-    for(std::string s : spreadsheet_names)
+
+    if(exists)
     {
-        outfile << s << std::endl;
+        std::set<UserModel> toLoop=toRemove->get_users();
+        std::set<std::shared_ptr<ClientConnection>> toDelete;
+            for(UserModel name: toLoop)
+            {
+                for(std::shared_ptr<ClientConnection> now: connections)
+                {
+                    if(now->get_user_name==name)
+                    {
+                        toDelete.insert(now);
+                    }
+                }
+
+            }
+            for(std::shared_ptr<ClientConnection> now: toDelete)
+            {
+                now->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+                now->socket_.close();
+                connections.erase(now);
+            }
+        spreadsheets.erase(toRemove);
     }
-    //close the file
-    outfile.close();
-
-    //SpreadsheetController::mu_lock_file_spreadsheet_txt.unlock();//Possible unlock for the future
-
    
 }
 
@@ -348,42 +359,17 @@ void Server::admin_remove_spreadsheet(json json_message)
  * */
 void Server::admin_add_user(std::string add_user_name, std::string add_user_pass)
     {
-        //SpreadsheetController::mu_lock_file_user_txt.lock();//Possible lock for the future
-        //Get and read over file for the user
-        std::ifstream file("../../data/users.txt");//******************************TODO: This might change on the server, Check periodically
-        std::string line;
-        bool already_exists = false;
-        while (std::getline(file, line))
+       
+        for(UserModel now : this->users)
         {
-            //Split line by comma as username and password shouldn't use commas
-            std::vector<std::string> current_line = SpreadsheetController::split(line, ",");
-            if(current_line.front() == add_user_name)//If we have found the user
-            {
-                if(current_line.back() != add_user_pass)//and if the passwords don't match
-                {
-                    //close the file and delete the user, then jump to next if statment
-                    file.close();
-                    admin_delete_user(add_user_name);
-                    break;
-                }
-                else
-                {
-                    //If both are the same, Change already_exists and go to next if
-                    already_exists = true;
-                    break;
-                }
-                
+            if(now.get_name()==add_user_name){
+               users.erase(now);
+               break;
             }
         }
-        //If the user/password already exists, just return
-        if(!already_exists)
-        {
-            std::ofstream file;
-            file.open("../../data/users.txt", std::ios_base::app);//******************************TODO: This might change on the server, Check periodically
-            file << add_user_name << "," << add_user_pass <<std::endl;
-            file.close();
-        }
-        //SpreadsheetController::mu_lock_file_user_txt.unlock();//Possible unlock for future use
+
+        UserModel user(add_user_name, add_user_pass);
+        users.insert(user);
     }
 
 /**
@@ -394,36 +380,26 @@ void Server::admin_add_user(std::string add_user_name, std::string add_user_pass
  * */
 void Server::admin_delete_user(std::string del_user)
     {
-        //SpreadsheetController::mu_lock_file_user_txt.lock();//Lock for possible future use
-        std::ifstream file("../../data/users.txt");//******************************TODO: This might change on the server, Check periodically
-        // changing to iterating through user's list to determine deletion.
-        std::string line;
-        std::set<std::string> user_names;
-        while (std::getline(file, line))
+       for(UserModel now : users)
+       {
+           if(now.get_name()==del_user)
+           {
+               users.erase(now);
+               break;
+           }
+       }
+
+       for(std::shared_ptr<ClientConnection> now: connections)
         {
-            // split user name from the password with a comma
-            std::vector<std::string> current_line = SpreadsheetController::split(line, ",");
-            // not the user you are looking for continue otherwise add to set of users
-            if(current_line.front() != del_user)
+            if(now->get_user_name==del_user)
             {
-             user_names.insert(line);
+                now->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+                now->socket_.close();
+                connections.erase(now);
+                break;
             }
         }
-        // closes file 
-        file.close(); 
-        // removes the file
-        remove("../../data/users.txt");//******************************TODO: This might change on the server, Check periodically
-        // remakes the file
-        std::ofstream outfile("../../data/users.txt");//******************************TODO: This might change on the server, Check periodically
-        // rewriting the users to the file
-        for(std::string u : user_names)
-        {
-            outfile << u <<std::endl;
-        }
-        // closes the file
-        outfile.close();
 
-        //SpreadsheetController::mu_lock_file_user_txt.unlock();
 
     }
 /**
@@ -435,38 +411,19 @@ void Server::admin_delete_user(std::string del_user)
  * return: void (nothing)
  */
 void Server::admin_add_spreadsheet(json json_message)
+{
+    std::string spreadsheetName=json_message["name"];
+    for(std::shared_ptr<SpreadsheetModel> now: spreadsheets)
     {
-        // checking json message debug
-        std::cout<<json_message<<std::endl;
-        // reading to file spreadsheet.txt
-        std::ifstream file("../../data/spreadsheets.txt");//******************************TODO: This might change on the server, Check periodically
-        // created for iterating through the lines of spreadsheets.txt
-        std::string line;
-        bool already_exists = false;
-        while (std::getline(file, line))
-            {
-                 //If it already exists breaks out of loop.
-                if(line == json_message["name"]){
-                    std::cout << already_exists <<std::endl;
-                    already_exists=true;
-                    break;
-                }
-            }
-         // the file is closed
-         file.close();
-         // If it already exists add it to the list.
-        if(!already_exists)
-            {
-                std::ofstream file;
-                std::cout <<"Was not found"<<std::endl;
-                std::cout << already_exists <<std::endl;
-                file.open("../../data/spreadsheets.txt", std::ios_base::app);//******************************TODO: This might change on the server, Check periodically
-                std::string name = json_message["name"];
-                file << name <<std::endl;
-                file.close();
-            }
-        
+        if(now->get_name()==spreadsheetName)
+        {
+            return;
+        }
     }
+    std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(spreadsheetName, false);
+    this->spreadsheets.insert(sm);
+
+}
 
 /**
  * This function checks if the spreadsheet is 
@@ -482,6 +439,7 @@ void Server::admin_delete_spreadsheet(json json_message)
         // checks to see if the spreadsheet is contatined in storage
         bool is_in_storage = SpreadsheetController::check_if_spreadsheet_in_storage(json_message, no_use_spread);
         // if it does exists
+        
         if (is_in_storage)
         {
             // The helper method to remove the spreadsheet will remove it.
