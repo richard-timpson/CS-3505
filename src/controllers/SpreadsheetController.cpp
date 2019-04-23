@@ -95,7 +95,7 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
     return ss.dump();
 }
 
-bool SpreadsheetController::validate_user(json message, std::string &error_message)
+bool SpreadsheetController::validate_user(json message)
 {
     if (!validate_login_message(message)) return false;
     if (message.value("type", " ") != "open")

@@ -82,6 +82,7 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                 }
                 else
                 {
+                    bool valid_user = SpreadsheetController::validate_user(json_message, error_message);
                     std::shared_ptr<SpreadsheetModel> sm = choose_spreadsheet(json_message);
                     connection->set_name(sm->get_name());
                     connection->set_user_name(json_message["username"]);
@@ -547,8 +548,77 @@ void Server::load_data()
         std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(name, false);
         this->spreadsheets.insert(sm);
     }
+}
 
+void Server::load_data()
+{
+    // get all of the users from users.txt and load them into users. 
+    std::ifstream file("../../data/users.txt");
+    std::string line;
+    int count = 0;
 
+    while (std::getline(file, line))
+    {
+        std::string name;
+        std::string password;
+        std::vector<std::string> info = SpreadsheetController::split(line, " ");
+        std::vector<std::string>::iterator it = info.begin();
+        name = *it;
+        it++;
+        password = *it;
+        UserModel user(name, password);
+        users.insert(user);
+    }
+    file.close();
+
+    // get all of the users from users.txt and load them into users. 
+    std::ifstream file("../../data/spreadsheets.txt");
+    std::string name;
+    std::set<std::string> spreadsheet_names;
+    int count = 0;
+
+    while (std::getline(file, name))
+    {
+        spreadsheet_names.insert(name);
+    }
+    file.close();
+
+    for (std::string name : spreadsheet_names)
+    {
+        std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(name, false);
+        this->spreadsheets.insert(sm);
+    }
+}
+
+void Server::save_data()
+{
+    // if the file does not exist, there is an issue
+    if (boost::filesystem::exists("../../data/users.txt"))
+    {
+        // remove the users file, and then create it again
+        std::remove("../../data/users.txt");
+        std::ofstream write_file;
+        write_file.open("../../data/users.txt");
+
+        // loop through all of the users, and write them to the file
+        for (UserModel user : this->users)
+        {
+            std::string user_string = user.get_name() + " " + user.get_password();
+            write_file << user_string << std::endl;
+        }
+        write_file.close();
+
+        // remove from the spreadsheet file, and create again
+        std::remove("../../data/spreadsheets.txt");
+        write_file.open("../../data/spreadsheets.txt");
+        for (std::shared_ptr<SpreadsheetModel> sm : this->spreadsheets)
+        {
+            std::string name = sm->get_name();
+            sm->write_json_ss_file();
+            write_file << name << std::endl;
+        }
+        write_file.close();
+    }
 }
 
 bool Server::check_if_spreadsheet_in_list(json message, std::shared_ptr<SpreadsheetModel> &sm)

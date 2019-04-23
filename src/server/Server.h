@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <set>
 #include "ClientConnection.h"
 #include "../models/SpreadsheetModel.h"

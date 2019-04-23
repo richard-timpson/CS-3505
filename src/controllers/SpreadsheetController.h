@@ -13,12 +13,12 @@ class SpreadsheetController
 {
   public:
 
-    
+
     static std::string get_list_of_users();
     static std::string get_list_of_spreadsheets(std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets);
     static std::string full_send(std::unordered_map<std::string, Cell> & cell_dictionary);
     static bool validate_admin(json message, std::string &error_message);  
-    static bool validate_user(json message, std::string &error_message);    
+    static bool validate_user(json message);    
     static bool validate_login_message(json & message);
     static bool check_if_spreadsheet_in_storage(json & message, std::string &spreadsheet);
     static bool handle_edit_message(json & message, std::shared_ptr<SpreadsheetModel> sm);
