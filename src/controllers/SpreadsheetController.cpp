@@ -20,28 +20,38 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
     std::string line;
     std::set<std::string> spreadsheet_names;
     int count = 0;
+
+    json json_spreadsheets;
+    json_spreadsheets["type"] = "list";
+    json_spreadsheets["spreadsheets"] = {};
+
     while (std::getline(file, line))
     {
-        spreadsheet_names.insert(line);
+        std::cout << line << std::endl;
+        //spreadsheet_names.insert(line);
+        json_spreadsheets["spreadsheets"].push_back(line);
         count++;
     }
     file.close();
     //mu_lock_file_spreadsheet_txt.unlock();
 
-    json json_spreadsheets;
-    json_spreadsheets["type"] = "list";
-    json_spreadsheets["spreadsheets"] = {};
+    //json json_spreadsheets;
+    //json_spreadsheets["type"] = "list";
+    //json_spreadsheets["spreadsheets"] = {};
+
     
     
-    for (std::shared_ptr<SpreadsheetModel> sheet : spreadsheets)
+    /*for (std::shared_ptr<SpreadsheetModel> sheet : spreadsheets)
     {
         std::cout << "Writing active spreadsheet " << sheet->get_name() << " to spreadsheet list " << std::endl;
         json_spreadsheets["spreadsheets"].push_back(sheet->get_name());
-    }
+        std::cout << sheet->get_name();
+    }*/
+
     if (count != 0)
     {
         //mu_lock_spreadsheet_list.lock();
-        std::cout << "count is 0" << std::endl;
+        /*std::cout << "count is 0" << std::endl;
         for (std::string name: spreadsheet_names)
         {
             bool exists;
@@ -59,8 +69,10 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
                 json_spreadsheets["spreadsheets"].push_back(name);
             }
              return json_spreadsheets.dump();
-        }
-       // mu_lock_spreadsheet_list.unlock();
+        }*/
+        // mu_lock_spreadsheet_list.unlock();
+        return json_spreadsheets.dump();
+
     }
     else
     {
@@ -236,6 +248,9 @@ bool SpreadsheetController::check_if_spreadsheet_in_storage(json & message, std:
     return false;
 }
 
+
+
+// LOOK AT THIS AGAIN
 bool SpreadsheetController::handle_edit_message(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
     if (!message.contains("type")) return false;
