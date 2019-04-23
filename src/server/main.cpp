@@ -16,6 +16,7 @@ int main(int argc, char **argv)
     boost::asio::io_context io_context;
     tcp::endpoint endpoint(tcp::v4(), port);
     Server server(io_context, endpoint);
+    server.load_data();
     server.accept_clients();
     io_context.run();
 }

@@ -16,6 +16,7 @@
 #include <stack>
 #include "Cell.h"
 #include "CellEdit.h"
+#include "UserModel.h"
 
 class SpreadsheetModel
 {
@@ -213,6 +214,8 @@ class SpreadsheetModel
 
     // the main data structure for the spreadsheet
     std::unordered_map<std::string, Cell> cell_dictionary;
+
+    std::set<UserModel> users;
 
     // the stack that represents the order of which cells have been edited. 
     std::stack<std::string> global_history;

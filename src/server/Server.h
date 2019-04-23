@@ -8,6 +8,7 @@
 #include "ClientConnection.h"
 #include "../models/SpreadsheetModel.h"
 #include "../../libs/json.hpp"
+#include "../models/UserModel.h"
 
 using json = nlohmann::json;
 
@@ -49,17 +50,27 @@ class Server
     std::shared_ptr<SpreadsheetModel> choose_spreadsheet(json &json_message);
     bool check_if_spreadsheet_in_list(json message, std::shared_ptr<SpreadsheetModel> &sm);
     void save_file_if_needed(std::shared_ptr<SpreadsheetModel> sm);
+    void load_data();
+    void save_data();
+    
 
 
     // getters/setters
     std::set<std::shared_ptr<SpreadsheetModel>> get_active_spreadsheets();
-    
+
+    /**
+     * This function will load all of the necessary data on 
+     * the server startup. It will load the users from user.txt into an active users list,
+     * and it will load the spreadsheets from spreadsheets.txt and associated json files into
+     * an active spreadsheets list. 
+     */ 
   private:
     tcp::acceptor acceptor_;
     std::set<std::shared_ptr<ClientConnection>> connections;
     //std::set<std::shared_ptr<ClientConnection>> admin_connections;
     boost::asio::streambuf buff;
     std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets;
+    std::set<UserModel> users;
 };
 
 #endif

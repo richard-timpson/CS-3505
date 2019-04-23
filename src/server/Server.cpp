@@ -16,6 +16,48 @@ Server::Server(boost::asio::io_context &context, const tcp::endpoint &endpoint)
 {
 }
 
+void Server::load_data()
+{
+    // get all of the users from users.txt and load them into users. 
+    std::ifstream file("../../data/users.txt");
+    std::string line;
+    int count = 0;
+
+    while (std::getline(file, line))
+    {
+        std::string name;
+        std::string password;
+        std::vector<std::string> info = SpreadsheetController::split(line, " ");
+        std::vector<std::string>::iterator it = info.begin();
+        name = *it;
+        it++;
+        password = *it;
+        UserModel user(name, password);
+        users.insert(user);
+    }
+    file.close();
+
+    // get all of the users from users.txt and load them into users. 
+    std::ifstream file("../../data/spreadsheets.txt");
+    std::string name;
+    std::set<std::string> spreadsheet_names;
+    int count = 0;
+
+    while (std::getline(file, name))
+    {
+        spreadsheet_names.insert(name);
+    }
+    file.close();
+
+    for (std::string name : spreadsheet_names)
+    {
+        std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(name, false);
+        this->spreadsheets.insert(sm);
+    }
+
+
+}
+
 void Server::accept_clients()
 {
     acceptor_.async_accept([this](boost::system::error_code ec, tcp::socket socket) {
