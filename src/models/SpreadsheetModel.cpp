@@ -23,6 +23,7 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
     if (new_ss)
     {
         this->name = input_name;
+        this->create_new_json_file();
     }
     else
     {
@@ -40,6 +41,9 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     if (it == cell_dictionary.end())
     {
         Cell new_cell(name, contents, dependents, type);
+
+        // NEED TO CHECK FOR CIRCULAR DEPENDENCY
+
         // bool circular_dependency = circular_dependency_check(name);
         // if (!circular_dependency)
         {
@@ -56,7 +60,7 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     {
         Cell *current_cell = &it->second;
         std::cout << "editing existing cell " << std::endl;
-        std::cout << "here" << std::endl;
+        
         it->second.direct_dependents = dependents;
         it++;
         current_cell->set_direct_dependents(dependents);
@@ -461,6 +465,19 @@ void SpreadsheetModel::write_ss_file_if_needed()
 
 }
 
+void SpreadsheetModel::create_new_json_file()
+{
+    std::ofstream write_file;
+    write_file.open("../../data/spreadsheets.txt", std::ios_base::out | std::ios_base::app);
+    write_file << this->get_name() << std::endl;
+    write_file.close();
+
+    std::ofstream write_file_j;
+    write_file_j.open(("../../data/" + this->name + ".json").c_str(), std::ios_base::out);
+    write_file_j.close();
+
+}
+
 std::string SpreadsheetModel::get_name()
 {
     return name;
@@ -585,7 +602,7 @@ void SpreadsheetModel::do_revert(std::string name)
         {
             std::cout << "setting cell contents" << std::endl;
             this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
-            this->global_history.push(name);
+            //this->global_history.push(name);
         }
         catch (const CircularException &e)
         {

@@ -271,7 +271,8 @@ void Server::admin_add_spreadsheet(json json_message)
                 std::cout <<"Was not found"<<std::endl;
                 std::cout << already_exists <<std::endl;
                 file.open("../../data/spreadsheets.txt", std::ios_base::app);
-                file << json_message["name"] <<std::endl;
+                std::string name = json_message["name"];
+                file << name <<std::endl;
                 file.close();
             }
         

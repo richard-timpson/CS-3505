@@ -39,6 +39,7 @@ class SpreadsheetModel
     void open_json_ss_file();
     void write_json_ss_file();
     void write_ss_file_if_needed();
+    void create_new_json_file();
 
     void do_edit(std::string cell_name, std::string contents, std::vector<std::string> &dependents, std::string type);
     void do_undo();
