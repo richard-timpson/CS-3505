@@ -20,7 +20,8 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
     j_spreadsheet_list["spreadsheets"] = {};
     for (std::shared_ptr<SpreadsheetModel> sm : spreadsheets)
     {
-        j_spreadsheet_list.push_back(sm->get_name());
+        std::string name = sm->get_name();
+        j_spreadsheet_list.push_back(name);
     }
     return j_spreadsheet_list.dump();
 }

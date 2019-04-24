@@ -26,7 +26,7 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
         // if we are creating a new spreadsheet set the name
         this->name = input_name;
         // TODO: not sure what this function does
-        this->create_new_json_file();
+        // this->create_new_json_file();
     }
     else
     {
