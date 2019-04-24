@@ -236,7 +236,7 @@ std::stack<std::string> SpreadsheetModel::get_global_history()
 
 void SpreadsheetModel::add_user_to_spreadsheet(std::string name)
 {
-    this->users.insert(name);
+    this->users.push_back(name);
 }
 void SpreadsheetModel::remove_user_from_spreadsheet(std::string name)
 {
