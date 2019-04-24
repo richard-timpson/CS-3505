@@ -15,13 +15,16 @@ std::vector<std::string> split(std::string s, std::string delimiter);
 // std::string check_type
 std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets)
 {
+    std::cout << "Getting list of spreadsheets in SpreadsheetController" << std::endl;
     json j_spreadsheet_list;
     j_spreadsheet_list["type"] = "list";
-    j_spreadsheet_list["spreadsheets"] = {};
+    j_spreadsheet_list["spreadsheets"] = json::array();
     for (std::shared_ptr<SpreadsheetModel> sm : spreadsheets)
     {
         std::string name = sm->get_name();
-        j_spreadsheet_list.push_back(name);
+        std::cout << "pushing spreadsheet " << name << " to json object" << std::endl;
+        j_spreadsheet_list["spreadsheets"].push_back(name);
+        std::cout << "successfully pushed to json arrar" << std::endl;
     }
     return j_spreadsheet_list.dump();
 }
