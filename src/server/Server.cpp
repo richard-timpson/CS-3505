@@ -330,8 +330,17 @@ void Server::admin_add_user(std::string add_user_name, std::string add_user_pass
             if(now.name == add_user_name){
             
                now.password = add_user_pass;
+               user_exists = true;
                break;
             }
+        }
+        if (!user_exists)
+        {
+            UserModel new_user;
+            new_user.name = add_user_name;
+            new_user.password = add_user_pass;
+
+            this->users.push_back(new_user);
         }
 
 
@@ -346,7 +355,19 @@ void Server::admin_add_user(std::string add_user_name, std::string add_user_pass
  * */
 void Server::admin_delete_user(std::string del_user)
     {
-       for(UserModel now : users)
+
+        int pos = 0;
+        for(UserModel now : this->users)
+        {
+            if(now.name == del_user)
+            {
+               break;
+            }
+            pos++;
+        }
+        this->users.erase(this->users.begin() + pos);
+
+       /*for(UserModel now : users)
        {
            if(now.get_name()==del_user)
            {
@@ -364,7 +385,7 @@ void Server::admin_delete_user(std::string del_user)
                 connections.erase(now);
                 break;
             }
-        }
+        }*/
 
 
     }

@@ -240,7 +240,7 @@ void SpreadsheetModel::add_user_to_spreadsheet(std::string name)
 }
 void SpreadsheetModel::remove_user_from_spreadsheet(std::string name)
 {
-    this->users.erase(name);
+    this->users.erase();
 }
 std::set<std::string> SpreadsheetModel::get_active_users()
 {
