@@ -256,7 +256,6 @@ namespace AdminClient
             }
             Controler.SendCommand(new OperationAdmin("AU", newUserTextBox.Text.ToString(), newPasswordTextBox.Text.ToString()));
             logTextBox.AppendText("Add User Command sent for " + newUserTextBox.Text + "\n");
-            Controler.SendCommand(new OperationAdmin("R", "", ""));
             closeNewUserItems();
 
         }
@@ -315,9 +314,8 @@ namespace AdminClient
                 MessageBox.Show("Please enter a the new Spreadsheet Name");
                 return;
             }
-            Controler.SendCommand(new OperationAdmin("AS", newSpreadhseetTextBox.Text.ToString(),""));
+            Controler.SendCommand(new OperationAdmin("AS", newSpreadhseetTextBox.Text.ToString(), ""));
             logTextBox.AppendText("Add Spreadsheet Command sent for " + newSpreadhseetTextBox.Text + "\n");
-            Controler.SendCommand(new OperationAdmin("R", "", ""));
             closeNewSpreadsheetItems();
         }
 
@@ -377,14 +375,20 @@ namespace AdminClient
 
                     string item = touse[0];
                     Controler.SendCommand(new OperationAdmin("DU", item, ""));
-                 
+
                 }
-                Controler.SendCommand(new OperationAdmin("R", "", ""));
 
                 deleteUserButton.Enabled = false;
                 deleteUserButton.Visible = false;
                 logTextBox.AppendText("Delete user(s) message sent");
             }
+        }
+
+        public void clearActiveItems()
+        {
+            MethodInvoker invalidater2 = new MethodInvoker(() => activeSpreadsheetsAndUsers.Clear());
+
+            this.Invoke(invalidater2);
         }
 
         private void deleteSpreadsheetButton_Click(object sender, EventArgs e)
@@ -405,7 +409,6 @@ namespace AdminClient
                     string item = now.Text;
                     Controler.SendCommand(new OperationAdmin("DS", item, ""));
                 }
-                Controler.SendCommand(new OperationAdmin("R", "", ""));
 
                 deleteSpreadsheetButton.Visible = false;
                 deleteSpreadsheetButton.Enabled = false;
