@@ -96,7 +96,10 @@ namespace CS3505
         /// LogIn Username
         /// </summary>
         private string Username;
-
+        /// <summary>
+        /// Keep track of whether or not the spreadsheet has been launched or not
+        /// </summary>
+        private bool launched = false;
         /// <summary>
         /// LogIn Password
         /// </summary>
@@ -192,8 +195,6 @@ namespace CS3505
                 string totalData = ss.sb.ToString();
                 string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
             
-
-
                 foreach (string p in parts)
                 {
                     //if (p.Length != 0 && p[0] == '{' && p[p.Length - 3] == '}')
@@ -316,7 +317,7 @@ namespace CS3505
             Networking.GetData(theServerState);
 
             // Launch a spreadsheet to be populated
-            LaunchSpreadsheet();
+           // LaunchSpreadsheet();
         }
 
 
@@ -517,6 +518,12 @@ namespace CS3505
         /// <param name="sb"></param>
         private void ProcessFullSend(string message)
         {
+            // if the spreadsheet has not been launched, launch it
+            if( !launched)
+            {
+                launched = true;
+                LaunchSpreadsheet();
+            }
             var fullsend = new
             {
                 type = "",
