@@ -220,7 +220,7 @@ class SpreadsheetModel
      */ 
     bool circular_dependency_check(std::set<std::string> names);
 
-    std::set<std::shared_ptr<UserModel>> get_users();
+    std::vector<std::string> get_users();
 
 
   private:
