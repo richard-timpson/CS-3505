@@ -11,6 +11,10 @@
  * Server class
  * ******************************************/
 
+// Server::Server()
+// {
+// }
+
 Server::Server(boost::asio::io_context &context, const tcp::endpoint &endpoint)
     : acceptor_(context, endpoint)
 {

@@ -21,6 +21,7 @@ class Server
 {
   public:
     // Constructor
+    Server();
     Server(boost::asio::io_context& context, const tcp::endpoint& endpoint);
 
     // networking functions
