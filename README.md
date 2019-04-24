@@ -41,7 +41,7 @@ ensure that the project can install correctly.
 
     This is the most important step so make sure to run the commands correctly. Most of boosts libraries are header only, and don't require compilation. However, the system library, which is required for the project, needs to be specifically compiled. The following command tells boost to compile that library, and put it in the right directory of the project. Make sure that you have the directory the project from step 1. Run this command in the extracted boost folder. 
     ```shell
-    ./bootstraph.sh --with-libraries=system --prefix=(path_to_project)/libs
+    ./bootstraph.sh --with-libraries=system --prefix=(path_to_project)/libs/boost
 7. **Compile and install boost**.  
   
     Boost should be configured to compile correctly now, so the following command will compile and install the needed boost libraries at the correct location. 
