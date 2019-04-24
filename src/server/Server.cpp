@@ -82,7 +82,11 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                 }
                 else
                 {
-                    bool valid_user = SpreadsheetController::validate_user(json_message, error_message);
+                    bool valid_user = validate_user(json_message);
+                    if (!valid_user)
+                    {
+                        send_type_1_error(connection);
+                    }
                     std::shared_ptr<SpreadsheetModel> sm = choose_spreadsheet(json_message);
                     connection->set_name(sm->get_name());
                     connection->set_user_name(json_message["username"]);
@@ -510,45 +514,6 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
         });
    }
 
-void Server::load_data()
-{
-    // get all of the users from users.txt and load them into users. 
-    std::ifstream file("../../data/users.txt");
-    std::string line;
-    int count = 0;
-
-    while (std::getline(file, line))
-    {
-        std::string name;
-        std::string password;
-        std::vector<std::string> info = SpreadsheetController::split(line, " ");
-        std::vector<std::string>::iterator it = info.begin();
-        name = *it;
-        it++;
-        password = *it;
-        UserModel user(name, password);
-        users.insert(user);
-    }
-    file.close();
-
-    // get all of the users from users.txt and load them into users. 
-    std::ifstream file("../../data/spreadsheets.txt");
-    std::string name;
-    std::set<std::string> spreadsheet_names;
-    int count = 0;
-
-    while (std::getline(file, name))
-    {
-        spreadsheet_names.insert(name);
-    }
-    file.close();
-
-    for (std::string name : spreadsheet_names)
-    {
-        std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(name, false);
-        this->spreadsheets.insert(sm);
-    }
-}
 
 void Server::load_data()
 {
@@ -636,6 +601,37 @@ bool Server::check_if_spreadsheet_in_list(json message, std::shared_ptr<Spreadsh
     return false;
 }
 
+bool Server::validate_user(json message)
+{
+    if (!SpreadsheetController::validate_login_message(message)) return false;
+    if (message.value("type", " ") != "open")
+    {
+        return false;
+    }
+    // get the name and password from json message
+    std::string name = message.value("username", " ");
+    std::string password = message.value("password", " ");
+    bool found = false;
+    // loop through all the users and check if the name and password match. 
+    for (UserModel user : this->users)
+    {
+        if (name == user.get_name() && password != user.get_password())
+        {
+            return false;
+        }
+        else if (name == user.get_name() && password == user.get_password())
+        {
+            found = true;
+            break;
+        }
+    }
+    // if we haven't found a user, add one to the list
+    if (!found)
+    {
+        UserModel user(name, password);
+        this->users.insert(user);
+    }
+}
 
 void Server::add_client_to_list(std::shared_ptr<ClientConnection> connection)
 {

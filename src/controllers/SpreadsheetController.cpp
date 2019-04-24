@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "SpreadsheetController.h"
 #include "../../libs/json.hpp"
+#include "../models/UserModel.h"
 
 using json = nlohmann::json;
 
@@ -95,14 +96,18 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
     return ss.dump();
 }
 
-bool SpreadsheetController::validate_user(json message)
+bool SpreadsheetController::validate_user(json message, std::set<UserModel> users)
 {
     if (!validate_login_message(message)) return false;
     if (message.value("type", " ") != "open")
     {
-        error_message = "Didn't send correct message type";
         return false;
     }
+
+
+
+
+
    // mu_lock_file_user_txt.lock();
     std::ifstream file("../../data/users.txt");
     std::string line;

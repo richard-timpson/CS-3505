@@ -52,6 +52,12 @@ class Server
     std::shared_ptr<SpreadsheetModel> choose_spreadsheet(json &json_message);
     bool check_if_spreadsheet_in_list(json message, std::shared_ptr<SpreadsheetModel> &sm);
     void save_file_if_needed(std::shared_ptr<SpreadsheetModel> sm);
+    /**
+     * Checks if the json_message is valid. 
+     * If it is, checks that the user matches the password in the list of users. 
+     * If the name doesn't exist, add the user to list of users. 
+     */ 
+    bool validate_user(json json_message);
     void load_data();
     void save_data();
     
