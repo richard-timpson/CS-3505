@@ -86,17 +86,18 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                     if (!valid_user)
                     {
                         send_type_1_error(connection);
+                        return;
                     }
                     UserModel user = choose_user(json_message);
                     std::shared_ptr<SpreadsheetModel> sm = choose_spreadsheet(json_message, user);
                     if (sm == nullptr)
                     {
                         send_type_1_error(connection);
+                        return;
                     }
                     connection->set_name(sm->get_name());
                     connection->set_user_name(json_message["username"]);
-                    send_full_spreadsheet(
-                        connection, sm);
+                    send_full_spreadsheet(connection, sm);
                 }
             }
             else
