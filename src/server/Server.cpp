@@ -448,9 +448,8 @@ void Server::admin_delete_spreadsheet(json json_message)
  */    
 void Server::shutdown()
 {
-
-
-    connections.clear();
+    close_all_connections();
+    save_data();
     exit(0);
 }
 

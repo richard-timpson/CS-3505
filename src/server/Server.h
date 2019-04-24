@@ -34,7 +34,6 @@ class Server
     void admin_delete_spreadsheet(json json_message);
     void admin_remove_spreadsheet(json json_message);
     void admin_remove_client(json json_message);
-    void admin_off();
     void accept_spreadsheet_selection(std::shared_ptr<ClientConnection> connection);
     void accept_edit(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm);
     void send_spreadsheet_list_to_client(std::shared_ptr<ClientConnection> connection);
@@ -69,6 +68,7 @@ class Server
      * Checks if username exsits, but password doesn't match. 
      */ 
     bool validate_user(json json_message);
+    void shutdown();
     void close_all_connections();
     void load_data();
     void save_data();
