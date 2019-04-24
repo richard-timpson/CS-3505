@@ -68,6 +68,7 @@ class Server
      * Checks if username exsits, but password doesn't match. 
      */ 
     bool validate_user(json json_message);
+    void remove_user_from_list(UserModel user);
     void shutdown();
     void close_all_connections();
     void load_data();

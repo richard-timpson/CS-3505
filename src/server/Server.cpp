@@ -283,7 +283,7 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
         }
         json users_json;
         users_json["type"] = "activeUser";
-        users_json["spreadsheet"] == ss->get_name();
+        users_json["spreadsheet"] = ss->get_name();
         users_json["users"] = {};
 
         for (std::shared_ptr<ClientConnection> connection: this->connections)
@@ -348,9 +348,9 @@ void Server::admin_delete_user(std::string del_user)
     {
        for(UserModel now : users)
        {
-           if(now.get_name()==del_user)
+           if(now.name == del_user)
            {
-               users.erase(now);
+               remove_user_from_list(now);
                break;
            }
        }
@@ -719,6 +719,15 @@ void Server::remove_sm_from_list(std::shared_ptr<SpreadsheetModel> sm)
 void Server::add_spreadsheet_to_list(std::shared_ptr<SpreadsheetModel> ss)
 {
     spreadsheets.insert(ss);
+}
+
+void Server::remove_user_from_list(UserModel user)
+{
+    std::string name = user.name;
+    std::vector<UserModel>::const_iterator it = std::remove_if(this->users.begin(), this->users.end(), [&](UserModel const & user){
+        return user.name == name;
+    });
+    if (it != this->users.end()) this->users.erase(it);
 }
 
 

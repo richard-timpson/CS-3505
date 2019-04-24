@@ -238,11 +238,13 @@ void SpreadsheetModel::add_user_to_spreadsheet(std::string name)
 {
     this->users.push_back(name);
 }
+
 void SpreadsheetModel::remove_user_from_spreadsheet(std::string name)
 {
-    this->users.erase(name);
+    std::vector<std::string>::iterator it = std::find(this->users.begin(), this->users.end(), name);
+    if (it != this->users.end()) this->users.erase(it);
 }
-std::set<std::string> SpreadsheetModel::get_active_users()
+std::vector<std::string> SpreadsheetModel::get_users()
 {
     return this->users;
 }
@@ -738,8 +740,4 @@ bool check_if_double(std::string &contents)
     {
         return false;
     }
-}
-std::vector<std::string> SpreadsheetModel::get_users()
-{
-    return this->users;
 }
