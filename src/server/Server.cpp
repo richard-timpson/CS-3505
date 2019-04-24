@@ -399,12 +399,12 @@ void Server::admin_add_spreadsheet(json json_message)
  *  won't do anything becuase there is nothing to delete.
  */
 void Server::admin_delete_spreadsheet(json json_message)
-    {
-        std::string name_spreadsheet;
+{
+    std::string name_spreadsheet;
     name_spreadsheet = json_message["name"];
     bool exists=false;
     std::shared_ptr<SpreadsheetModel> toRemove;
-    
+
     for (std::shared_ptr<SpreadsheetModel> sm : spreadsheets)
     {
         if(sm->get_name() == name_spreadsheet)
@@ -418,44 +418,51 @@ void Server::admin_delete_spreadsheet(json json_message)
 
     if(exists)
     {
-        std::set<std::shared_ptr<UserModel>> toLoop= toRemove->get_users();
+        std::vector<std::string> toLoop= toRemove->get_users();
         std::set<std::shared_ptr<ClientConnection>> toDelete;
-            for(std::shared_ptr<UserModel>  name: toLoop)
+        for(std::string name: toLoop)
+        {
+            for(std::shared_ptr<ClientConnection> now: connections)
             {
-                for(std::shared_ptr<ClientConnection> now: connections)
+                if(now->get_user_name() == name)
                 {
-                    if(now->get_user_name() == name->get_name())
-                    {
-                        toDelete.insert(now);
-                    }
+                    toDelete.insert(now);
                 }
+            }
 
-            }
-            for(std::shared_ptr<ClientConnection> now: toDelete)
-            {
-                now->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-                now->socket_.close();
-                connections.erase(now);
-            }
+        }
+        for(std::shared_ptr<ClientConnection> now: toDelete)
+        {
+            now->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+            now->socket_.close();
+            connections.erase(now);
+        }
         spreadsheets.erase(toRemove);
     }
-    }
+}
 
 /**
  * This function shuts down the server
  * and closes all spreadsheets and 
  * disconnects all clients
  */    
-void Server::admin_off()
-    {
+void Server::shutdown()
+{
 
-        connections.clear();
-       // SpreadsheetController::mu_lock_user_list.lock();
-       // SpreadsheetController::mu_lock_spreadsheet_list.lock();
-       // SpreadsheetController::mu_lock_file_user_txt.lock();
-       // SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
-        exit(0);
+
+    connections.clear();
+    exit(0);
+}
+
+void Server::close_all_connections()
+{
+    for (std::shared_ptr<ClientConnection> connection: this->connections)
+    {
+        connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        connection->socket_.close();
     }
+    connections.clear();
+}
 
 /**
  *  This is a parser that the admin will be used 
@@ -521,7 +528,7 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
                         // OFF command is being executed
                     else if (json_message["Operation"]=="OFF")
                         {
-                            admin_off();
+                            shutdown();
                             refresh_admin(connection);
                         }
                     else

@@ -238,7 +238,7 @@ class SpreadsheetModel
     // the stack that represents the order of which cells have been edited. 
     std::stack<std::string> global_history;
 
-    std::set<std::shared_ptr<UserModel>>  users;
+    std::vector<std::string> users;
 
     // the name of the spreadsheet.
     std::string name;
