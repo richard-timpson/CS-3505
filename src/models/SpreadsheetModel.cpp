@@ -40,10 +40,10 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
 void SpreadsheetModel::set_cell_contents_and_type(std::string name, std::string contents, std::string type)
 {
     std::cout << "setting the cell contents" << std::endl;
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
 
     // Get a reference to the current cell
-    Cell *current_cell = &it->second;
+    std::shared_ptr<Cell> current_cell = it->second;
     current_cell->set_contents(contents);
     current_cell->set_type(type);
 
@@ -51,81 +51,81 @@ void SpreadsheetModel::set_cell_contents_and_type(std::string name, std::string 
 
 void SpreadsheetModel::set_cell_direct_dependents(std::string name, std::vector<std::string> & dependents)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
-    Cell *current_cell = &it->second;
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
+    std::shared_ptr<Cell> current_cell = it->second;
     current_cell->direct_dependents = dependents;
 }
 
 std::string SpreadsheetModel::get_cell_contents(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
 
     if (it != cell_dictionary.end())
     {
-        return it->second.get_contents();
+        return it->second->get_contents();
     }
 }
 
 std::vector<std::string> SpreadsheetModel::get_cell_direct_dependents(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.get_direct_dependents();
+        return it->second->get_direct_dependents();
     }
 }
 
 std::string SpreadsheetModel::get_cell_type(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.get_type();
+        return it->second->get_type();
     }
 }
 
 std::stack<CellEdit> SpreadsheetModel::get_cell_revert_history(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.revert_history;
+        return it->second->revert_history;
     }
 }
 
 void SpreadsheetModel::push_cell_revert_history(std::string name, CellEdit edit)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        it->second.revert_history.push(edit);
+        it->second->revert_history.push(edit);
     }
 }
 
 void SpreadsheetModel::pop_cell_revert_history(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.revert_history.pop();
+        return it->second->revert_history.pop();
     }
 }
 
 CellEdit SpreadsheetModel::top_cell_revert_history(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.revert_history.top();
+        return it->second->revert_history.top();
     }
 }
 
 bool SpreadsheetModel::check_cell_revert_history_empty(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.revert_history.empty();
+        return it->second->revert_history.empty();
     }
     else
     {
@@ -135,48 +135,48 @@ bool SpreadsheetModel::check_cell_revert_history_empty(std::string name)
 
 std::stack<CellEdit> SpreadsheetModel::get_cell_undo_history(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.undo_history;
+        return it->second->undo_history;
     }
 }
 
 void SpreadsheetModel::push_cell_undo_history(std::string name, CellEdit edit)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        it->second.undo_history.push(edit);
+        it->second->undo_history.push(edit);
     }
 }
 
 void SpreadsheetModel::pop_cell_undo_history(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.undo_history.pop();
+        return it->second->undo_history.pop();
     }
 }
 
 CellEdit SpreadsheetModel::top_cell_undo_history(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
         std::cout << "topping from undo history in top_cell_undo_history" << std::endl;
-        return it->second.undo_history.top();
+        return it->second->undo_history.top();
         std::cout << "successful top in top_cell_undo_history" << std::endl;
     }
 }
 
 bool SpreadsheetModel::check_cell_undo_history_empty(std::string name)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        return it->second.undo_history.empty();
+        return it->second->undo_history.empty();
     }
     else
     {
@@ -184,7 +184,7 @@ bool SpreadsheetModel::check_cell_undo_history_empty(std::string name)
     }
 }
 
-std::unordered_map<std::string, Cell> SpreadsheetModel::get_cell_dictionary()
+std::unordered_map<std::string, std::shared_ptr<Cell>> SpreadsheetModel::get_cell_dictionary()
 {
     return this->cell_dictionary;
 }
@@ -229,7 +229,7 @@ void SpreadsheetModel::read_json_ss_file()
 
     // creating temporary global_history and cell_dictionary for storing late
     std::stack<std::string> new_global_history;
-    std::unordered_map<std::string, Cell> new_cell_dictionary;
+    std::unordered_map<std::string, std::shared_ptr<Cell>> new_cell_dictionary;
 
     // loop through the global history and push the cell name to the global history stack
     for (json::reverse_iterator jcell_it = j_global_history.rbegin(); jcell_it != j_global_history.rend(); ++jcell_it)
@@ -274,7 +274,7 @@ void SpreadsheetModel::read_json_ss_file()
         }
 
         // Making core cell object
-        Cell new_cell(new_cell_name, new_cell_current_contents, new_cell_direct_dependents, new_cell_type);
+        std::shared_ptr<Cell> new_cell = std::make_shared<Cell>(new_cell_name, new_cell_current_contents, new_cell_direct_dependents, new_cell_type);
 
         // Going through a cell's Revert personal history
         json cell_history = cell["cell_history"];
@@ -311,7 +311,7 @@ void SpreadsheetModel::read_json_ss_file()
         }
 
         // Saving revert history
-        new_cell.revert_history = new_cell_revert_history;
+        new_cell->revert_history = new_cell_revert_history;
 
         /**
          * Going through the json objects cell history,
@@ -346,10 +346,10 @@ void SpreadsheetModel::read_json_ss_file()
         }
 
         // Saving undo history
-        new_cell.undo_history = new_cell_undo_history;
+        new_cell->undo_history = new_cell_undo_history;
 
         // Making pair for cell
-        std::pair<std::string, Cell> new_cell_pair (new_cell_name, new_cell);
+        std::pair<std::string, std::shared_ptr<Cell>> new_cell_pair (new_cell_name, new_cell);
 
         // Inserting pair for cell
         new_cell_dictionary.insert(new_cell_pair);
@@ -386,15 +386,15 @@ void SpreadsheetModel::write_json_ss_file()
     else
     {
         // for reach cell
-        for (std::pair<const std::string, Cell> cell : cell_dictionary)
+        for (std::pair<const std::string, std::shared_ptr<Cell>> cell : cell_dictionary)
         {
             // get the data from the cell
-            std::string name = cell.second.get_name();
-            std::string contents = cell.second.get_contents();
-            std::string type = cell.second.get_type();
-            std::vector<std::string> dependents = cell.second.get_direct_dependents();
-            std::stack<CellEdit> cell_history = cell.second.revert_history;
-            std::stack<CellEdit> undo_history = cell.second.undo_history;
+            std::string name = cell.second->get_name();
+            std::string contents = cell.second->get_contents();
+            std::string type = cell.second->get_type();
+            std::vector<std::string> dependents = cell.second->get_direct_dependents();
+            std::stack<CellEdit> cell_history = cell.second->revert_history;
+            std::stack<CellEdit> undo_history = cell.second->undo_history;
 
             // setting some fields on the json object
             fields["contents"] = contents;
@@ -505,7 +505,7 @@ bool SpreadsheetModel::circular_dependency_check(std::string name, std::vector<s
 {
     std::set<std::string> names{name};
     std::vector<std::string> old_dependents;
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
         old_dependents = this->get_cell_direct_dependents(name);
@@ -546,7 +546,7 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
     std::vector<std::string> dependents = get_cell_direct_dependents(name);
     for (std::string n : dependents)
     {
-        std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(n);
+        std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(n);
         if (it == cell_dictionary.end())
         {
             return false;
@@ -565,11 +565,11 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
 
 void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std::vector<std::string> &dependents, std::string type)
 {
-    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(cell_name);
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(cell_name);
     if (it == cell_dictionary.end())
     {
-        Cell cell(cell_name, type);
-        std::pair<std::string, Cell> insert_cell(cell_name, cell);
+        std::shared_ptr<Cell> cell = std::make_shared<Cell>(cell_name, type);
+        std::pair<std::string, std::shared_ptr<Cell>> insert_cell(cell_name, cell);
         cell_dictionary.insert(insert_cell);
     }
     // check for circular dependency, this will set the cell dependents if valid. 

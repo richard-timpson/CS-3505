@@ -120,7 +120,7 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
 
 void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
 {
-    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cell_dictionary = sm->get_cell_dictionary();
     std::string message = SpreadsheetController::full_send(cell_dictionary);
     message += "\n\n";
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
@@ -193,7 +193,7 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
 
 void Server::send_full_spreadsheet_to_clients(std::shared_ptr<SpreadsheetModel> sm)
 {
-    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cell_dictionary = sm->get_cell_dictionary();
     std::string message = SpreadsheetController::full_send(cell_dictionary);
     message += "\n\n";
     for (std::shared_ptr<ClientConnection> connection: this->connections)

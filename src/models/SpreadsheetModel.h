@@ -142,7 +142,7 @@ class SpreadsheetModel
     /**
      * The main storage of the spreadsheet
      */ 
-    std::unordered_map<std::string, Cell> get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> get_cell_dictionary();
 
     /**
      * Adds user to active user list
@@ -232,7 +232,7 @@ class SpreadsheetModel
     bool edit_made;
 
     // the main data structure for the spreadsheet
-    std::unordered_map<std::string, Cell> cell_dictionary;
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cell_dictionary;
 
     // the stack that represents the order of which cells have been edited. 
     std::stack<std::string> global_history;
