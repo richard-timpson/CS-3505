@@ -242,15 +242,7 @@ void SpreadsheetModel::add_user_to_spreadsheet(std::string name)
 void SpreadsheetModel::remove_user_from_spreadsheet(std::string name)
 {
     std::vector<std::string>::iterator it = std::find(this->users.begin(), this->users.end(), name);
-<<<<<<< HEAD
     if (it != this->users.end()) this->users.erase(it);
-=======
-    if(it != this->users.end()) 
-    {
-        this->users.erase(it);
-    }
-       
->>>>>>> JabrailsBranch
 }
 std::vector<std::string> SpreadsheetModel::get_users()
 {

@@ -357,21 +357,18 @@ void Server::admin_delete_user(std::string del_user)
     //remove_user_from_list()
     int pos = 0;
     bool exists = false;
+    UserModel user;
     for(UserModel now : this->users)
     {
         if(now.name == del_user)
         {
             bool exists = true;
+            user = now;
             break;
         }
         pos++;
     }
-    if (exists)
-    {
-        this->users.erase(this->users.begin() + pos);
-
-    }
-
+    remove_user_from_list(user);
 }
 /**
  * This function searches the current list of 
