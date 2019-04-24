@@ -41,7 +41,7 @@ void SpreadsheetModel::set_cell_contents_and_type(std::string name, std::string 
 {
     std::cout << "setting the cell contents" << std::endl;
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
-    
+
     // Get a reference to the current cell
     Cell *current_cell = &it->second;
     current_cell->set_contents(contents);
@@ -529,6 +529,7 @@ bool SpreadsheetModel::circular_dependency_check(std::set<std::string> names, st
     std::set<std::string> visited;
     for (std::string name : names)
     {
+        
         if (visited.find(name) == visited.end())
         {
             return visit(name, name, visited, changed);
@@ -543,6 +544,11 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
     std::vector<std::string> dependents = get_cell_direct_dependents(name);
     for (std::string n : dependents)
     {
+        std::vector<std::string>::iterator it = cell_dictionary.find(n);
+        if (it == cell_dictionary.end())
+        {
+            return false;
+        }
         if (n == start)
         {
             return true;
@@ -557,7 +563,12 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
 
 void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std::vector<std::string> &dependents, std::string type)
 {
-
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(cell_name);
+    if (it == cell_dictionary.end())
+    {
+        Cell cell(cell_name, type);
+        cell_dictionary.insert(cell);
+    }
     // check for circular dependency, this will set the cell dependents if valid. 
     bool circular_dependency = circular_dependency_check(cell_name, dependents);
     // if there is one, throw exception
