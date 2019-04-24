@@ -357,15 +357,21 @@ void Server::admin_delete_user(std::string del_user)
     {
 
         int pos = 0;
+        bool exists = false;
         for(UserModel now : this->users)
         {
             if(now.name == del_user)
             {
-               break;
+                bool exists = true;
+                break;
             }
             pos++;
         }
-        this->users.erase(this->users.begin() + pos);
+        if (exists)
+        {
+            this->users.erase(this->users.begin() + pos);
+
+        }
 
        /*for(UserModel now : users)
        {
