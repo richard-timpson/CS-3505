@@ -41,23 +41,12 @@ void SpreadsheetModel::set_cell_contents_and_type(std::string name, std::string 
 {
     std::cout << "setting the cell contents" << std::endl;
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    
+    // Get a reference to the current cell
+    Cell *current_cell = &it->second;
+    current_cell->set_contents(contents);
+    current_cell->set_type(type);
 
-    // If cell doesn't exist
-    if (it == cell_dictionary.end())
-    {
-        // make a new cell
-        std::vector<std::string> dependents;
-        Cell new_cell(name, contents, dependents, type);
-        cell_dictionary.insert({name, new_cell});
-    }
-    // If the cell already exists
-    else
-    {
-        // Get a reference to the current cell
-        Cell *current_cell = &it->second;
-        current_cell->set_contents(contents);
-        current_cell->set_type(type);
-    }
 }
 
 void SpreadsheetModel::set_cell_direct_dependents(std::string name, std::vector<std::string> & dependents)
@@ -513,7 +502,12 @@ std::string SpreadsheetModel::get_name()
 bool SpreadsheetModel::circular_dependency_check(std::string name, std::vector<std::string>& dependents)
 {
     std::set<std::string> names{name};
-    std::vector<std::string> old_dependents = this->get_cell_direct_dependents(name);
+    std::vector<std::string> old_dependents;
+    std::vector<std::string>::iterator it = cell_dictionary.find(name);
+    if (it != cell_dictionary.end())
+    {
+        old_dependents = this->get_cell_drect_dependents(name);
+    }
     this->set_cell_direct_dependents(name, dependents);
     bool circular_dependency = circular_dependency_check(names, dependents);
     if (circular_dependency)
@@ -563,6 +557,7 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
 
 void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std::vector<std::string> &dependents, std::string type)
 {
+
     // check for circular dependency, this will set the cell dependents if valid. 
     bool circular_dependency = circular_dependency_check(cell_name, dependents);
     // if there is one, throw exception
