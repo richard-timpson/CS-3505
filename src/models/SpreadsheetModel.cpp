@@ -37,7 +37,7 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
     }
 }
 
-void SpreadsheetModel::set_cell_contents(std::string name, std::string contents, std::vector<std::string> &dependents, std::string type)
+void SpreadsheetModel::set_cell_contents_and_type(std::string name, std::string contents, std::string type)
 {
     std::cout << "setting the cell contents" << std::endl;
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
@@ -46,54 +46,25 @@ void SpreadsheetModel::set_cell_contents(std::string name, std::string contents,
     if (it == cell_dictionary.end())
     {
         // make a new cell
+        std::vector<std::string> dependents;
         Cell new_cell(name, contents, dependents, type);
-
-        // TODO: we need to implement circular dependency check, but it's throwing an error
-
-        // bool circular_dependency = circular_dependency_check(name);
-        // if (!circular_dependency)
-        {
-            // if not circular dependency, insert new cell into dictionary
-            cell_dictionary.insert({name, new_cell});
-        }
-        // else
-        // {
-        //     throw CircularException(name);
-        // }
+        cell_dictionary.insert({name, new_cell});
     }
     // If the cell already exists
     else
     {
         // Get a reference to the current cell
         Cell *current_cell = &it->second;
-        std::cout << "editing existing cell " << std::endl;
-
-        // Get the dependents of that cell
-        it->second.direct_dependents = dependents;
-
-        // increment the iterator, seemed to fix a bug with the iterators, but it may not be. Works for now, so I'll leave it
-        it++;
-
-        // Set the direct dependents of that cell
-        current_cell->set_direct_dependents(dependents);
-
-        // check for circular dependency
-        bool circular_dependency = circular_dependency_check(name);
-
-        if (!circular_dependency)
-        {
-            // if no circular dependency, set cell contents, and update cell type
-            std::cout << "actually setting the cell contents" << std::endl;
-            current_cell->set_contents(contents);
-            current_cell->set_type(type);
-            std::cout << "successfully set cell contents" << std::endl;
-        }
-        else
-        {
-            // if there is, throw exception
-            throw CircularException(name);
-        }
+        current_cell->set_contents(contents);
+        current_cell->set_type(type);
     }
+}
+
+void SpreadsheetModel::set_cell_direct_dependents(std::string name, std::vector<std::string> & dependents)
+{
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
+    Cell *current_cell = &it->second;
+    current_cell->direct_dependents = dependents;
 }
 
 std::string SpreadsheetModel::get_cell_contents(std::string name)
@@ -539,14 +510,27 @@ std::string SpreadsheetModel::get_name()
     return name;
 }
 
-bool SpreadsheetModel::circular_dependency_check(std::string name)
+bool SpreadsheetModel::circular_dependency_check(std::string name, std::vector<std::string>& dependents)
 {
     std::set<std::string> names{name};
-    return circular_dependency_check(names);
+    std::vector<std::string> old_dependents = this->get_cell_direct_dependents(name);
+    this->set_cell_direct_dependents(name, dependents);
+    bool circular_dependency = circular_dependency_check(names, dependents);
+    if (circular_dependency)
+    {
+        this->set_cell_direct_dependents(name, old_dependents);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    
 }
 
-bool SpreadsheetModel::circular_dependency_check(std::set<std::string> names)
+bool SpreadsheetModel::circular_dependency_check(std::set<std::string> names, std::vector<std::string> &dependents)
 {
+
     std::vector<std::string> changed;
     std::set<std::string> visited;
     for (std::string name : names)
@@ -579,26 +563,29 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
 
 void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std::vector<std::string> &dependents, std::string type)
 {
-    // try setting cell_contents, which will throw circular dependency if dependents aren't valid
-    try
+    // check for circular dependency, this will set the cell dependents if valid. 
+    bool circular_dependency = circular_dependency_check(cell_name, dependents);
+    // if there is one, throw exception
+    if (circular_dependency)
     {
-        this->set_cell_contents(cell_name, contents, dependents, type);
+        throw CircularException(name);
     }
-    catch (const CircularException &e)
+    // if there isn't
+    else
     {
-        std::cerr << e.what() << '\n';
-        throw e;
+        // set cell contents and type, and push to stacks
+        this->set_cell_contents_and_type(cell_name, contents, type);
+        CellEdit edit;
+        edit.name = cell_name;
+        edit.contents = contents;
+        edit.direct_dependents = dependents;
+        edit.type = type;
+        this->global_history.push(edit.name);
+        this->push_cell_revert_history(cell_name, edit);
+        this->push_cell_undo_history(cell_name, edit);
+        
     }
-    // if we successfully set the cell contents, 
-    // push the edit to global, personal undo, and personal revert histories. 
-    CellEdit edit;
-    edit.name = cell_name;
-    edit.contents = contents;
-    edit.direct_dependents = dependents;
-    edit.type = type;
-    this->global_history.push(edit.name);
-    this->push_cell_revert_history(cell_name, edit);
-    this->push_cell_undo_history(cell_name, edit);
+    
 }
 
 void SpreadsheetModel::do_undo()
@@ -633,19 +620,9 @@ void SpreadsheetModel::do_undo()
         {
             edit = this->top_cell_undo_history(edit.name);
         }
-        // try setting the cell contents, if there is a circular dependency, catch and throw it
-        // if not, cell contents will be set, and we need to push to revert history. 
-        // Don't push to other histories, as undo does not make edit. 
-        try
-        {
-            this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
-            this->push_cell_revert_history(edit.name, edit);
-        }
-        catch (const CircularException &e)
-        {
-            std::cerr << e.what() << '\n';
-            throw e;
-        }
+        this->set_cell_direct_dependents(edit.name, edit.direct_dependents);
+        this->set_cell_contents_and_type(edit.name, edit.contents, edit.type);            
+        this->push_cell_revert_history(edit.name, edit);
     }
 }
 
@@ -656,25 +633,19 @@ void SpreadsheetModel::do_revert(std::string name)
     // if revert history is  empty, set edit to empty object
     if (this->check_cell_revert_history_empty(name))
     {
+        // if the cell history is empty, set the cell contents and dependents, and don't
+        // check for circular dependency
         edit.name = name;
         edit.contents = "";
         std::vector<std::string> dep;
         edit.direct_dependents = dep;
         edit.type = "string";
-        // try setting cell contents and pushing to all stacks (effectively making an edit)
-        try
-        {
-            std::cout << "setting cell contents" << std::endl;
-            this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
-            this->global_history.push(name);
-            this->push_cell_undo_history(edit.name, edit);
-        }
-        // catch and throw circular exception if there is one
-        catch (const CircularException &e)
-        {
-            std::cerr << e.what() << '\n';
-            throw e;
-        }
+
+        std::cout << "setting cell contents" << std::endl;
+        this->set_cell_direct_dependents(edit.name, edit.direct_dependents);
+        this->set_cell_contents_and_type(edit.name, edit.contents, edit.type);
+        this->global_history.push(name);
+        this->push_cell_undo_history(edit.name, edit);
     }
     // if revert history is not empty
     else 
@@ -697,19 +668,20 @@ void SpreadsheetModel::do_revert(std::string name)
         {
             edit = this->top_cell_revert_history(name);
         }
-        // set cell contents, push to all stacks, and catch exception if needed. 
-        try
+        // check for circular dependency, throw exception if needed, or make edit. 
+        std::cout << "setting cell contents in revert" << std::endl;
+        bool circular_dependency = circular_dependency_check(edit.name, edit.direct_dependents);
+        if (circular_dependency)
         {
-            std::cout << "setting cell contents in revert" << std::endl;
-            this->set_cell_contents(edit.name, edit.contents, edit.direct_dependents, edit.type);
+            this->push_cell_revert_history(edit.name, edit);
+            std::cout << "Circular dependecy at " << edit.name << std::endl;
+            throw CircularException(edit.name);
+        }
+        else
+        {
+            this->set_cell_contents_and_type(edit.name, edit.contents, edit.type);
             this->global_history.push(edit.name);
             this->push_cell_undo_history(edit.name, edit);
-        }
-        catch (const CircularException &e)
-        {
-            std::cerr << "circular dependency in revert" << std::endl;;
-            this->push_cell_revert_history(edit.name, edit);
-            throw e;
         }
     }
 }
