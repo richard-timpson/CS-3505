@@ -232,6 +232,21 @@ std::stack<std::string> SpreadsheetModel::get_global_history()
     return this->global_history;
 }
 
+
+
+void SpreadsheetModel::add_user_to_spreadsheet(std::string name)
+{
+    this->users.insert(name);
+}
+void SpreadsheetModel::remove_user_from_spreadsheet(std::string name)
+{
+    this->users.erase(name);
+}
+std::set<std::string> SpreadsheetModel::get_active_users()
+{
+    return this->users;
+}
+
 void SpreadsheetModel::read_json_ss_file()
 {
     // open the input file into an in stream

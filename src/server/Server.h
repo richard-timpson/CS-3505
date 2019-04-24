@@ -60,7 +60,7 @@ class Server
      * If it does, it will return that user, if it doesn't, it will create a new one,
      * and return that
      */ 
-    UserModel Server::choose_user(json & message);
+    UserModel choose_user(json & message);
 
     bool check_if_spreadsheet_in_list(json message, std::shared_ptr<SpreadsheetModel> &sm);
     void save_file_if_needed(std::shared_ptr<SpreadsheetModel> sm);
@@ -88,7 +88,7 @@ class Server
     //std::set<std::shared_ptr<ClientConnection>> admin_connections;
     boost::asio::streambuf buff;
     std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets;
-    std::set<UserModel> users;
+    std::vector<UserModel> users;
 };
 
 #endif

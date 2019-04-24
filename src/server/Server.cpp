@@ -129,7 +129,7 @@ void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection,
                     connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                     connection->socket_.close();
                     this->remove_client_from_list(connection);
-                    this->save_file_if_needed(sm);
+                    // this->save_file_if_needed(sm);
                 }
             });
 }
@@ -178,7 +178,7 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
                 connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                 connection->socket_.close();
                 this->remove_client_from_list(connection);
-                this->save_file_if_needed(sm);
+                // this->save_file_if_needed(sm);
             }
             
         });
@@ -250,7 +250,7 @@ void Server::send_type_2_error(std::shared_ptr<ClientConnection> connection, std
                     connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                     connection->socket_.close();
                     this->remove_client_from_list(connection);
-                    this->save_file_if_needed(sm);
+                    // this->save_file_if_needed(sm);
                 }
             });
 }
@@ -523,11 +523,10 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
 void Server::load_data()
 {
     // get all of the users from users.txt and load them into users. 
-    std::ifstream file("../../data/users.txt");
+    std::ifstream user_file("../../data/users.txt");
     std::string line;
-    int count = 0;
 
-    while (std::getline(file, line))
+    while (std::getline(user_file, line))
     {
         std::string name;
         std::string password;
@@ -536,22 +535,23 @@ void Server::load_data()
         name = *it;
         it++;
         password = *it;
-        UserModel user(name, password);
-        users.insert(user);
+        UserModel user;
+        user.name = name;
+        user.password = password;
+        users.push_back(user);
     }
-    file.close();
+    user_file.close();
 
     // get all of the users from users.txt and load them into users. 
-    std::ifstream file("../../data/spreadsheets.txt");
+    std::ifstream spreadsheet_file("../../data/spreadsheets.txt");
     std::string name;
     std::set<std::string> spreadsheet_names;
-    int count = 0;
 
-    while (std::getline(file, name))
+    while (std::getline(spreadsheet_file, name))
     {
         spreadsheet_names.insert(name);
     }
-    file.close();
+    spreadsheet_file.close();
 
     for (std::string name : spreadsheet_names)
     {
@@ -563,23 +563,23 @@ void Server::load_data()
 void Server::save_data()
 {
     // if the file does not exist, there is an issue
-    if (boost::filesystem::exists("../../data/users.txt"))
+    // if (boost::filesystem::exists("../../data/users.txt"))
     {
         // remove the users file, and then create it again
-        std::remove("../../data/users.txt");
+        // std::remove("../../data/users.txt");
         std::ofstream write_file;
         write_file.open("../../data/users.txt");
 
         // loop through all of the users, and write them to the file
         for (UserModel user : this->users)
         {
-            std::string user_string = user.get_name() + " " + user.get_password();
+            std::string user_string = user.name + " " + user.password;
             write_file << user_string << std::endl;
         }
         write_file.close();
 
         // remove from the spreadsheet file, and create again
-        std::remove("../../data/spreadsheets.txt");
+        // std::remove("../../data/spreadsheets.txt");
         write_file.open("../../data/spreadsheets.txt");
         for (std::shared_ptr<SpreadsheetModel> sm : this->spreadsheets)
         {
@@ -613,9 +613,10 @@ bool Server::validate_user(json message)
     std::string password = message.value("password", " ");
     bool found = false;
     // loop through all the users and check if the name and password match. 
+    // for (std::set<UserModel>::iterator user = this->users.begin(); user != users.end(); user++)
     for (UserModel user : this->users)
     {
-        if (name == user.get_name() && password != user.get_password())
+        if (name == user.name && password != user.password)
         {
             return false;
         }
@@ -631,7 +632,7 @@ UserModel Server::choose_user(json & message)
     bool found;
     for (UserModel user : this->users)
     {
-        if (name == user.get_name() && password == user.get_password())
+        if (name == user.name && password == user.password)
         {
             found = true;
             return user;
@@ -640,8 +641,10 @@ UserModel Server::choose_user(json & message)
     // if we haven't found a user, add one to the list
     if (!found)
     {
-        UserModel user(name, password);
-        this->users.insert(user);
+        UserModel user;
+        user.name = name;
+        user.password = password;
+        this->users.push_back(user);
         return user;
     }
 }
@@ -660,14 +663,14 @@ std::shared_ptr<SpreadsheetModel> Server::choose_spreadsheet(json & json_message
         if (json_message["name"] == ss->get_name())
         {
             sm = ss;
-            sm->add_user_to_spreadsheet(user.get_name());
+            sm->add_user_to_spreadsheet(user.name);
             return sm;
         }
     }
     // if it doesn't, make new sheet, and return that. 
     std::string spreadsheet_name = json_message.value("name", "-1");
     sm = std::make_shared<SpreadsheetModel>(spreadsheet_name, true);
-    sm->add_user_to_spreadsheet(user.get_name());
+    sm->add_user_to_spreadsheet(user.name);
     return sm;
 }
 void Server::add_client_to_list(std::shared_ptr<ClientConnection> connection)
