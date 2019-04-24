@@ -44,6 +44,7 @@ namespace ClientGUI
             ssController.SpreadsheetsReceived += UpdateListOfSpreadsheets;
             ssController.SpreadsheetUpdated += UpdateSpreadsheet;
             ssController.InvalidUsername += UsernameInvalid;
+            ssController.InvalidPassword += PasswordInvalid;
             ssController.SpreadsheetError += ProcessError;
             ssController.ConnectionLostEvent += ConnectionLostNotification;
             ssController.DeniedConnection += ConnectionDenied;
@@ -66,12 +67,24 @@ namespace ClientGUI
         }
 
         /// <summary>
+        /// Lets the user know that an invalid password was entered.
+        /// Passwords cannot have commas.
+        /// </summary>
+        private void PasswordInvalid()
+        {
+            MessageBox.Show("The specified password is invalid.\n\nPasswords cannot have commas.",
+                            "Invalid Password",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Stop);
+        }
+
+        /// <summary>
         /// When the connection is denied, notify the user
         /// and reenable the controls accordingly
         /// </summary>
         private void ConnectionDenied()
         {
-            MessageBox.Show("The connection to " + AddressTextBox.Text + " has been denied.",
+            MessageBox.Show("The connection to " + AddressTextBox.Text + " has been denied.\n\nPlease verify the address and try again.",
                             "Connection Denied",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Warning);
@@ -230,7 +243,8 @@ namespace ClientGUI
 
                 // Close the Client GUI
                 MethodInvoker m1 = new MethodInvoker(() => this.Close());
-                this.Invoke(m1);
+                if (this.InvokeRequired)
+                    this.Invoke(m1);
             }
 
         }
@@ -290,7 +304,7 @@ namespace ClientGUI
         /// </summary>
         private void UsernameInvalid()
         {
-            MessageBox.Show("The specified username is invalid.\n\nUsernames cannot have whitespaces.", 
+            MessageBox.Show("The specified username is invalid.\n\nUsernames cannot have commas.", 
                             "Invalid Username", 
                             MessageBoxButtons.OK, 
                             MessageBoxIcon.Stop);
