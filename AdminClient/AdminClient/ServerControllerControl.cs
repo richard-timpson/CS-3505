@@ -75,32 +75,27 @@ namespace AdminClient
                         RecievedDataList recievedDataList;
                         if (obj["type"] != null)
                         {
+                            string theType = obj["type"].ToString();
 
-
-                            if (obj["spreadsheets"] != null)
+                            //if (obj["spreadsheets"] != null)
+                            if (theType.Equals("list") && obj["spreadsheets"] != null)
                             {
-                                if (obj["type"].Equals("\"full send\"") || obj["type"].Equals("\"edit\""))
-                                {
-                                    continue;
-                                }
-
                                 recievedDataList = JsonConvert.DeserializeObject<RecievedDataList>(input);
 
                                 view.recieveListData(recievedDataList.names(), 1);
                             }
-                            else if (obj["spreadsheet"] != null)
+                            else if (theType.Equals("activeUser"))
                             {
-                                if (obj["type"].Equals("\"full send\"") || obj["type"].Equals("\"edit\""))
-                                {
-                                    continue;
-                                }
 
                                 ActiveDataRecieve activeDataRecieve = JsonConvert.DeserializeObject<ActiveDataRecieve>(input);
                                 view.addActiveItems(activeDataRecieve.namesSpread, activeDataRecieve.namesUse);
 
-
                             }
-                            else if (obj["users"] != null)
+                            else if (theType.Equals("activeSpreadsheets"))
+                            {
+                                view.clearActiveItems();
+                            }
+                            else if (theType.Equals("list") && obj["users"] != null)
                             {
 
                                 recievedDataList = JsonConvert.DeserializeObject<RecievedDataList>(input);
@@ -108,7 +103,7 @@ namespace AdminClient
                                 view.recieveListData(recievedDataList.names(), 0);
                             }
 
-                            else if (obj["sorce"] != null)
+                            else if (theType.Equals("error") && obj["sorce"] != null)
                             {
                                 view.errorMessageShow(obj["source"].ToString());
                             }
@@ -189,10 +184,10 @@ namespace AdminClient
         private string function;
 
         [JsonProperty(PropertyName = "name")]
-        public String name;
+        public string name;
 
         [JsonProperty(PropertyName = "password")]
-        private String password;
+        private string password;
 
         public OperationAdmin(String func, string nam, string pass)
         {
