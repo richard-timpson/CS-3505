@@ -165,8 +165,8 @@ namespace CS3505
 
         /// <summary>
         /// Connects to the given server initiating the client server handshake
-        /// </summary>
-        /// <param name="ipAddress"></param>
+        /// </summary> 
+        /// /// <param name="ipAddress"></param>
         public void Connect(string ipAddress)
         {
             theServer = Networking.ConnectToServer(ipAddress, ReceiveSpreadsheetsList);
@@ -178,7 +178,12 @@ namespace CS3505
         /// </summary>
         private void ConnectionLost()
         {
-            ConnectionLostEvent();
+            // KEEP?
+            if (connected)
+            {
+                connected = false;
+                ConnectionLostEvent();
+            }
         }
 
 
