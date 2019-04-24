@@ -63,10 +63,11 @@ class SpreadsheetModel
      * dependents: A list of cell names that specifies this cells dependents –
      * type: The type of the cell –
      */ 
-    void set_cell_contents(std::string name, std::string contents, std::vector<std::string> &dependents, std::string type);
+    void set_cell_contents_and_type(std::string name, std::string contents, std::string type);
     /**
      *  Uses the cell dictionary to return the contents of a certain cell
      */
+    void set_cell_direct_dependents(std::string name, std::vector<std::string> &dep);
     std::string get_cell_contents(std::string name);
     /**
      *  Uses the cell dictionary to return the type of a certain cell
@@ -212,13 +213,13 @@ class SpreadsheetModel
      * Converts the name passed in to a singleton set, and calls
      * circular_dependency_check with that set
      */ 
-    bool circular_dependency_check(std::string name);
+    bool circular_dependency_check(std::string name, std::vector<std::string> &dependents);
     /**
      * Uses a dfs to check all of the dependents of each cell in the specified set
      * to check for a circular dependency. –
      * returns: Boolean value specifiying if circular dependency is there
      */ 
-    bool circular_dependency_check(std::set<std::string> names);
+    bool circular_dependency_check(std::set<std::string> names, std::vector<std::string> &dependents);
 
     std::vector<std::string> get_users();
 
