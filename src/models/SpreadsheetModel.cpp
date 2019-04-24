@@ -503,10 +503,10 @@ bool SpreadsheetModel::circular_dependency_check(std::string name, std::vector<s
 {
     std::set<std::string> names{name};
     std::vector<std::string> old_dependents;
-    std::vector<std::string>::iterator it = cell_dictionary.find(name);
+    std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
-        old_dependents = this->get_cell_drect_dependents(name);
+        old_dependents = this->get_cell_direct_dependents(name);
     }
     this->set_cell_direct_dependents(name, dependents);
     bool circular_dependency = circular_dependency_check(names, dependents);
@@ -544,7 +544,7 @@ bool SpreadsheetModel::visit(std::string &start, std::string &name, std::set<std
     std::vector<std::string> dependents = get_cell_direct_dependents(name);
     for (std::string n : dependents)
     {
-        std::vector<std::string>::iterator it = cell_dictionary.find(n);
+        std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(n);
         if (it == cell_dictionary.end())
         {
             return false;
@@ -567,7 +567,8 @@ void SpreadsheetModel::do_edit(std::string cell_name, std::string contents, std:
     if (it == cell_dictionary.end())
     {
         Cell cell(cell_name, type);
-        cell_dictionary.insert(cell);
+        std::pair<std::string, Cell> insert_cell(cell_name, cell);
+        cell_dictionary.insert(insert_cell);
     }
     // check for circular dependency, this will set the cell dependents if valid. 
     bool circular_dependency = circular_dependency_check(cell_name, dependents);
