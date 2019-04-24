@@ -130,7 +130,7 @@ class SpreadsheetModel
     CellEdit top_cell_undo_history(std::string name);
 
     /****************************************
-     * Direct dependents, and cell dictionary
+     * Direct dependents, cell dictionary, and users
      * **************************************/
 
     /**
@@ -142,6 +142,21 @@ class SpreadsheetModel
      * The main storage of the spreadsheet
      */ 
     std::unordered_map<std::string, Cell> get_cell_dictionary();
+
+    /**
+     * Adds user to active user list
+     */ 
+    void add_user_to_spreadsheet(std::string);
+
+    /**
+     * Removes user from active user list
+     */ 
+    void remove_user_from_spreadsheet(std::string);
+
+    /**
+     * Get's the active user set
+     */ 
+    std::set<std::string> get_active_users();
 
     /*******************
      * Storage Functions
@@ -215,7 +230,7 @@ class SpreadsheetModel
     // the main data structure for the spreadsheet
     std::unordered_map<std::string, Cell> cell_dictionary;
 
-    std::set<UserModel> users;
+    std::set<std::string> users;
 
     // the stack that represents the order of which cells have been edited. 
     std::stack<std::string> global_history;

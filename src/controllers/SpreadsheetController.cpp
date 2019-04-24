@@ -96,60 +96,6 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
     return ss.dump();
 }
 
-bool SpreadsheetController::validate_user(json message, std::set<UserModel> users)
-{
-    if (!validate_login_message(message)) return false;
-    if (message.value("type", " ") != "open")
-    {
-        return false;
-    }
-
-
-
-
-
-   // mu_lock_file_user_txt.lock();
-    std::ifstream file("../../data/users.txt");
-    std::string line;
-    bool valid_user; // is this value ever used?
-    // search for the user
-    while (std::getline(file, line))
-    {
-        // read a line of the file
-        std::vector<std::string> current_line = split(line, " ");
-        std::vector<std::string>::iterator it = current_line.begin();
-        std::string username = *it;
-        it++;
-        std::string password = *it;
-        // compare the username and the password?
-        if (message.value("username", " ") != username && message.value("password", " ") != password)
-        {
-            
-        }
-        else if(message.value("username", " ") == username && message.value("password", " ") != password)
-        {
-            //send as an invalid function
-           // mu_lock_file_user_txt.unlock();
-            return false;
-        }
-        else
-        {
-            valid_user = true;
-            file.close();
-           // mu_lock_file_user_txt.unlock();
-            return true;
-        }
-    }
-    file.close();
-    
-    // if Username is not found create a new user
-    std::ofstream write_file;
-    write_file.open("../../data/users.txt", std::ios::app);
-    write_file << message.value("username", " ") << " " << message.value("password", " ") << std::endl;
-    write_file.close();
-    //mu_lock_file_user_txt.unlock();
-    return true;
-}
 
 bool SpreadsheetController::validate_admin(json message, std::string &error_message)
 {

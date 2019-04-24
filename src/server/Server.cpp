@@ -87,7 +87,12 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
                     {
                         send_type_1_error(connection);
                     }
-                    std::shared_ptr<SpreadsheetModel> sm = choose_spreadsheet(json_message);
+                    UserModel user = choose_user(json_message);
+                    std::shared_ptr<SpreadsheetModel> sm = choose_spreadsheet(json_message, user);
+                    if (sm == nullptr)
+                    {
+                        send_type_1_error(connection);
+                    }
                     connection->set_name(sm->get_name());
                     connection->set_user_name(json_message["username"]);
                     send_full_spreadsheet(
@@ -603,11 +608,6 @@ bool Server::check_if_spreadsheet_in_list(json message, std::shared_ptr<Spreadsh
 
 bool Server::validate_user(json message)
 {
-    if (!SpreadsheetController::validate_login_message(message)) return false;
-    if (message.value("type", " ") != "open")
-    {
-        return false;
-    }
     // get the name and password from json message
     std::string name = message.value("username", " ");
     std::string password = message.value("password", " ");
@@ -619,10 +619,22 @@ bool Server::validate_user(json message)
         {
             return false;
         }
-        else if (name == user.get_name() && password == user.get_password())
+    }
+    return true;
+}
+
+UserModel Server::choose_user(json & message)
+{
+    // get the name and password from json message
+    std::string name = message.value("username", " ");
+    std::string password = message.value("password", " ");
+    bool found;
+    for (UserModel user : this->users)
+    {
+        if (name == user.get_name() && password == user.get_password())
         {
             found = true;
-            break;
+            return user;
         }
     }
     // if we haven't found a user, add one to the list
@@ -630,9 +642,34 @@ bool Server::validate_user(json message)
     {
         UserModel user(name, password);
         this->users.insert(user);
+        return user;
     }
 }
 
+
+std::shared_ptr<SpreadsheetModel> Server::choose_spreadsheet(json & json_message, UserModel user)
+{
+    // initialize null spreadsheet
+    std::shared_ptr<SpreadsheetModel> sm(nullptr);
+    // if the message is invalid, return the null pointer
+    if (!SpreadsheetController::validate_login_message(json_message)) return sm;
+    // loop through list of spreadsheet, and check if the spreadsheet selection already exists
+    for (std::shared_ptr<SpreadsheetModel> ss : this->spreadsheets)
+    {
+        // if it does, return that spreadsheet
+        if (json_message["name"] == ss->get_name())
+        {
+            sm = ss;
+            sm->add_user_to_spreadsheet(user.get_name());
+            return sm;
+        }
+    }
+    // if it doesn't, make new sheet, and return that. 
+    std::string spreadsheet_name = json_message.value("name", "-1");
+    sm = std::make_shared<SpreadsheetModel>(spreadsheet_name, true);
+    sm->add_user_to_spreadsheet(user.get_name());
+    return sm;
+}
 void Server::add_client_to_list(std::shared_ptr<ClientConnection> connection)
 {
     connections.insert(connection);
@@ -653,52 +690,6 @@ void Server::add_spreadsheet_to_list(std::shared_ptr<SpreadsheetModel> ss)
     spreadsheets.insert(ss);
 }
 
-void Server::save_file_if_needed(std::shared_ptr<SpreadsheetModel> sm)
-{
-    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
-    for (std::shared_ptr<ClientConnection> connection: this->connections)
-    {
-        if (connection->get_name() == sm->get_name())
-        {
-            return;
-        }
-    }
-    sm->write_json_ss_file();
-    sm->write_ss_file_if_needed();
-    this->remove_sm_from_list(sm);
-}
-
-std::shared_ptr<SpreadsheetModel> Server::choose_spreadsheet(json & json_message)
-{
-    std::shared_ptr<SpreadsheetModel> sm(nullptr);
-    std::string spreadsheet_name = json_message.value("name", "-1");
-    bool is_in_list = check_if_spreadsheet_in_list(json_message, sm);
-    if (!is_in_list)
-    {
-        std::string spreadsheet;
-        bool is_in_storage = SpreadsheetController::check_if_spreadsheet_in_storage(json_message, spreadsheet);
-        if (!is_in_storage)
-        {
-            // make new spreadsheet
-            std::cout << "creating new spreadsheet" << std::endl;
-            sm = std::make_shared<SpreadsheetModel>(spreadsheet_name, true);
-            this->add_spreadsheet_to_list(sm);
-            return sm;
-        }
-        else
-        {
-            std::cout << "loading spreadsheet from json file" << std::endl;
-            sm = std::make_shared<SpreadsheetModel>(spreadsheet_name, false);
-            return sm;
-            // load the model from storage 
-        }
-    }
-    else 
-    {
-        std::cout << "loading spreadsheet from active list" << std::endl;
-        return sm;
-    }
-}
 
 std::set<std::shared_ptr<SpreadsheetModel>> Server::get_active_spreadsheets()
 {
