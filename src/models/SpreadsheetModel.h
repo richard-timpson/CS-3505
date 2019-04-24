@@ -205,6 +205,8 @@ class SpreadsheetModel
      */ 
     bool circular_dependency_check(std::set<std::string> names);
 
+    std::set<UserModel> get_users();
+
   private:
     // used in dfs for circular dependency check
     bool visit(std::string &start, std::string &name, std::set<std::string> & visited, std::vector<std::string> & changed);

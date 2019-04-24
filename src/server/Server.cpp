@@ -248,39 +248,38 @@ void Server::send_type_2_error(std::shared_ptr<ClientConnection> connection, std
 }
 void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
 {
-    //Get the list of spreadsheets and add to message
-    std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets;
+
     std::string message = SpreadsheetController::get_list_of_spreadsheets(spreadsheets);
     message += "\n\n";
     //Get the list of users and add to message
-    message += SpreadsheetController::get_list_of_users();
+    message += SpreadsheetController::get_list_of_users(this->users);
     message += "\n\n";
+    json activeSpreadsheet;
+    activeSpreadsheet["type"] = "activeSpreadsheets";
+    activeSpreadsheet["activeSpreadsheet"] = "ClearBoy";
+    message+= activeSpreadsheet.dump();
     //Get active Spreadsheets(if any)
     int temp=0;
     for (std::shared_ptr<SpreadsheetModel> ss : spreadsheets)
     {
-        //Debug comments to make sure loop is entered
-        std::cout << "looping throug the spreadsheets at name " << ss->get_name() << std::endl;
-        message+= "{\"type\":\"activeUser\", \"spreadsheet\":"+ss->get_name()+",\"users\":[";
-        std::cout << "we have active users got em" <<std::endl;
-        temp=0;
-        //send active users to a spreadsheet
+        if(ss->get_users().empty())
+        {
+            continue;
+        }
+        json users_json;
+        users_json["type"] = "activeUser";
+        users_json["spreadsheet"] == ss->get_name();
+        users_json["users"] = {};
+
         for (std::shared_ptr<ClientConnection> connection: this->connections)
         {
-            //Debug to make sure loop is entered
-            std::cout << "looping through the client connections at client " << connection->get_name() << std::endl;
-            //If the client uses the spreadsheet, add them to message
-            if(connection->get_name()==ss->get_name())
+            if(connection->get_name() == ss->get_name())
             {
-                //Only add commas after the first client found
-                if(temp!=0){
-                    message+=",";
-                }
-                temp++;
-                message+="\""+connection->get_user_name()+"\"";
+                users_json["users"].push_back(connection->get_user_name());
             }
+
         }
-        message+="]}\n\n";//Split the messages by two newlines
+        message+= users_json.dump();
     }
     //Send message to client
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
@@ -299,56 +298,6 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
             });
 
 
-}
-/**
- * This is called to remove a spreadsheet from the list of spreadsheets
- * 
- * Parameters: Json message
- * Return: None
- */
-void Server::admin_remove_spreadsheet(json json_message)
-{
-
-    std::string name_spreadsheet;
-    name_spreadsheet = json_message["name"];
-    bool exists=false;
-    std::shared_ptr<SpreadsheetModel> toRemove;
-    
-    for (std::shared_ptr<SpreadsheetModel> sm : spreadsheets)
-    {
-        if(sm->get_name() == name_spreadsheet)
-        {
-            
-            toRemove = sm;
-            exists = true;
-            break;
-        }
-    }
-
-    if(exists)
-    {
-        std::set<UserModel> toLoop=toRemove->get_users();
-        std::set<std::shared_ptr<ClientConnection>> toDelete;
-            for(UserModel name: toLoop)
-            {
-                for(std::shared_ptr<ClientConnection> now: connections)
-                {
-                    if(now->get_user_name==name)
-                    {
-                        toDelete.insert(now);
-                    }
-                }
-
-            }
-            for(std::shared_ptr<ClientConnection> now: toDelete)
-            {
-                now->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-                now->socket_.close();
-                connections.erase(now);
-            }
-        spreadsheets.erase(toRemove);
-    }
-   
 }
 
 /**
@@ -434,21 +383,45 @@ void Server::admin_add_spreadsheet(json json_message)
  */
 void Server::admin_delete_spreadsheet(json json_message)
     {
-        // 
-        std::string no_use_spread;
-        // checks to see if the spreadsheet is contatined in storage
-        bool is_in_storage = SpreadsheetController::check_if_spreadsheet_in_storage(json_message, no_use_spread);
-        // if it does exists
-        
-        if (is_in_storage)
+        std::string name_spreadsheet;
+    name_spreadsheet = json_message["name"];
+    bool exists=false;
+    std::shared_ptr<SpreadsheetModel> toRemove;
+    
+    for (std::shared_ptr<SpreadsheetModel> sm : spreadsheets)
+    {
+        if(sm->get_name() == name_spreadsheet)
         {
-            // The helper method to remove the spreadsheet will remove it.
-            admin_remove_spreadsheet(json_message);
+            
+            toRemove = sm;
+            exists = true;
+            break;
         }
-        else
-        {
-            // do nothing because it doesn't exist 
-        }
+    }
+
+    if(exists)
+    {
+        std::set<UserModel> toLoop=toRemove->get_users();
+        std::set<std::shared_ptr<ClientConnection>> toDelete;
+            for(UserModel name: toLoop)
+            {
+                for(std::shared_ptr<ClientConnection> now: connections)
+                {
+                    if(now->get_user_name==name)
+                    {
+                        toDelete.insert(now);
+                    }
+                }
+
+            }
+            for(std::shared_ptr<ClientConnection> now: toDelete)
+            {
+                now->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+                now->socket_.close();
+                connections.erase(now);
+            }
+        spreadsheets.erase(toRemove);
+    }
     }
 
 /**
