@@ -724,7 +724,7 @@ bool check_if_double(std::string &contents)
         return false;
     }
 }
-std::set<UserModel> SpreadsheetModel::get_users()
+std::set<std::shared_ptr<UserModel>> SpreadsheetModel::get_users()
 {
     return this->users;
 }

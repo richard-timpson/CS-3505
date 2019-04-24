@@ -259,7 +259,7 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
     activeSpreadsheet["activeSpreadsheet"] = "ClearBoy";
     message+= activeSpreadsheet.dump();
     //Get active Spreadsheets(if any)
-    int temp=0;
+   // int temp=0;
     for (std::shared_ptr<SpreadsheetModel> ss : spreadsheets)
     {
         if(ss->get_users().empty())
@@ -340,7 +340,7 @@ void Server::admin_delete_user(std::string del_user)
 
        for(std::shared_ptr<ClientConnection> now: connections)
         {
-            if(now->get_user_name==del_user)
+            if(now->get_user_name() == del_user)
             {
                 now->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
                 now->socket_.close();
@@ -401,13 +401,13 @@ void Server::admin_delete_spreadsheet(json json_message)
 
     if(exists)
     {
-        std::set<UserModel> toLoop=toRemove->get_users();
+        std::set<std::shared_ptr<UserModel>> toLoop= toRemove->get_users();
         std::set<std::shared_ptr<ClientConnection>> toDelete;
-            for(UserModel name: toLoop)
+            for(std::shared_ptr<UserModel>  name: toLoop)
             {
                 for(std::shared_ptr<ClientConnection> now: connections)
                 {
-                    if(now->get_user_name==name)
+                    if(now->get_user_name() == name->get_name())
                     {
                         toDelete.insert(now);
                     }
@@ -526,11 +526,11 @@ void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connectio
 void Server::load_data()
 {
     // get all of the users from users.txt and load them into users. 
-    std::ifstream file("../../data/users.txt");
+    std::ifstream user_file("../../data/users.txt");
     std::string line;
-    int count = 0;
+    //int user_count = 0;
 
-    while (std::getline(file, line))
+    while (std::getline(user_file, line))
     {
         std::string name;
         std::string password;
@@ -542,13 +542,13 @@ void Server::load_data()
         UserModel user(name, password);
         users.insert(user);
     }
-    file.close();
+    user_file.close();
 
     // get all of the users from users.txt and load them into users. 
     std::ifstream file("../../data/spreadsheets.txt");
     std::string name;
     std::set<std::string> spreadsheet_names;
-    int count = 0;
+    //int count = 0;
 
     while (std::getline(file, name))
     {
