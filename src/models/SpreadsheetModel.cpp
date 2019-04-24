@@ -26,7 +26,7 @@ SpreadsheetModel::SpreadsheetModel(std::string input_name, bool new_ss)
         // if we are creating a new spreadsheet set the name
         this->name = input_name;
         // TODO: not sure what this function does
-        this->create_new_json_file();
+        // this->create_new_json_file();
     }
     else
     {
@@ -230,6 +230,21 @@ std::unordered_map<std::string, Cell> SpreadsheetModel::get_cell_dictionary()
 std::stack<std::string> SpreadsheetModel::get_global_history()
 {
     return this->global_history;
+}
+
+
+
+void SpreadsheetModel::add_user_to_spreadsheet(std::string name)
+{
+    this->users.insert(name);
+}
+void SpreadsheetModel::remove_user_from_spreadsheet(std::string name)
+{
+    this->users.erase(name);
+}
+std::set<std::string> SpreadsheetModel::get_active_users()
+{
+    return this->users;
 }
 
 void SpreadsheetModel::read_json_ss_file()
