@@ -670,6 +670,7 @@ std::shared_ptr<SpreadsheetModel> Server::choose_spreadsheet(json & json_message
     // if it doesn't, make new sheet, and return that. 
     std::string spreadsheet_name = json_message.value("name", "-1");
     sm = std::make_shared<SpreadsheetModel>(spreadsheet_name, true);
+    this->add_spreadsheet_to_list(sm);
     sm->add_user_to_spreadsheet(user.name);
     return sm;
 }
