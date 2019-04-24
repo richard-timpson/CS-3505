@@ -329,12 +329,20 @@ void Server::admin_add_user(std::string add_user_name, std::string add_user_pass
     for(UserModel now : this->users)
     {
         if(now.name == add_user_name){
+        
             now.password = add_user_pass;
+            user_exists = true;
             break;
         }
     }
+    if (!user_exists)
+    {
+        UserModel new_user;
+        new_user.name = add_user_name;
+        new_user.password = add_user_pass;
 
-
+        this->users.push_back(new_user);
+    }
     
 }
 
@@ -345,29 +353,26 @@ void Server::admin_add_user(std::string add_user_name, std::string add_user_pass
  * Returns: Nothing
  * */
 void Server::admin_delete_user(std::string del_user)
+{
+    //remove_user_from_list()
+    int pos = 0;
+    bool exists = false;
+    for(UserModel now : this->users)
     {
-       for(UserModel now : users)
-       {
-           if(now.name == del_user)
-           {
-               remove_user_from_list(now);
-               break;
-           }
-       }
-
-       for(std::shared_ptr<ClientConnection> now: connections)
+        if(now.name == del_user)
         {
-            if(now->get_user_name() == del_user)
-            {
-                now->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-                now->socket_.close();
-                connections.erase(now);
-                break;
-            }
+            bool exists = true;
+            break;
         }
-
+        pos++;
+    }
+    if (exists)
+    {
+        this->users.erase(this->users.begin() + pos);
 
     }
+
+}
 /**
  * This function searches the current list of 
  * spreadsheets and if the specified spreadsheet 
@@ -378,7 +383,7 @@ void Server::admin_delete_user(std::string del_user)
  */
 void Server::admin_add_spreadsheet(json json_message)
 {
-    std::string spreadsheetName=json_message["name"];
+    std::string spreadsheetName= json_message["name"];
     for(std::shared_ptr<SpreadsheetModel> now: spreadsheets)
     {
         if(now->get_name()==spreadsheetName)
@@ -386,9 +391,8 @@ void Server::admin_add_spreadsheet(json json_message)
             return;
         }
     }
-    std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(spreadsheetName, false);
+    std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(spreadsheetName, true);
     this->spreadsheets.insert(sm);
-
 }
 
 /**
