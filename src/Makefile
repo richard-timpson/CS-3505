@@ -58,3 +58,6 @@ clean_tests:
 
 clean_data: 
 	rm -rf ../data/*
+
+make_data:
+	touch ../data/spreadsheets.txt ../data/users.txt
