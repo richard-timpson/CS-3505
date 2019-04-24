@@ -115,7 +115,7 @@ namespace AdminClient
         public void addActiveItems(string spreadsheetName, string[] users)
         {
             // Create three items and three sets of subitems for each item.
-
+            Console.WriteLine("Trying to add to active Spreadsheet/users");
             ListViewItem item1 = new ListViewItem(spreadsheetName);
             // Place a check mark next to the item.
             StringBuilder listOfUsers = new StringBuilder();
@@ -123,16 +123,19 @@ namespace AdminClient
             {
                 listOfUsers.Append(now + ", ");
             }
+            Console.WriteLine(listOfUsers.ToString());
             MethodInvoker invalidater;
             item1.SubItems.Add(listOfUsers.ToString());
             if (activeSpreadsheetUserPair.ContainsKey(spreadsheetName))
             {
+                MethodInvoker invalidater1;
+                Console.WriteLine("Removing");
                 ListViewItem toRemove = activeSpreadsheetUserPair[spreadsheetName];
-                invalidater = new MethodInvoker(() => activeSpreadsheetsAndUsers.Items.Remove(toRemove));
-                this.Invoke(invalidater);
+                invalidater1 = new MethodInvoker(() => activeSpreadsheetsAndUsers.Items.Remove(toRemove));
+                this.Invoke(invalidater1);
                 activeSpreadsheetUserPair.Remove(spreadsheetName);
             }
-
+            Console.WriteLine("Going to add");
             activeSpreadsheetUserPair.Add(spreadsheetName, item1);
             invalidater = new MethodInvoker(() => activeSpreadsheetsAndUsers.Items.Add(item1));
 
@@ -386,7 +389,7 @@ namespace AdminClient
 
         public void clearActiveItems()
         {
-            MethodInvoker invalidater2 = new MethodInvoker(() => activeSpreadsheetsAndUsers.Clear());
+            MethodInvoker invalidater2 = new MethodInvoker(() => activeSpreadsheetsAndUsers.Items.Clear());
 
             this.Invoke(invalidater2);
         }
