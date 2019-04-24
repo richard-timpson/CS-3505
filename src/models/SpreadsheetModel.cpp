@@ -165,7 +165,9 @@ CellEdit SpreadsheetModel::top_cell_undo_history(std::string name)
     std::unordered_map<std::string, Cell>::iterator it = cell_dictionary.find(name);
     if (it != cell_dictionary.end())
     {
+        std::cout << "topping from undo history in top_cell_undo_history" << std::endl;
         return it->second.undo_history.top();
+        std::cout << "successful top in top_cell_undo_history" << std::endl;
     }
 }
 
@@ -600,6 +602,7 @@ void SpreadsheetModel::do_undo()
     // if the global history is empty, don't do anything
     if (!this->global_history.empty())
     {
+        std::cout << "in undo global history is not empty" << std::endl;
         // get the name of the last edited cell
         std::string name = this->global_history.top();
 
@@ -608,7 +611,7 @@ void SpreadsheetModel::do_undo()
 
         // remove from the cells undo history
         this->pop_cell_undo_history(name);
-
+        std::cout << "popped the undo history at " << name <<  std::endl;
         // create an edit object to push onto stacks later
         CellEdit edit;
 
@@ -625,8 +628,11 @@ void SpreadsheetModel::do_undo()
         // if it's not empty, get the latest edit from the stack
         else
         {
+            std::cout << "about to top the history from cell history" << std::endl;
             edit = this->top_cell_undo_history(edit.name);
+            std::cout << "got the edit from the cell undo history at " << edit.name << std::endl;
         }
+        std::cout << "setting the contents, dependents, and type" << std::endl;
         this->set_cell_direct_dependents(edit.name, edit.direct_dependents);
         this->set_cell_contents_and_type(edit.name, edit.contents, edit.type);            
         this->push_cell_revert_history(edit.name, edit);
