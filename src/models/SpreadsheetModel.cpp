@@ -409,7 +409,7 @@ void SpreadsheetModel::write_json_ss_file()
     // Needs to check if it's there first, before removal.
 
     std::remove(("../../data" + this->get_name() + ".json").c_str());
-
+    std::cout << "Writing spreadsheet " << this->get_name() << " to json file" << std::endl;
     // create temp json objects
     json ss;
     json cells;

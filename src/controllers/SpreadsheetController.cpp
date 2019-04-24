@@ -33,10 +33,10 @@ std::string SpreadsheetController::get_list_of_users(std::vector<UserModel> user
 {
     json j_user_list;
     j_user_list["type"] = "list";
-    j_user_list["users"] = {};
+    j_user_list["users"] = json::array();
     for (UserModel um : users)
     {
-        j_user_list.push_back(um.name);
+        j_user_list["users"].push_back(um.name);
     }
     return j_user_list.dump(); 
 }

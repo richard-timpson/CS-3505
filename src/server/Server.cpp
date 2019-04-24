@@ -271,8 +271,8 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
     message += "\n\n";
     json activeSpreadsheet;
     activeSpreadsheet["type"] = "activeSpreadsheets";
-    activeSpreadsheet["activeSpreadsheet"] = "ClearBoy";
     message+= activeSpreadsheet.dump();
+    message += "\n\n";
     //Get active Spreadsheets(if any)
    // int temp=0;
     for (std::shared_ptr<SpreadsheetModel> ss : spreadsheets)
@@ -284,7 +284,7 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
         json users_json;
         users_json["type"] = "activeUser";
         users_json["spreadsheet"] = ss->get_name();
-        users_json["users"] = {};
+        users_json["users"] = json::array();
 
         for (std::shared_ptr<ClientConnection> connection: this->connections)
         {
@@ -295,6 +295,7 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
 
         }
         message+= users_json.dump();
+        message += "\n\n";
     }
     //Send message to client
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
@@ -322,21 +323,20 @@ void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
  * Parameters:string add_user_name, string add_user_pass
  * */
 void Server::admin_add_user(std::string add_user_name, std::string add_user_pass)
-    { 
-        bool user_exists = false;
-        
-        for(UserModel now : this->users)
-        {
-            if(now.name == add_user_name){
-            
-               now.password = add_user_pass;
-               break;
-            }
+{ 
+    bool user_exists = false;
+    
+    for(UserModel now : this->users)
+    {
+        if(now.name == add_user_name){
+            now.password = add_user_pass;
+            break;
         }
-
-
-        
     }
+
+
+    
+}
 
 /**
  * This Method goes through the list of users and tries to delete the specified username
@@ -607,11 +607,17 @@ void Server::save_data()
 
         // remove from the spreadsheet file, and create again
         // std::remove("../../data/spreadsheets.txt");
-        write_file.open("../../data/spreadsheets.txt");
+        std::vector<std::string> names;
         for (std::shared_ptr<SpreadsheetModel> sm : this->spreadsheets)
         {
+            std::cout << "Looping through spreadsheet " << sm->get_name() << " to save" << std::endl;
             std::string name = sm->get_name();
+            names.push_back(name);
             sm->write_json_ss_file();
+        }
+        write_file.open("../../data/spreadsheets.txt");
+        for (std::string name: names)
+        {
             write_file << name << std::endl;
         }
         write_file.close();
@@ -724,7 +730,7 @@ void Server::add_spreadsheet_to_list(std::shared_ptr<SpreadsheetModel> ss)
 void Server::remove_user_from_list(UserModel user)
 {
     std::string name = user.name;
-    std::vector<UserModel>::const_iterator it = std::remove_if(this->users.begin(), this->users.end(), [&](UserModel const & user){
+    std::vector<UserModel>::iterator it = std::remove_if(this->users.begin(), this->users.end(), [&](UserModel const & user){
         return user.name == name;
     });
     if (it != this->users.end()) this->users.erase(it);

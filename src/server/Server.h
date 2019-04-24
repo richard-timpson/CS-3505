@@ -7,6 +7,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <set>
+#include <vector>
 #include "ClientConnection.h"
 #include "../models/SpreadsheetModel.h"
 #include "../../libs/json.hpp"
