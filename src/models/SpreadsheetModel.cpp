@@ -629,7 +629,7 @@ void SpreadsheetModel::do_undo()
         else
         {
             std::cout << "about to top the history from cell history" << std::endl;
-            edit = this->top_cell_undo_history(edit.name);
+            edit = this->top_cell_undo_history(name);
             std::cout << "got the edit from the cell undo history at " << edit.name << std::endl;
         }
         std::cout << "setting the contents, dependents, and type" << std::endl;
@@ -641,60 +641,64 @@ void SpreadsheetModel::do_undo()
 
 void SpreadsheetModel::do_revert(std::string name)
 {
-    // temp edit object
-    CellEdit edit;
-    // if revert history is  empty, set edit to empty object
-    if (this->check_cell_revert_history_empty(name))
+    std::unordered_map<std::string, std::shared_ptr<Cell>>::iterator it = cell_dictionary.find(name);
+    if (it != cell_dictionary.end())
     {
-        // if the cell history is empty, set the cell contents and dependents, and don't
-        // check for circular dependency
-        edit.name = name;
-        edit.contents = "";
-        std::vector<std::string> dep;
-        edit.direct_dependents = dep;
-        edit.type = "string";
-
-        std::cout << "setting cell contents" << std::endl;
-        this->set_cell_direct_dependents(edit.name, edit.direct_dependents);
-        this->set_cell_contents_and_type(edit.name, edit.contents, edit.type);
-        this->global_history.push(name);
-        this->push_cell_undo_history(edit.name, edit);
-    }
-    // if revert history is not empty
-    else 
-    {
-        // remove the last edit
-        this->pop_cell_revert_history(name);
-
-        // check if it's empty again. If it is, we have gone to the start
-        // set edit to empty edit
+        // temp edit object
+        CellEdit edit;
+        // if revert history is  empty, set edit to empty object
         if (this->check_cell_revert_history_empty(name))
         {
+            // if the cell history is empty, set the cell contents and dependents, and don't
+            // check for circular dependency
             edit.name = name;
             edit.contents = "";
             std::vector<std::string> dep;
             edit.direct_dependents = dep;
             edit.type = "string";
-        }
-        // if not, get the edit from the stack
-        else
-        {
-            edit = this->top_cell_revert_history(name);
-        }
-        // check for circular dependency, throw exception if needed, or make edit. 
-        std::cout << "setting cell contents in revert" << std::endl;
-        bool circular_dependency = circular_dependency_check(edit.name, edit.direct_dependents);
-        if (circular_dependency)
-        {
-            this->push_cell_revert_history(edit.name, edit);
-            std::cout << "Circular dependecy at " << edit.name << std::endl;
-            throw CircularException(edit.name);
-        }
-        else
-        {
+
+            std::cout << "setting cell contents" << std::endl;
+            this->set_cell_direct_dependents(edit.name, edit.direct_dependents);
             this->set_cell_contents_and_type(edit.name, edit.contents, edit.type);
-            this->global_history.push(edit.name);
+            this->global_history.push(name);
             this->push_cell_undo_history(edit.name, edit);
+        }
+        // if revert history is not empty
+        else 
+        {
+            // remove the last edit
+            this->pop_cell_revert_history(name);
+
+            // check if it's empty again. If it is, we have gone to the start
+            // set edit to empty edit
+            if (this->check_cell_revert_history_empty(name))
+            {
+                edit.name = name;
+                edit.contents = "";
+                std::vector<std::string> dep;
+                edit.direct_dependents = dep;
+                edit.type = "string";
+            }
+            // if not, get the edit from the stack
+            else
+            {
+                edit = this->top_cell_revert_history(name);
+            }
+            // check for circular dependency, throw exception if needed, or make edit. 
+            std::cout << "setting cell contents in revert" << std::endl;
+            bool circular_dependency = circular_dependency_check(edit.name, edit.direct_dependents);
+            if (circular_dependency)
+            {
+                this->push_cell_revert_history(edit.name, edit);
+                std::cout << "Circular dependecy at " << edit.name << std::endl;
+                throw CircularException(edit.name);
+            }
+            else
+            {
+                this->set_cell_contents_and_type(edit.name, edit.contents, edit.type);
+                this->global_history.push(edit.name);
+                this->push_cell_undo_history(edit.name, edit);
+            }
         }
     }
 }
