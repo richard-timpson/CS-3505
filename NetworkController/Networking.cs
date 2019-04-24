@@ -30,7 +30,7 @@ namespace CS3505
         public Socket theSocket;
         public int ID;
         public NetworkAction CallMe;
-        
+
 
         // This is the buffer where we will receive data from the socket
         public byte[] messageBuffer = new byte[4096];
@@ -142,7 +142,7 @@ namespace CS3505
                 socket.NoDelay = true;
 
             }
-            catch 
+            catch
             {
 
                 throw new ArgumentException("Invalid address");
@@ -208,11 +208,18 @@ namespace CS3505
         {
             try
             {
+                if (!IsConnected(ss.theSocket))
+                {
+                    ConnectionLost();
+                    ss.theSocket.Close();
+                    return;
+                }
+
                 ss.theSocket.BeginReceive(ss.messageBuffer, 0, ss.messageBuffer.Length, SocketFlags.None, ReceiveCallback, ss);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-
+                System.Diagnostics.Debug.WriteLine("GetData Exception Caught" + e.Message);
             }
         }
 
@@ -228,10 +235,17 @@ namespace CS3505
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
             try
             {
+                if (!IsConnected(s))
+                {
+                    ConnectionLost();
+                    s.Close();
+                    return false ;
+                }
+
                 s.BeginSend(messageBytes, 0, messageBytes.Length, SocketFlags.None, SendCallback, s);
                 return true;
             }
-            catch 
+            catch
             {
                 System.Diagnostics.Debug.WriteLine("Send Exception caught");
                 return false;
@@ -250,6 +264,13 @@ namespace CS3505
 
             try
             {
+                if (!IsConnected(s))
+                {
+                    ConnectionLost();
+                    s.Close();
+                    return;
+                }
+
                 if (s.Connected)
                 {
                     s.EndSend(ar);
@@ -276,6 +297,12 @@ namespace CS3505
             SocketState ss = (SocketState)ar.AsyncState;
             try
             {
+                if (!IsConnected(ss.theSocket))
+                {
+                    ConnectionLost();
+                    ss.theSocket.Close();
+                    return;
+                }
 
                 int bytesRead = ss.theSocket.EndReceive(ar);
 
@@ -325,7 +352,22 @@ namespace CS3505
             listn.BeginAcceptSocket(AcceptNewClient, serv);
 
         }
-        // FIXME?
+
+        /// <summary>
+        /// Taken from https://stackoverflow.com/questions/722240/instantly-detect-client-disconnection-from-server-socket
+        /// Notifies if the connection has been lost
+        /// </summary>
+        /// <param name="socket"></param>
+        /// <returns></returns>
+        public static bool IsConnected(Socket socket)
+        {
+            try
+            {
+                return !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
+            }
+            catch (SocketException) { return false; }
+        }
+
         /// <summary>
         /// Call back that begin Accept Socket uses for TCP Listening. 
         /// Uses the AsyncResult to extract a ServerState and then create a new

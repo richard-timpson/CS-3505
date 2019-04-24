@@ -65,11 +65,18 @@ namespace CS3505
         public event ConnectionLostHandler ConnectionLostEvent;
 
         /// <summary>
-        /// Usernames cannot have whitespace, this lets the client know
-        /// that the username contains a whitespace
+        /// Usernames cannot have commas, this lets the client know
+        /// that the username contains a comma
         /// </summary>
         public delegate void InvalidUsernameHandler();
         public event InvalidUsernameHandler InvalidUsername;
+
+        /// <summary>
+        /// Passwords cannot have commas, this lets the client know
+        /// that the password contains a comma
+        /// </summary>
+        public delegate void InvalidPasswordHandler();
+        public event InvalidPasswordHandler InvalidPassword;
 
         /// <summary>
         /// Handles Denied Connections by passing it forward to the client
@@ -89,7 +96,10 @@ namespace CS3505
         /// LogIn Username
         /// </summary>
         private string Username;
-
+        /// <summary>
+        /// Keep track of whether or not the spreadsheet has been launched or not
+        /// </summary>
+        private bool launched = false;
         /// <summary>
         /// LogIn Password
         /// </summary>
@@ -114,10 +124,8 @@ namespace CS3505
         /// <summary>
         /// Access to the underlying spreadsheet
         /// </summary>
-        public Spreadsheet Sheet
-        {
-            get
-            {
+        public Spreadsheet Sheet {
+            get {
                 return sheet;
             }
 
@@ -132,10 +140,8 @@ namespace CS3505
         /// <summary>
         /// Public property for accessing the list of sheets available
         /// </summary>
-        public string[] Sheets
-        {
-            get
-            {
+        public string[] Sheets {
+            get {
                 return SheetOptions;
             }
         }
@@ -182,83 +188,86 @@ namespace CS3505
         /// <param name="ss"></param>
         private void ReceiveSpreadsheetsList(SocketState ss)
         {
-            // begin parsing the data
-            string totalData = ss.sb.ToString();
-            string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
+
             lock (sheet)
             {
-
-
+                // begin parsing the data
+                string totalData = ss.sb.ToString();
+                string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
+            
                 foreach (string p in parts)
                 {
-                    // ignore empty strings
-                    if (p.Length == 0)
-                    {
-                        continue;
-                    }
-                    // if the last two chars are not new lines then there are
-                    // no more full messages be evaluated
-                    if (p.Length < 3)
-                    {
-                        continue;
-                    }
-                    if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
-                    {
-                        break;
-                    }
-
-
-                    // Create a dynamic type for processing the kind of message sent
-                    var receive = new
-                    {
-                        type = ""
-                    };
-
-                    //if (ss.sb.ToString().Length != 0)
-                    //{ 
-                    receive = JsonConvert.DeserializeAnonymousType(p, receive);
-
-
-                    // if it is the wrong kind of message check if it is an error
-                    // otherwise ignore it
-                    if (receive.type != "list")
-                    {
-                        if (receive.type == "error")
+                    //if (p.Length != 0 && p[0] == '{' && p[p.Length - 3] == '}')
+                    
+                        // ignore empty strings
+                        if (p.Length == 0)
                         {
-                            ProcessError(p);
-
+                            continue;
                         }
-                        else
+                        // if the last two chars are not new lines then there are
+                        // no more full messages be evaluated
+                        if (p.Length < 3)
                         {
-                            /// ss.sb.Remove(0, p.Length);
+                            ss.sb.Remove(0, p.Length);
+                            continue;
+                        }
+                        if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
+                        {
+                            break;
+                        }
+
+
+                        // Create a dynamic type for processing the kind of message sent
+                        var receive = new
+                        {
+                            type = ""
+                        };
+
+                        receive = JsonConvert.DeserializeAnonymousType(p, receive);
+
+
+                        // if it is the wrong kind of message check if it is an error
+                        // otherwise ignore it
+                        if (receive.type != "list")
+                        {
+                            if (receive.type == "error")
+                            {
+                                ProcessError(p);
+
+                            }
+                            else
+                            {
+
+                                Networking.GetData(ss);
+                            }
                             Networking.GetData(ss);
+                            return;
                         }
-                        Networking.GetData(ss);
-                        return;
-                    }
 
-                    // Process the message and output the lists
-                    var list = new
-                    {
-                        type = "",
-                        spreadsheets = new string[0]
-                    };
+                        // Process the message and output the lists
+                        var list = new
+                        {
+                            type = "",
+                            spreadsheets = new string[0]
+                        };
 
-                    list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
+                        list = JsonConvert.DeserializeAnonymousType(ss.sb.ToString(), list);
 
-                    this.SheetOptions = list.spreadsheets;
+                        this.SheetOptions = list.spreadsheets;
 
-                    // Notify the client that new spreadsheets are available
-                    SpreadsheetsReceived();
-                    theServerState = ss;
+                        // Notify the client that new spreadsheets are available
+                        SpreadsheetsReceived();
+                        theServerState = ss;
 
-                    this.connected = true;
+                        this.connected = true;
 
-                    //Networking.GetData(ss);
-                    ss.sb.Remove(0, p.Length);
+                        //Networking.GetData(ss);
+                        ss.sb.Remove(0, p.Length);
+                    
                     //ss.CallMe = ReceiveEdit; // MAYBE??
                 }
             }
+            //theServerState = ss;
             Networking.GetData(ss);
         }
 
@@ -269,22 +278,27 @@ namespace CS3505
         /// <param name="sheet"></param>
         public void ChooseSpreadsheet(string sheetName, string username, string password)
         {
-            if(!theServer.Connected)
+            if (!theServer.Connected)
             {
                 ConnectionLost();
                 return;
             }
             Username = username;
+            Password = password;
 
-            //Usernames cannot have whitespaces. If the given username has a whitespace,
-            //Alert the client and do not proceed with the request.
-            if (Username.Contains(" "))
+            //Validate username and password. Usernames and passwords cannot contain commas.
+            if (/*Username.Contains(" ") || */Username.Contains(","))
             {
                 InvalidUsername();
                 return;
             }
 
-            Password = password;
+            if (Password.Contains(","))
+            {
+                InvalidPassword();
+                return;
+            }
+
             // create the JSon object to be sent
             var open = new
             {
@@ -293,17 +307,17 @@ namespace CS3505
                 username = Username,
                 password = Password
             };
-            
+
             // send the request to the server
             string message = JsonConvert.SerializeObject(open) + ENDOFMESSAGE;
             theServerState.CallMe = ReceiveEdit;
             Networking.Send(theServer, message);
 
-            
+
             Networking.GetData(theServerState);
 
             // Launch a spreadsheet to be populated
-            LaunchSpreadsheet();
+           // LaunchSpreadsheet();
         }
 
 
@@ -335,7 +349,7 @@ namespace CS3505
                 {
                     type = "edit",
                     cell = cellName,
-                    value = contents, 
+                    value = contents,
                     dependencies = depend
                 };
                 Networking.Send(theServer, JsonConvert.SerializeObject(edit) + ENDOFMESSAGE);
@@ -347,12 +361,12 @@ namespace CS3505
                 {
                     type = "edit",
                     cell = cellName,
-                    value = cellContents, 
+                    value = cellContents,
                     dependencies = depend
                 };
                 Networking.Send(theServer, JsonConvert.SerializeObject(edit) + ENDOFMESSAGE);
             }
-           
+
         }
 
         /// <summary>
@@ -366,6 +380,7 @@ namespace CS3505
             }
             // create the request
             var undo = new { type = "undo" };
+            System.Diagnostics.Debug.WriteLine(JsonConvert.SerializeObject(undo));
             // send the message
             Networking.Send(theServer, JsonConvert.SerializeObject(undo) + ENDOFMESSAGE);
         }
@@ -394,51 +409,55 @@ namespace CS3505
         /// <param name="ss"></param>
         private void ReceiveEdit(SocketState ss)
         {
-            string totalData = ss.sb.ToString();
-            string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
 
             lock (sheet)
             {
+                string totalData = ss.sb.ToString();
+                string[] parts = Regex.Split(totalData, @"(?<=[\n][\n])");
+
+
                 foreach (string p in parts)
                 {
-                    // ignore empty strings
-                    if (p.Length == 0)
+                    if (p.Length != 0 && p[0] == '{' && p[p.Length - 3] == '}')
                     {
-                        continue;
-                    }
-                    // if the last two chars are not new lines then there are
-                    // no more full messages be evaluated
+                        // ignore empty strings
+                        if (p.Length == 0)
+                        {
+                            continue;
+                        }
+                        // if the last two chars are not new lines then there are
+                        // no more full messages be evaluated
 
-                    if (p.Length < 3)
-                    {
+                        if (p.Length < 3)
+                        {
+                            //ss.sb.Remove(0, p.Length);
+                            continue;
+                        }
+                        if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
+                        {
+                            break;
+                        }
+
+                        // Create a dynamic type for processing the kind of message sent
+                        var recieve = new
+                        {
+                            type = ""
+                        };
+
+                        var check = JsonConvert.DeserializeAnonymousType(p, recieve);
+
+                        if (check.type == "error")
+                        {
+                            ProcessError(p);
+
+                        }
+                        else if (check.type == "full send")
+                        {
+                            ProcessFullSend(p);
+                        }
+                        // if unexpected message comes ignore it for now?? ...
                         ss.sb.Remove(0, p.Length);
-                        continue;
                     }
-                    if (p[p.Length - 1] != '\n' || p[p.Length - 2] != '\n')
-                    {
-                        break;
-                    }
-
-                    // Create a dynamic type for processing the kind of message sent
-                    var recieve = new
-                    {
-                        type = ""
-                    };
-
-                    var check = JsonConvert.DeserializeAnonymousType(p, recieve);
-
-                    if (check.type == "error")
-                    {
-                        ProcessError(p);
-
-                    }
-                    else if (check.type == "full send")
-                    {
-                        ProcessFullSend(p);
-                    }
-                    // if unexpected message comes ignore it for now?? ...
-                    ss.sb.Remove(0, p.Length);
-
                 }
             }
 
@@ -491,7 +510,7 @@ namespace CS3505
             }
         }
 
-       
+
 
         /// <summary>
         /// Helper Method for Processing a Full Send message from the server
@@ -499,6 +518,12 @@ namespace CS3505
         /// <param name="sb"></param>
         private void ProcessFullSend(string message)
         {
+            // if the spreadsheet has not been launched, launch it
+            if( !launched)
+            {
+                launched = true;
+                LaunchSpreadsheet();
+            }
             var fullsend = new
             {
                 type = "",
@@ -510,7 +535,7 @@ namespace CS3505
             Dictionary<string, string> edits = fullsend.spreadsheet;
 
             // ignore invalid messages
-            if(fullsend.spreadsheet == null)
+            if (fullsend.spreadsheet == null)
             {
                 return;
             }
@@ -521,9 +546,7 @@ namespace CS3505
                 // process changes
                 foreach (string cell in edits.Keys)
                 {
-                   // MethodInvoker mi = new MethodInvoker(() => this.sheet.SetContentsOfCell(cell, edits[cell]);
-                    //SpreadsheetController.Invoke(mi);
-                  cellDependencies[cell] = this.sheet.SetContentsOfCell(cell, edits[cell]);
+                    cellDependencies[cell] = this.sheet.SetContentsOfCell(cell, edits[cell]);
                 }
 
             }
