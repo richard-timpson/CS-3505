@@ -29,37 +29,16 @@ std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared
     return j_spreadsheet_list.dump();
 }
 
-std::string SpreadsheetController::get_list_of_users()
+std::string SpreadsheetController::get_list_of_users(std::vector<UserModel> users)
 {
-   // mu_lock_file_user_txt.lock();
-    std::ifstream file("../../data/users.txt");
-    std::string line;
-    std::vector<std::string> user_names;
-    int count = 0;
-    while (std::getline(file, line))
+    json j_user_list;
+    j_user_list["type"] = "list";
+    j_user_list["users"] = {};
+    for (UserModel um : users)
     {
-        user_names.push_back(line);
-        count++;
+        j_user_list.push_back(um.name);
     }
-    file.close();
-   // mu_lock_file_user_txt.unlock();
-    json users;
-    users["type"] = "list";
-    users["users"] = {};
-    if (count != 0)
-    {
-        std::cout << "count is 0" << std::endl;
-        for (std::vector<std::string>::iterator it = user_names.begin(); it != user_names.end(); it++)
-        {
-            users["users"].push_back(*it);
-        }
-        return users.dump();
-    }
-    else
-    {
-        return "{\"type\":\"list\",\"users\":[]}";
-    }
-    return users.dump();
+    return j_user_list.dump(); 
 }
 
 std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cell> & cell_dictionary)
