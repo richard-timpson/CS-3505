@@ -11,10 +11,15 @@
  * Server class
  * ******************************************/
 
+// Server::Server()
+// {
+// }
+
 Server::Server(boost::asio::io_context &context, const tcp::endpoint &endpoint)
     : acceptor_(context, endpoint)
 {
 }
+
 
 void Server::accept_clients()
 {
@@ -66,30 +71,39 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
             std::cout << "async read handler called" << std::endl;
             if (!ec)
             {
-                // get the message from the client
-                // buff.commit(size);
                 std::istream istrm(&connection->buff);
                 std::string message;
                 std::getline(istrm, message);
-                // while (istrm >> std::noskipws >> message)
-                // istrm >> std::noskipws >> message;
                 connection->buff.consume(size);
                 std::cout << "message is " << message << std::endl;
                 std::string error_message;
                 json json_message = json::parse(message);
-                
+                // Boolean for admin member to differentiate from client
                 bool admin_member = SpreadsheetController::validate_admin(json_message, error_message);
+                // If admin gets seperated from clients
                 if(admin_member)
                 {
                     Server::refresh_admin(connection);
                 }
+                // Regular clients
                 else
                 {
-                    std::shared_ptr<SpreadsheetModel> sm = choose_spreadsheet(json_message);
+                    bool valid_user = validate_user(json_message);
+                    if (!valid_user)
+                    {
+                        send_type_1_error(connection);
+                        return;
+                    }
+                    UserModel user = choose_user(json_message);
+                    std::shared_ptr<SpreadsheetModel> sm = choose_spreadsheet(json_message, user);
+                    if (sm == nullptr)
+                    {
+                        send_type_1_error(connection);
+                        return;
+                    }
                     connection->set_name(sm->get_name());
                     connection->set_user_name(json_message["username"]);
-                    send_full_spreadsheet(
-                        connection, sm);
+                    send_full_spreadsheet(connection, sm);
                 }
             }
             else
@@ -103,273 +117,10 @@ void Server::accept_spreadsheet_selection(std::shared_ptr<ClientConnection> conn
         });
 }
 
-void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
-{
-    std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets;
-    std::string message = SpreadsheetController::get_list_of_spreadsheets(spreadsheets);
-    message += "\n\n";
-    message += SpreadsheetController::get_list_of_users();
-    message += "\n\n";
-    int temp=0;
-    for (std::shared_ptr<SpreadsheetModel> ss : spreadsheets)
-    {
-        // if(ss->get_name()==""){
-        //     continue;
-        // }
-        std::cout << "looping throug the spreadsheets at name " << ss->get_name() << std::endl;
-        message+= "{\"type\":\"activeUser\", \"spreadsheet\":"+ss->get_name()+",\"users\":[";
-        std::cout << "we have active users got em" <<std::endl;
-        temp=0;
-        for (std::shared_ptr<ClientConnection> connection: this->connections)
-        {
-            std::cout << "looping through the client connections at client " << connection->get_name() << std::endl;
-            if(connection->get_name()==ss->get_name())
-            {
-                if(temp!=0){
-                    message+=",";
-                }
-                temp++;
-                message+="\""+connection->get_user_name()+"\"";
-            }
-        }
-        message+="]}\n\n";
-    }
-
-    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
-            [message, connection, this](boost::system::error_code ec, std::size_t){
-                if (!ec)
-                {
-                    std::cout << "writing message " << message << std::endl;
-                    admin_parser_operations(connection);
-                }
-                else
-                {
-                    std::cout << "Error sending message " << ec.message() << std::endl;
-                }
-            });
-
-
-}
-
-void Server::admin_remove_spreadsheet(json json_message)
-{
-    std::string name_spreadsheet;
-    name_spreadsheet = json_message["name"];
-   // SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
-    std::ifstream file("../../data/spreadsheets.txt");
-    std::string line;
-    std::set<std::string> spreadsheet_names;
-    while (std::getline(file, line))
-    {
-        if(line != name_spreadsheet)
-        {
-            spreadsheet_names.insert(line);
-        }
-    }
-    file.close();
-    
-    remove("../../data/spreadsheets.txt");
-
-    std::ofstream outfile("../../data/spreadsheets.txt");
-
-    for(std::string s : spreadsheet_names)
-    {
-        outfile << s << std::endl;
-    }
-
-    outfile.close();
-
-    //SpreadsheetController::mu_lock_file_spreadsheet_txt.unlock();
-
-   
-}
-
-
-void Server::admin_add_user(std::string add_user_name, std::string add_user_pass)
-    {
-        //SpreadsheetController::mu_lock_file_user_txt.lock();
-        std::ifstream file("../../data/users.txt");
-        std::string line;
-        bool already_exists = false;
-        while (std::getline(file, line))
-        {
-            std::vector<std::string> current_line = SpreadsheetController::split(line, " ");
-            if(current_line.front() == add_user_name)
-            {
-                if(current_line.back() != add_user_pass)
-                {
-                    file.close();
-                    admin_delete_user(add_user_name);
-                    break;
-                }
-                else
-                {
-                    already_exists = true;
-                    break;
-                }
-                
-            }
-        }
-        if(!already_exists)
-        {
-            std::ofstream file;
-            file.open("../../data/users.txt", std::ios_base::app);
-            file << add_user_name << " " << add_user_pass <<std::endl;
-            file.close();
-        }
-        //SpreadsheetController::mu_lock_file_user_txt.unlock();
-    }
-void Server::admin_delete_user(std::string del_user)
-    {
-        //SpreadsheetController::mu_lock_file_user_txt.lock();
-        std::ifstream file("../../data/users.txt");
-        std::string line;
-        std::set<std::string> user_names;
-        while (std::getline(file, line))
-        {
-            std::vector<std::string> current_line = SpreadsheetController::split(line, " ");
-            if(current_line.front() != del_user)
-            {
-             user_names.insert(line);
-            }
-        }
-        file.close();
-    
-        remove("../../data/users.txt");
-
-        std::ofstream outfile("../../data/users.txt");
-
-        for(std::string u : user_names)
-        {
-            outfile << u <<std::endl;
-        }
-
-        outfile.close();
-
-        //SpreadsheetController::mu_lock_file_user_txt.unlock();
-
-    }
-void Server::admin_add_spreadsheet(json json_message)
-    {
-        std::string no_use_spread;
-        std::cout<<json_message<<std::endl;
-        std::ifstream file("../../data/spreadsheets.txt");
-        std::string line;
-        bool already_exists = false;
-        while (std::getline(file, line))
-            {
-                if(line == json_message["name"]){
-                    std::cout << already_exists <<std::endl;
-                    already_exists=true;
-                }
-                    std::cout << already_exists <<std::endl;
-            }
-        file.close();
-        if(!already_exists)
-            {
-                std::ofstream file;
-                std::cout <<"Was not found"<<std::endl;
-                std::cout << already_exists <<std::endl;
-                file.open("../../data/spreadsheets.txt", std::ios_base::app);
-                file << json_message["name"] <<std::endl;
-                file.close();
-            }
-        
-    }
-void Server::admin_delete_spreadsheet(json json_message)
-    {
-        std::string no_use_spread;
-        
-        bool is_in_storage = SpreadsheetController::check_if_spreadsheet_in_storage(json_message, no_use_spread);
-        if (is_in_storage)
-        {
-            admin_remove_spreadsheet(json_message);
-        }
-        else
-        {
-            // do nothing because it doesn't exist 
-        }
-    }
-void Server::admin_off()
-    {
-
-        connections.clear();
-       // SpreadsheetController::mu_lock_user_list.lock();
-       // SpreadsheetController::mu_lock_spreadsheet_list.lock();
-       // SpreadsheetController::mu_lock_file_user_txt.lock();
-       // SpreadsheetController::mu_lock_file_spreadsheet_txt.lock();
-        exit(0);
-    }
-
-void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connection)
-   {
-       boost::asio::async_read_until(connection->socket_, connection->buff, "\n\n", 
-        [connection, this](boost::system::error_code ec, std::size_t size){
-            std::cout << "async read handler called" << std::endl;
-                // get the message from the client
-  //              buff.commit(size);
-                std::istream istrm(&connection->buff);
-                std::string message;
-                std::getline(istrm, message);
-                // istrm >> std::noskipws >> message;
-                connection->buff.consume(size);
-                std::cout << "admin message is " << message << std::endl;
-                std::string error_message;
-                if(message != "")
-                {
-                     json json_message = json::parse(message);
-                    if(json_message.value("type", " ") != "open")
-                        {
-                            refresh_admin(connection);
-                        }
-                    if (json_message["Operation"]== "AU")
-                        {
-                            admin_add_user(json_message["name"], json_message["password"]);
-                            refresh_admin(connection);
-                        }
-                    else if (json_message["Operation"]=="DU")
-                        {
-                            admin_delete_user(json_message["name"]);
-                            refresh_admin(connection);
-                        }
-                    else if (json_message["Operation"]=="AS")
-                        {
-                            admin_add_spreadsheet(json_message);
-                            refresh_admin(connection);
-                        }
-                    else if (json_message["Operation"]=="DS")
-                        {
-                            admin_delete_spreadsheet(json_message);
-                            refresh_admin(connection);
-                        }
-                    else if (json_message["Operation"]=="OFF")
-                        {
-                            admin_off();
-                            refresh_admin(connection);
-                        }
-                    else
-                        {
-                            //operation doesn't exist
-                            refresh_admin(connection);
-                        }
-                }
-                else
-                {
-                    refresh_admin(connection);
-                }
-               
-    
-
-                
-             
-            
-        });
-   }
-
 
 void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection, std::shared_ptr<SpreadsheetModel> sm)
 {
-    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cell_dictionary = sm->get_cell_dictionary();
     std::string message = SpreadsheetController::full_send(cell_dictionary);
     message += "\n\n";
     boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
@@ -385,7 +136,7 @@ void Server::send_full_spreadsheet(std::shared_ptr<ClientConnection> connection,
                     connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                     connection->socket_.close();
                     this->remove_client_from_list(connection);
-                    this->save_file_if_needed(sm);
+                    // this->save_file_if_needed(sm);
                 }
             });
 }
@@ -434,7 +185,7 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
                 connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                 connection->socket_.close();
                 this->remove_client_from_list(connection);
-                this->save_file_if_needed(sm);
+                // this->save_file_if_needed(sm);
             }
             
         });
@@ -442,7 +193,7 @@ void Server::accept_edit(std::shared_ptr<ClientConnection> connection, std::shar
 
 void Server::send_full_spreadsheet_to_clients(std::shared_ptr<SpreadsheetModel> sm)
 {
-    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cell_dictionary = sm->get_cell_dictionary();
     std::string message = SpreadsheetController::full_send(cell_dictionary);
     message += "\n\n";
     for (std::shared_ptr<ClientConnection> connection: this->connections)
@@ -506,9 +257,372 @@ void Server::send_type_2_error(std::shared_ptr<ClientConnection> connection, std
                     connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                     connection->socket_.close();
                     this->remove_client_from_list(connection);
-                    this->save_file_if_needed(sm);
+                    // this->save_file_if_needed(sm);
                 }
             });
+}
+void Server::refresh_admin(std::shared_ptr<ClientConnection> connection)
+{
+
+    std::string message = SpreadsheetController::get_list_of_spreadsheets(spreadsheets);
+    message += "\n\n";
+    //Get the list of users and add to message
+    message += SpreadsheetController::get_list_of_users(this->users);
+    message += "\n\n";
+    json activeSpreadsheet;
+    activeSpreadsheet["type"] = "activeSpreadsheets";
+    message+= activeSpreadsheet.dump();
+    message += "\n\n";
+    //Get active Spreadsheets(if any)
+   // int temp=0;
+    for (std::shared_ptr<SpreadsheetModel> ss : spreadsheets)
+    {
+        if(ss->get_users().empty())
+        {
+            continue;
+        }
+        json users_json;
+        users_json["type"] = "activeUser";
+        users_json["spreadsheet"] = ss->get_name();
+        users_json["users"] = json::array();
+
+        for (std::shared_ptr<ClientConnection> connection: this->connections)
+        {
+            if(connection->get_name() == ss->get_name())
+            {
+                users_json["users"].push_back(connection->get_user_name());
+            }
+
+        }
+        message+= users_json.dump();
+        message += "\n\n";
+    }
+    //Send message to client
+    boost::asio::async_write(connection->socket_, boost::asio::buffer(message), 
+            [message, connection, this](boost::system::error_code ec, std::size_t){
+                if (!ec)
+                {
+                    //Debug statment for proper message sent
+                    std::cout << "writing message to admin: " << message << std::endl;
+                    admin_parser_operations(connection);//Continue loop
+                }
+                else
+                {
+                    //Debug to show what error occured
+                    std::cout << "Error sending message " << ec.message() << std::endl;
+                }
+            });
+
+
+}
+
+/**
+ * This method adds a user to the txt file. If the user already exists, remove them and 
+ * readd them under the same name and given password
+ * 
+ * Parameters:string add_user_name, string add_user_pass
+ * */
+void Server::admin_add_user(std::string add_user_name, std::string add_user_pass)
+{ 
+    bool user_exists = false;
+    
+    for(UserModel now : this->users)
+    {
+        if(now.name == add_user_name){
+        
+            now.password = add_user_pass;
+            user_exists = true;
+            break;
+        }
+    }
+    if (!user_exists)
+    {
+        UserModel new_user;
+        new_user.name = add_user_name;
+        new_user.password = add_user_pass;
+
+        this->users.push_back(new_user);
+    }
+    
+}
+
+/**
+ * This Method goes through the list of users and tries to delete the specified username
+ * 
+ * Parameters: String User to Delete
+ * Returns: Nothing
+ * */
+void Server::admin_delete_user(std::string del_user)
+{
+    //remove_user_from_list()
+    int pos = 0;
+    bool exists = false;
+    UserModel user;
+    for(UserModel now : this->users)
+    {
+        if(now.name == del_user)
+        {
+            bool exists = true;
+            user = now;
+            break;
+        }
+        pos++;
+    }
+    remove_user_from_list(user);
+}
+/**
+ * This function searches the current list of 
+ * spreadsheets and if the specified spreadsheet 
+ * doesn't exist then adds new spreadsheet. 
+ * 
+ * parameters: json string (with spreadsheet name)
+ * return: void (nothing)
+ */
+void Server::admin_add_spreadsheet(json json_message)
+{
+    std::string spreadsheetName= json_message["name"];
+    for(std::shared_ptr<SpreadsheetModel> now: spreadsheets)
+    {
+        if(now->get_name()==spreadsheetName)
+        {
+            return;
+        }
+    }
+    std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(spreadsheetName, true);
+    this->spreadsheets.insert(sm);
+}
+
+/**
+ * This function checks if the spreadsheet is 
+ * contained in storage and then if the spreadsheet 
+ * is there it will send it to a helper function to 
+ * delete it and if the spreadsheet isn't there it
+ *  won't do anything becuase there is nothing to delete.
+ */
+void Server::admin_delete_spreadsheet(json json_message)
+{
+    std::string name_spreadsheet;
+    name_spreadsheet = json_message["name"];
+    bool exists=false;
+    std::shared_ptr<SpreadsheetModel> toRemove;
+
+    for (std::shared_ptr<SpreadsheetModel> sm : spreadsheets)
+    {
+        if(sm->get_name() == name_spreadsheet)
+        {
+            
+            toRemove = sm;
+            exists = true;
+            break;
+        }
+    }
+
+    if(exists)
+    {
+        std::vector<std::string> toLoop= toRemove->get_users();
+        std::set<std::shared_ptr<ClientConnection>> toDelete;
+        for(std::string name: toLoop)
+        {
+            for(std::shared_ptr<ClientConnection> now: connections)
+            {
+                if(now->get_user_name() == name)
+                {
+                    toDelete.insert(now);
+                }
+            }
+
+        }
+        for(std::shared_ptr<ClientConnection> now: toDelete)
+        {
+            now->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+            now->socket_.close();
+            connections.erase(now);
+        }
+        spreadsheets.erase(toRemove);
+    }
+}
+
+/**
+ * This function shuts down the server
+ * and closes all spreadsheets and 
+ * disconnects all clients
+ */    
+void Server::shutdown()
+{
+    close_all_connections();
+    save_data();
+    exit(0);
+}
+
+void Server::close_all_connections()
+{
+    for (std::shared_ptr<ClientConnection> connection: this->connections)
+    {
+        connection->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        connection->socket_.close();
+    }
+    connections.clear();
+}
+
+/**
+ *  This is a parser that the admin will be used 
+ * to execute the operations of adding/deleting of 
+ * users and spreadsheets while also having a master 
+ * command of off which will turn of a server.
+ * param = shared_ptr<ClientConnection> connection
+ * return = void
+ */
+void Server::admin_parser_operations(std::shared_ptr<ClientConnection> connection)
+   {
+       // Using the boost library, we reading in the sent message from the buffer.
+       boost::asio::async_read_until(connection->socket_, connection->buff, "\n\n", 
+        [connection, this](boost::system::error_code ec, std::size_t size){
+            //Debug statement making sure the correct handler is called
+            std::cout << "async read handler called" << std::endl;
+                // get the message from the client
+                std::istream istrm(&connection->buff);
+                // generating string for message
+                std::string message;
+                // getting the message into the string
+                std::getline(istrm, message);
+                //remove used message
+                connection->buff.consume(size);
+                // confirming that it is a message from admin (Debug help)
+                std::cout << "admin message is " << message << std::endl;
+                // message for any error run into
+                std::string error_message;
+                // making sure the message isn't blank
+                if(message != "")
+                {
+                    // parsing the message into JSON object
+                     json json_message = json::parse(message);
+                     // Open spreadsheet command is being executed
+                    // if(json_message.value("type", " ") != "open")
+                    //     {
+                    //         refresh_admin(connection);
+                    //     }
+                        // Add user command is being executed
+                    if (json_message["Operation"]== "AU")
+                        {
+                            admin_add_user(json_message["name"], json_message["password"]);
+                            refresh_admin(connection);
+                        }
+                        // Delete user command is being executed
+                    else if (json_message["Operation"]=="DU")
+                        {
+                            admin_delete_user(json_message["name"]);
+                            refresh_admin(connection);
+                        }
+                        // Add spreadsheet is being executed
+                    else if (json_message["Operation"]=="AS")
+                        {
+                            admin_add_spreadsheet(json_message);
+                            refresh_admin(connection);
+                        }
+                        // Delete spreadsheet is being executed
+                    else if (json_message["Operation"]=="DS")
+                        {
+                            admin_delete_spreadsheet(json_message);
+                            refresh_admin(connection);
+                        }
+                        // OFF command is being executed
+                    else if (json_message["Operation"]=="OFF")
+                        {
+                            shutdown();
+                            refresh_admin(connection);
+                        }
+                    else
+                        {
+                            //operation doesn't exist
+                            refresh_admin(connection);
+                        }
+                }
+                // No proper command was given so refreshed
+                else
+                {
+                    std::cout<< "This is not a proper message admin: " << message <<std::endl;
+                    refresh_admin(connection);
+                }
+            
+        });
+   }
+
+
+void Server::load_data()
+{
+    // get all of the users from users.txt and load them into users. 
+    std::ifstream user_file("../../data/users.txt");
+    std::string line;
+
+    while (std::getline(user_file, line))
+    {
+        std::string name;
+        std::string password;
+        std::vector<std::string> info = SpreadsheetController::split(line, " ");
+        std::vector<std::string>::iterator it = info.begin();
+        name = *it;
+        it++;
+        password = *it;
+        UserModel user;
+        user.name = name;
+        user.password = password;
+        users.push_back(user);
+    }
+    user_file.close();
+
+    // get all of the users from users.txt and load them into users. 
+    std::ifstream spreadsheet_file("../../data/spreadsheets.txt");
+    std::string name;
+    std::set<std::string> spreadsheet_names;
+
+    while (std::getline(spreadsheet_file, name))
+    {
+        spreadsheet_names.insert(name);
+    }
+    spreadsheet_file.close();
+
+    for (std::string name : spreadsheet_names)
+    {
+        std::shared_ptr<SpreadsheetModel> sm = std::make_shared<SpreadsheetModel>(name, false);
+        this->spreadsheets.insert(sm);
+    }
+}
+
+void Server::save_data()
+{
+    // if the file does not exist, there is an issue
+    // if (boost::filesystem::exists("../../data/users.txt"))
+    {
+        // remove the users file, and then create it again
+        // std::remove("../../data/users.txt");
+        std::ofstream write_file;
+        write_file.open("../../data/users.txt");
+
+        // loop through all of the users, and write them to the file
+        for (UserModel user : this->users)
+        {
+            std::string user_string = user.name + " " + user.password;
+            write_file << user_string << std::endl;
+        }
+        write_file.close();
+
+        // remove from the spreadsheet file, and create again
+        // std::remove("../../data/spreadsheets.txt");
+        std::vector<std::string> names;
+        for (std::shared_ptr<SpreadsheetModel> sm : this->spreadsheets)
+        {
+            std::cout << "Looping through spreadsheet " << sm->get_name() << " to save" << std::endl;
+            std::string name = sm->get_name();
+            names.push_back(name);
+            sm->write_json_ss_file();
+        }
+        write_file.open("../../data/spreadsheets.txt");
+        for (std::string name: names)
+        {
+            write_file << name << std::endl;
+        }
+        write_file.close();
+    }
 }
 
 bool Server::check_if_spreadsheet_in_list(json message, std::shared_ptr<SpreadsheetModel> &sm)
@@ -526,7 +640,74 @@ bool Server::check_if_spreadsheet_in_list(json message, std::shared_ptr<Spreadsh
     return false;
 }
 
+bool Server::validate_user(json message)
+{
+    // get the name and password from json message
+    std::string name = message.value("username", " ");
+    std::string password = message.value("password", " ");
+    bool found = false;
+    // loop through all the users and check if the name and password match. 
+    // for (std::set<UserModel>::iterator user = this->users.begin(); user != users.end(); user++)
+    for (UserModel user : this->users)
+    {
+        if (name == user.name && password != user.password)
+        {
+            return false;
+        }
+    }
+    return true;
+}
 
+UserModel Server::choose_user(json & message)
+{
+    // get the name and password from json message
+    std::string name = message.value("username", " ");
+    std::string password = message.value("password", " ");
+    bool found;
+    for (UserModel user : this->users)
+    {
+        if (name == user.name && password == user.password)
+        {
+            found = true;
+            return user;
+        }
+    }
+    // if we haven't found a user, add one to the list
+    if (!found)
+    {
+        UserModel user;
+        user.name = name;
+        user.password = password;
+        this->users.push_back(user);
+        return user;
+    }
+}
+
+
+std::shared_ptr<SpreadsheetModel> Server::choose_spreadsheet(json & json_message, UserModel user)
+{
+    // initialize null spreadsheet
+    std::shared_ptr<SpreadsheetModel> sm(nullptr);
+    // if the message is invalid, return the null pointer
+    if (!SpreadsheetController::validate_login_message(json_message)) return sm;
+    // loop through list of spreadsheet, and check if the spreadsheet selection already exists
+    for (std::shared_ptr<SpreadsheetModel> ss : this->spreadsheets)
+    {
+        // if it does, return that spreadsheet
+        if (json_message["name"] == ss->get_name())
+        {
+            sm = ss;
+            sm->add_user_to_spreadsheet(user.name);
+            return sm;
+        }
+    }
+    // if it doesn't, make new sheet, and return that. 
+    std::string spreadsheet_name = json_message.value("name", "-1");
+    sm = std::make_shared<SpreadsheetModel>(spreadsheet_name, true);
+    this->add_spreadsheet_to_list(sm);
+    sm->add_user_to_spreadsheet(user.name);
+    return sm;
+}
 void Server::add_client_to_list(std::shared_ptr<ClientConnection> connection)
 {
     connections.insert(connection);
@@ -547,52 +728,15 @@ void Server::add_spreadsheet_to_list(std::shared_ptr<SpreadsheetModel> ss)
     spreadsheets.insert(ss);
 }
 
-void Server::save_file_if_needed(std::shared_ptr<SpreadsheetModel> sm)
+void Server::remove_user_from_list(UserModel user)
 {
-    std::unordered_map<std::string, Cell> cell_dictionary = sm->get_cell_dictionary();
-    for (std::shared_ptr<ClientConnection> connection: this->connections)
-    {
-        if (connection->get_name() == sm->get_name())
-        {
-            return;
-        }
-    }
-    sm->write_json_ss_file();
-    sm->write_ss_file_if_needed();
-    this->remove_sm_from_list(sm);
+    std::string name = user.name;
+    std::vector<UserModel>::iterator it = std::remove_if(this->users.begin(), this->users.end(), [&](UserModel const & user){
+        return user.name == name;
+    });
+    if (it != this->users.end()) this->users.erase(it);
 }
 
-std::shared_ptr<SpreadsheetModel> Server::choose_spreadsheet(json & json_message)
-{
-    std::shared_ptr<SpreadsheetModel> sm(nullptr);
-    std::string spreadsheet_name = json_message.value("name", "-1");
-    bool is_in_list = check_if_spreadsheet_in_list(json_message, sm);
-    if (!is_in_list)
-    {
-        std::string spreadsheet;
-        bool is_in_storage = SpreadsheetController::check_if_spreadsheet_in_storage(json_message, spreadsheet);
-        if (!is_in_storage)
-        {
-            // make new spreadsheet
-            std::cout << "creating new spreadsheet" << std::endl;
-            sm = std::make_shared<SpreadsheetModel>(spreadsheet_name, true);
-            this->add_spreadsheet_to_list(sm);
-            return sm;
-        }
-        else
-        {
-            std::cout << "loading spreadsheet from json file" << std::endl;
-            sm = std::make_shared<SpreadsheetModel>(spreadsheet_name, false);
-            return sm;
-            // load the model from storage 
-        }
-    }
-    else 
-    {
-        std::cout << "loading spreadsheet from active list" << std::endl;
-        return sm;
-    }
-}
 
 std::set<std::shared_ptr<SpreadsheetModel>> Server::get_active_spreadsheets()
 {

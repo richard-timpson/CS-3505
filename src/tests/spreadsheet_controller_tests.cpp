@@ -292,7 +292,7 @@ void test10()
     alpha.set_cell_contents("A6", "2.00012341234", a5_dependents, "double" );
 
 
-    std::unordered_map<std::string, Cell> cell_dictionary = alpha.get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cell_dictionary = alpha.get_cell_dictionary();
     std::cout << "\t" << SpreadsheetController::full_send(cell_dictionary) << std::endl;
 
     std::cout << "Test 10 finished" << std::endl;
@@ -306,7 +306,7 @@ void test11()
 {
     SpreadsheetModel alpha("SM", true);
     std::cout << "Test 11: Test for correct full send string on new spreadsheet creation" << std::endl;
-    std::unordered_map<std::string, Cell> cell_dictionary = alpha.get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cell_dictionary = alpha.get_cell_dictionary();
     std::cout << "\t" << SpreadsheetController::full_send(cell_dictionary) << std::endl;
 
     std::cout << "Test 11 finished" << std::endl;
@@ -336,7 +336,7 @@ void test12()
     }
     else
     {
-        std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
+        std::unordered_map<std::string, std::shared_ptr<Cell>> cells = sm->get_cell_dictionary();
         std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
         print_success_or_failure(valid);
     }
@@ -362,7 +362,7 @@ void test13()
     {
         print_success_or_failure(valid);
     }
-    std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cells = sm->get_cell_dictionary();
     std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
     print_success_or_failure(valid);
     std::cout << "Test 13 finished " << std::endl <<std::endl;
@@ -388,7 +388,7 @@ void test14()
     {
         print_success_or_failure(valid);
     }
-    std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cells = sm->get_cell_dictionary();
     std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
     print_success_or_failure(valid);
     std::cout << "Test 14 finished " << std::endl <<std::endl;
@@ -454,7 +454,7 @@ void test15()
         print_success_or_failure(valid);
         return;
     }
-    std::unordered_map<std::string, Cell> cells = sm->get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cells = sm->get_cell_dictionary();
     std::cout << "\t" << SpreadsheetController::full_send(cells) << std::endl;
 
     std::cout << "calling handle edit" << std::endl;
@@ -465,7 +465,7 @@ void test15()
         return;
     }
     std::cout << "called handle edit" << std::endl;
-    std::unordered_map<std::string, Cell> cells1 = sm->get_cell_dictionary();
+    std::unordered_map<std::string, std::shared_ptr<Cell>> cells1 = sm->get_cell_dictionary();
     std::cout << "calling full send" << std::endl;
     std::cout << "\t" << SpreadsheetController::full_send(cells1) << std::endl;
     print_success_or_failure(valid);

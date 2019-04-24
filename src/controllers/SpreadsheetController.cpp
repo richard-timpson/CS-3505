@@ -1,12 +1,13 @@
-#include "SpreadsheetController.h"
 #include <iostream>
 #include <fstream>
-#include "../../libs/json.hpp"
 #include <string>
 #include <iterator>
 #include <list>
 #include <set>
 #include <algorithm>
+#include "SpreadsheetController.h"
+#include "../../libs/json.hpp"
+#include "../models/UserModel.h"
 
 using json = nlohmann::json;
 
@@ -14,96 +15,33 @@ std::vector<std::string> split(std::string s, std::string delimiter);
 // std::string check_type
 std::string SpreadsheetController::get_list_of_spreadsheets(std::set<std::shared_ptr<SpreadsheetModel>> spreadsheets)
 {
-    //mu_lock_file_spreadsheet_txt.lock();
-
-    std::ifstream file("../../data/spreadsheets.txt");
-    std::string line;
-    std::set<std::string> spreadsheet_names;
-    int count = 0;
-    while (std::getline(file, line))
+    std::cout << "Getting list of spreadsheets in SpreadsheetController" << std::endl;
+    json j_spreadsheet_list;
+    j_spreadsheet_list["type"] = "list";
+    j_spreadsheet_list["spreadsheets"] = json::array();
+    for (std::shared_ptr<SpreadsheetModel> sm : spreadsheets)
     {
-        spreadsheet_names.insert(line);
-        count++;
+        std::string name = sm->get_name();
+        std::cout << "pushing spreadsheet " << name << " to json object" << std::endl;
+        j_spreadsheet_list["spreadsheets"].push_back(name);
+        std::cout << "successfully pushed to json arrar" << std::endl;
     }
-    file.close();
-    //mu_lock_file_spreadsheet_txt.unlock();
-
-    json json_spreadsheets;
-    json_spreadsheets["type"] = "list";
-    json_spreadsheets["spreadsheets"] = {};
-    
-    
-    for (std::shared_ptr<SpreadsheetModel> sheet : spreadsheets)
-    {
-        std::cout << "Writing active spreadsheet " << sheet->get_name() << " to spreadsheet list " << std::endl;
-        json_spreadsheets["spreadsheets"].push_back(sheet->get_name());
-    }
-    if (count != 0)
-    {
-        //mu_lock_spreadsheet_list.lock();
-        std::cout << "count is 0" << std::endl;
-        for (std::string name: spreadsheet_names)
-        {
-            bool exists;
-            for (std::shared_ptr<SpreadsheetModel> sheet1: spreadsheets)
-            {
-                if (sheet1->get_name() == name)
-                {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists)
-            {
-                std::cout << "Writing stored spreadsheet " << name << " to spreadsheet list " << std::endl;
-                json_spreadsheets["spreadsheets"].push_back(name);
-            }
-             return json_spreadsheets.dump();
-        }
-       // mu_lock_spreadsheet_list.unlock();
-    }
-    else
-    {
-    //   json_spreadsheets[""]
-      return "{\"type\":\"list\",\"spreadsheets\":[]}";
-    }
-    // return json_spreadsheets.dump();
+    return j_spreadsheet_list.dump();
 }
 
-std::string SpreadsheetController::get_list_of_users()
+std::string SpreadsheetController::get_list_of_users(std::vector<UserModel> users)
 {
-   // mu_lock_file_user_txt.lock();
-    std::ifstream file("../../data/users.txt");
-    std::string line;
-    std::vector<std::string> user_names;
-    int count = 0;
-    while (std::getline(file, line))
+    json j_user_list;
+    j_user_list["type"] = "list";
+    j_user_list["users"] = json::array();
+    for (UserModel um : users)
     {
-        user_names.push_back(line);
-        count++;
+        j_user_list["users"].push_back(um.name);
     }
-    file.close();
-   // mu_lock_file_user_txt.unlock();
-    json users;
-    users["type"] = "list";
-    users["users"] = {};
-    if (count != 0)
-    {
-        std::cout << "count is 0" << std::endl;
-        for (std::vector<std::string>::iterator it = user_names.begin(); it != user_names.end(); it++)
-        {
-            users["users"].push_back(*it);
-        }
-        return users.dump();
-    }
-    else
-    {
-        return "{\"type\":\"list\",\"users\":[]}";
-    }
-    return users.dump();
+    return j_user_list.dump(); 
 }
 
-std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cell> & cell_dictionary)
+std::string SpreadsheetController::full_send(std::unordered_map<std::string, std::shared_ptr<Cell>> & cell_dictionary)
 {
     json ss;
     json cells;
@@ -114,12 +52,12 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
     }
     else
     {
-        for (std::pair<std::string, Cell> cell : cell_dictionary)
+        for (std::pair<std::string, std::shared_ptr<Cell>> cell : cell_dictionary)
         {
             // std::cout << "entered loop in full send " << std::endl;
-            std::string name = cell.second.get_name();
-            std::string contents = cell.second.get_contents();
-            std::string type = cell.second.get_type();
+            std::string name = cell.second->get_name();
+            std::string contents = cell.second->get_contents();
+            std::string type = cell.second->get_type();
             if (type == "int")
             {
                 cells[name] = stoi(contents);
@@ -141,56 +79,6 @@ std::string SpreadsheetController::full_send(std::unordered_map<std::string, Cel
     return ss.dump();
 }
 
-bool SpreadsheetController::validate_user(json message, std::string &error_message)
-{
-    if (!validate_login_message(message)) return false;
-    if (message.value("type", " ") != "open")
-    {
-        error_message = "Didn't send correct message type";
-        return false;
-    }
-   // mu_lock_file_user_txt.lock();
-    std::ifstream file("../../data/users.txt");
-    std::string line;
-    bool valid_user; // is this value ever used?
-    // search for the user
-    while (std::getline(file, line))
-    {
-        // read a line of the file
-        std::vector<std::string> current_line = split(line, " ");
-        std::vector<std::string>::iterator it = current_line.begin();
-        std::string username = *it;
-        it++;
-        std::string password = *it;
-        // compare the username and the password?
-        if (message.value("username", " ") != username && message.value("password", " ") != password)
-        {
-            
-        }
-        else if(message.value("username", " ") == username && message.value("password", " ") != password)
-        {
-            //send as an invalid function
-           // mu_lock_file_user_txt.unlock();
-            return false;
-        }
-        else
-        {
-            valid_user = true;
-            file.close();
-           // mu_lock_file_user_txt.unlock();
-            return true;
-        }
-    }
-    file.close();
-    
-    // if Username is not found create a new user
-    std::ofstream write_file;
-    write_file.open("../../data/users.txt", std::ios::app);
-    write_file << message.value("username", " ") << " " << message.value("password", " ") << std::endl;
-    write_file.close();
-    //mu_lock_file_user_txt.unlock();
-    return true;
-}
 
 bool SpreadsheetController::validate_admin(json message, std::string &error_message)
 {
@@ -236,6 +124,9 @@ bool SpreadsheetController::check_if_spreadsheet_in_storage(json & message, std:
     return false;
 }
 
+
+
+// LOOK AT THIS AGAIN
 bool SpreadsheetController::handle_edit_message(json & message, std::shared_ptr<SpreadsheetModel> sm)
 {
     if (!message.contains("type")) return false;
