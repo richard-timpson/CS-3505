@@ -51,6 +51,7 @@
             this.usersLabel = new System.Windows.Forms.Label();
             this.spreadsheetsLabel = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.refreshButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // offButton
@@ -133,6 +134,7 @@
             this.newUserTextBox.Size = new System.Drawing.Size(138, 20);
             this.newUserTextBox.TabIndex = 7;
             this.newUserTextBox.Visible = false;
+            this.newUserTextBox.TextChanged += new System.EventHandler(this.newUserTextBox_TextChanged);
             // 
             // newPasswordTextBox
             // 
@@ -287,11 +289,22 @@
             this.label3.TabIndex = 22;
             this.label3.Text = "Active Spreadsheets and Users";
             // 
+            // refreshButton
+            // 
+            this.refreshButton.Location = new System.Drawing.Point(13, 394);
+            this.refreshButton.Name = "refreshButton";
+            this.refreshButton.Size = new System.Drawing.Size(100, 23);
+            this.refreshButton.TabIndex = 23;
+            this.refreshButton.Text = "Refresh";
+            this.refreshButton.UseVisualStyleBackColor = true;
+            this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
+            // 
             // ServerControllerView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1190, 446);
+            this.Controls.Add(this.refreshButton);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.spreadsheetsLabel);
             this.Controls.Add(this.usersLabel);
@@ -349,6 +362,7 @@
         private System.Windows.Forms.Label usersLabel;
         private System.Windows.Forms.Label spreadsheetsLabel;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button refreshButton;
     }
 }
 

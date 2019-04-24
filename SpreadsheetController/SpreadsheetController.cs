@@ -37,6 +37,9 @@ namespace CS3505
         public delegate void SpreadsheetUpdatedEventHandler(Dictionary<string, IEnumerable<string>> updatedDependencies);
         public event SpreadsheetUpdatedEventHandler SpreadsheetUpdated;
 
+        public delegate void LaunchSpreadsheetHandler();
+        public event LaunchSpreadsheetHandler LaunchSpreadsheet;
+
         /// <summary>
         /// Event that notifies the client that an error has been sent by the server
         /// </summary>
@@ -313,7 +316,7 @@ namespace CS3505
             Networking.GetData(theServerState);
 
             // Launch a spreadsheet to be populated
-            SpreadsheetUpdated(new Dictionary<string, IEnumerable<string>>());
+            LaunchSpreadsheet();
         }
 
 

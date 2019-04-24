@@ -42,12 +42,13 @@ namespace ClientGUI
             //is no Spreadsheet associated with the client yet.
             ssController = new SpreadsheetController(new Spreadsheet(x => true, x => x.ToUpper(), "cs3505"));
             ssController.SpreadsheetsReceived += UpdateListOfSpreadsheets;
-            ssController.SpreadsheetUpdated += UpdateSpreadsheet;
+           // ssController.SpreadsheetUpdated += UpdateSpreadsheet;
             ssController.InvalidUsername += UsernameInvalid;
             ssController.InvalidPassword += PasswordInvalid;
             ssController.SpreadsheetError += ProcessError;
             ssController.ConnectionLostEvent += ConnectionLostNotification;
             ssController.DeniedConnection += ConnectionDenied;
+            ssController.LaunchSpreadsheet += UpdateSpreadsheet;
             //------------------------------------------------------------------------------
 
             //----------ListOfSpreadsheets Initialization-------------------------------
@@ -233,12 +234,12 @@ namespace ClientGUI
         /// <summary>
         /// Subscribes and updates a spreadsheet
         /// </summary>
-        private void UpdateSpreadsheet(Dictionary<string, IEnumerable<string>> cellDependencies)
+        private void UpdateSpreadsheet()
         {
             // Launch the SpreadsheetView
             if (!this.IsDisposed)
             {
-                MethodInvoker m = new MethodInvoker(() => Program.runView(cellDependencies, name));
+                MethodInvoker m = new MethodInvoker(() => Program.runView(new Dictionary<string, IEnumerable<string>>(), name));
                 this.Invoke(m);
 
                 // Close the Client GUI
