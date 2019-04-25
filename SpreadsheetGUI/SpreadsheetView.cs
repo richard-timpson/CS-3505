@@ -405,9 +405,17 @@ namespace SpreadsheetGUI
         /// </summary>
         private void ConnectionLostNotification()
         {
+            MethodInvoker mi = new MethodInvoker(() => UpdateDisconnectLabel());
+            
             MessageBox.Show("Connection to the Server Was Lost Please Reconnect", "Connection Lost",
                                           MessageBoxButtons.OK,
                                           MessageBoxIcon.Warning);
+            Invoke(mi);
+        }
+
+        private void UpdateDisconnectLabel()
+        {
+            DisconnectedLabel.Text = "The Client Has Disconnected,  Please Reconnect";
         }
 
         private void FormulaExceptionNotification(string message, string contents)
@@ -1096,6 +1104,11 @@ namespace SpreadsheetGUI
             //{
             //    MethodInvoker m = new MethodInvoker(() => this.menu);
             //    this.Invoke(m);
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

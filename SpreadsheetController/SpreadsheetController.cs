@@ -178,11 +178,13 @@ namespace CS3505
         /// </summary>
         private void ConnectionLost()
         {
-            // KEEP?
-            if (connected)
+            lock (sheet)
             {
-                connected = false;
-                ConnectionLostEvent();
+                if (connected)
+                {
+                    connected = false;
+                    ConnectionLostEvent();
+                }
             }
         }
 
@@ -551,7 +553,11 @@ namespace CS3505
                 // process changes
                 foreach (string cell in edits.Keys)
                 {
-                    cellDependencies[cell] = this.sheet.SetContentsOfCell(cell, edits[cell]);
+                    // only update view if the contents have changed
+                    if (this.sheet.GetCellContents(cell).ToString() != edits[cell])
+                    {
+                        cellDependencies[cell] = this.sheet.SetContentsOfCell(cell, edits[cell]);
+                    }
                 }
 
             }
