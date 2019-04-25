@@ -594,9 +594,13 @@ void Server::save_data()
     // if (boost::filesystem::exists("../../data/users.txt"))
     {
         // remove the users file, and then create it again
-        // std::remove("../../data/users.txt");
+        //std::remove("../../data/users.txt");
         std::ofstream write_file;
         write_file.open("../../data/users.txt");
+	if (!write_file.is_open())
+	{
+	  std::cout << "Write file users.txt not open when it should be" << std::endl;
+	}
 
         // loop through all of the users, and write them to the file
         for (UserModel user : this->users)
@@ -607,7 +611,7 @@ void Server::save_data()
         write_file.close();
 
         // remove from the spreadsheet file, and create again
-        // std::remove("../../data/spreadsheets.txt");
+        //std::remove("../../data/spreadsheets.txt");
         std::vector<std::string> names;
         for (std::shared_ptr<SpreadsheetModel> sm : this->spreadsheets)
         {
@@ -616,12 +620,18 @@ void Server::save_data()
             names.push_back(name);
             sm->write_json_ss_file();
         }
-        write_file.open("../../data/spreadsheets.txt");
+	std::ofstream write_file1;
+        write_file1.open("../../data/spreadsheets.txt");
+	if (!write_file1.is_open())
+	{
+	  std::cout << "Write file spreadsheets.txt not open when it should be " << std::endl;
+	}
+
         for (std::string name: names)
         {
             write_file << name << std::endl;
         }
-        write_file.close();
+        write_file1.close();
     }
 }
 

@@ -219,6 +219,10 @@ void SpreadsheetModel::read_json_ss_file()
      * Need to find way to debug
      */ 
     std::ifstream input_file("../../data/" + this->name + ".json");
+    if (!input_file.is_open())
+    {
+      std::cout << "input file is not open" << std::endl;
+    }
 
     // Read the input stream into a json object
     json ss;
