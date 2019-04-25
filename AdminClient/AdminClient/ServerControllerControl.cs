@@ -71,10 +71,12 @@ namespace AdminClient
                 {
                     if (input[input.Length - 1] == '\n')
                     {
+                        Console.WriteLine(input);
                         JObject obj = JObject.Parse(input);
                         RecievedDataList recievedDataList;
                         if (obj["type"] != null)
                         {
+
                             string theType = obj["type"].ToString();
 
                             //if (obj["spreadsheets"] != null)
@@ -84,16 +86,21 @@ namespace AdminClient
 
                                 view.recieveListData(recievedDataList.names(), 1);
                             }
-                            else if (theType.Equals("activeUser"))
-                            {
 
-                                ActiveDataRecieve activeDataRecieve = JsonConvert.DeserializeObject<ActiveDataRecieve>(input);
-                                view.addActiveItems(activeDataRecieve.namesSpread, activeDataRecieve.namesUse);
 
-                            }
                             else if (theType.Equals("activeSpreadsheets"))
                             {
                                 view.clearActiveItems();
+                            }
+                            else if (theType.Equals("activeUser"))
+                            {
+                                Console.WriteLine("Is active User" + (theType.Equals("activeUser")));
+
+                                ActiveDataRecieve activeDataRecieve = JsonConvert.DeserializeObject<ActiveDataRecieve>(input);
+                                Console.WriteLine(activeDataRecieve.getSpreadName());
+                                if (activeDataRecieve.getNameSize() != 0)
+                                    view.addActiveItems(activeDataRecieve.namesSpread, activeDataRecieve.namesUse);
+
                             }
                             else if (theType.Equals("list") && obj["users"] != null)
                             {
@@ -146,7 +153,15 @@ namespace AdminClient
         [JsonProperty(PropertyName = "users")]
         public string[] namesUse;
 
+        public string getSpreadName()
+        {
+            return namesSpread;
+        }
 
+        internal int getNameSize()
+        {
+            return namesUse.Length;
+        }
     }
     public class RecievedDataList
     {
