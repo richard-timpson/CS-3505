@@ -75,6 +75,16 @@ Either method will install the project correctly. If for any reason you need to 
 ```shell
 make clean
 ```
+The project relies on the existence of files in the data/ folder. These files are data/users.txt and spreadsheets.txt. 
+To start with clean data, run the following command inside of the src/ folder. 
+```shell
+make clean_data
+```
+This will wipe all existent data. To create the empty text files for a clean start, run
+```shell
+make make_data
+```
+At this point, you should have a clean compilation, and a clean data start. 
 
 
 ## Team notes
