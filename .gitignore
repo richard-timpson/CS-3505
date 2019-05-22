@@ -1,0 +1,7 @@
+.vscode
+*.out
+/libs/boost*
+#*
+bin/objects/*
+bin/tests/*
+bin/executables/*
